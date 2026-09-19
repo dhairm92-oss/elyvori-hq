@@ -91,7 +91,7 @@ export function LoginGateModal({
           body: JSON.stringify({
             email: email.trim(),
             password: password.trim(),
-            organizationName: organizationName.trim(),
+            companyName: organizationName.trim(),
           }),
         });
 
