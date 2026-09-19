@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# ELYVORI — AI-Powered Business Solutions
 
-# Run and deploy your AI Studio app
+The official website for **ELYVORI**, an AI-powered business solutions company offering four core services:
 
-This contains everything you need to run your app locally.
+- 🧠 **Digital Products** — AI researches market gaps and builds sellable digital products (PDF guides, Excel templates, mini-courses)
+- 🌐 **Website & App Building** — AI builds full custom websites and Android apps with real backends and databases
+- 👥 **Recruitment CRM** — An AI-powered applicant tracking system for hiring teams
+- 📢 **Marketing Agent** — Generates bilingual (English/Arabic) social media campaigns automatically
 
-View your app in AI Studio: https://ai.studio/apps/58165831-8942-4df2-ad9d-c882f9801085
+## Features
 
-## Run Locally
+- 🔐 Secure login/signup gate
+- 🌍 Full bilingual support (English / Arabic, with RTL)
+- 🌗 Light / Dark mode
+- 💳 Simple, transparent pricing: Free, Starter ($19/mo), and Pro ($49/mo)
+- ⚡ Live-connected contact form
 
-**Prerequisites:**  Node.js
+## Tech Stack
 
+Built with React, TypeScript, and Vite — generated with [Google AI Studio](https://aistudio.google.com).
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Backend
+
+This site connects to the ELYVORI API, hosted at:
+```
+https://elyvori-api.onrender.com
+```
+
+---
+
+© 2026 ELYVORI. All rights reserved.
