@@ -1,0 +1,6 @@
+{
+  "name": "Elyvori",
+  "description": "AI-powered digital products, custom web and app development, recruitment CRM, and bilingual marketing solutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
