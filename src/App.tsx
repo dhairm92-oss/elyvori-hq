@@ -6,6 +6,7 @@ import { FloatingSideLogo } from './components/FloatingSideLogo';
 import { Hero } from './components/Hero';
 import { LiveStatsSection } from './components/LiveStatsSection';
 import { ServicesSection } from './components/ServicesSection';
+import { SocialProofSection } from './components/SocialProofSection';
 import { PricingSection } from './components/PricingSection';
 import { ContactDemoSection } from './components/ContactDemoSection';
 import { Footer } from './components/Footer';
@@ -170,6 +171,9 @@ export default function App() {
           lang={lang}
           onRequestDemo={() => scrollTo('demo')}
         />
+
+        {/* Social Proof - real business names from recent successful builds */}
+        <SocialProofSection lang={lang} />
 
         {/* Pricing Section (Free, Starter, Pro) */}
         <PricingSection
