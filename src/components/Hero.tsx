@@ -3,6 +3,7 @@ import { Language } from '../types';
 import { translations } from '../translations';
 import { Hero3DVisuals } from './Hero3DVisuals';
 import { QuantumButton } from './QuantumButton';
+import { LiveDemoAnimation } from './LiveDemoAnimation';
 
 interface HeroProps {
   lang: Language;
@@ -65,6 +66,11 @@ export function Hero({ lang, onExploreServices, onRequestDemo }: HeroProps) {
           >
             <span>{t.hero.ctaSecondary}</span>
           </QuantumButton>
+        </div>
+
+        {/* Self-running animated demo - shows the real request -> build -> live site flow */}
+        <div className="mt-14">
+          <LiveDemoAnimation lang={lang} />
         </div>
 
         {/* 3D Company Visuals Suite (Requested 3D pictures & vertical sculpture at beginning of page) */}
