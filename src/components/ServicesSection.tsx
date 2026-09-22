@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Sparkles,
   ArrowUpRight,
+  Search,
 } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
@@ -30,12 +31,23 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
   const [activeTab, setActiveTab] = useState<string>('digital-products');
   const isRtl = lang === 'ar';
 
+  // FIX: this map only listed the original 4 icons - when the Content
+  // Creation Agent and Lead Discovery Agent services were added (using
+  // 'FileText' and 'Search' as their iconName), this map had no entry
+  // for either one, so IconComponent resolved to `undefined` and React
+  // crashed with a blank page the moment ServicesSection tried to render
+  // it. Every icon actually used by any service in translations.ts must
+  // have a matching entry here.
   const icons = {
     Package: Package,
     Layout: Layout,
     Users: Users,
     Megaphone: Megaphone,
+    FileText: FileText,
+    Search: Search,
   };
+
+  const totalServices = t.services.items.length;
 
   return (
     <section id="services" className="relative py-16 sm:py-24 border-t border-slate-200/80 dark:border-slate-800/80">
@@ -60,7 +72,7 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
           </p>
         </div>
 
-        {/* 4 Services Grid */}
+        {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {t.services.items.map((srv, idx) => {
             const IconComponent = icons[srv.iconName];
@@ -82,14 +94,14 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="flex items-center gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
-                        <IconComponent className="h-6 w-6" />
+                        {IconComponent && <IconComponent className="h-6 w-6" />}
                       </div>
                       <div>
                         <span className="inline-block rounded-md bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
                           {srv.badge}
                         </span>
                         <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-                          0{idx + 1} / 04
+                          {String(idx + 1).padStart(2, '0')} / {String(totalServices).padStart(2, '0')}
                         </div>
                       </div>
                     </div>
@@ -134,7 +146,7 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
                     <ArrowUpRight className={`h-3.5 w-3.5 ${isRtl ? 'rotate-[-90deg]' : ''}`} />
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    {isSelected ? (lang === 'en' ? 'Active view' : 'محدد حالياً') : (lang === 'en' ? 'Click to inspect' : 'انقر للمعاينة')}
+                    {isSelected ? (lang === 'en' ? 'Active view' : 'معروض حالياً') : (lang === 'en' ? 'Click to inspect' : 'اضغط للمعاينة')}
                   </span>
                 </div>
               </div>
@@ -202,7 +214,7 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
                 <p className="text-xs text-slate-600 dark:text-slate-400">
                   {lang === 'en'
                     ? 'Automated spreadsheet models with dynamic macros, KPIs, and pre-configured financial formulas.'
-                    : 'نماذج جداول بيانات ذكية بمعادلات مالية ومؤشرات أداء مسبقة الإعداد وقابلة للتخصيص.'}
+                    : 'نماذج جداول بيانات ذكية بمعادلات مالية وأدوات أداء جاهزة للاستخدام.'}
                 </p>
                 <div className="mt-3 flex items-center justify-between text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">
                   <span>Format: .XLSX & Google Sheets</span>
@@ -214,13 +226,13 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-2">
                   <GraduationCap className="h-5 w-5" />
                   <span className="font-semibold text-sm">
-                    {lang === 'en' ? 'Structured Mini-Courses' : 'دورات تدريبية مصغرة'}
+                    {lang === 'en' ? 'Structured Mini-Courses' : 'دورات تدريبية مصغرة منظمة'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
                   {lang === 'en'
                     ? 'Full video lecture outlines, student slide decks, actionable homework quizzes, and launch copy.'
-                    : 'خطط دروس مرئية، شرائح عرض جاهزة، اختبارات تفاعلية، ونصوص تسويقية لإطلاق الدورة.'}
+                    : 'خطط دروس مرئية، شرائح عرض للطلاب، اختبارات تفاعلية، ونصوص إطلاق جاهزة.'}
                 </p>
                 <div className="mt-3 flex items-center justify-between text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">
                   <span>5-Module Bundle</span>
@@ -319,8 +331,89 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
                   </span>
                 </div>
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-cairo">
-                  "تحويل الأفكار إلى منتجات رقمية تجارية لم يعد يتطلب أشهراً من العمل التقليدي. تتيح لك أنظمة إليفوري الذكية اكتشاف فجوات السوق وبناء منتجات مربحة وجاهزة للإطلاق في 48 ساعة فقط. #أتمتة_الأعمال #منتجات_رقمية #ريادة_الأعمال"
+                  "تحويل الأفكار إلى منتجات رقمية تجارية لم يعد يتطلب أشهراً من العمل التقليدي. تتيح لك أنظمة إليفوري الذكية اكتشاف فجوات السوق وبناء منتجات مربحة وجاهزة للإطلاق في أقل من 48 ساعة فقط. #أتمتة_الأعمال #منتجات_رقمية #ريادة_الأعمال"
                 </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'content-agent' && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3.5">
+                <div className="flex items-center gap-2 text-indigo-500 mb-1.5">
+                  <FileText className="h-4 w-4" />
+                  <span className="text-xs font-bold">{lang === 'en' ? 'Blog Article' : 'مقالة مدونة'}</span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-slate-400">
+                  {lang === 'en' ? '500-900 words, fully structured and specific to the topic.' : '500-900 كلمة، منظمة بالكامل ومحددة للموضوع.'}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3.5">
+                <div className="flex items-center gap-2 text-emerald-500 mb-1.5">
+                  <Table className="h-4 w-4" />
+                  <span className="text-xs font-bold">{lang === 'en' ? 'Video Script' : 'سكربت فيديو'}</span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-slate-400">
+                  {lang === 'en' ? 'Ready to record, with a hook and a clear call to action.' : 'جاهز للتسجيل، بمقدمة جذابة ودعوة واضحة لاتخاذ إجراء.'}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3.5">
+                <div className="flex items-center gap-2 text-blue-500 mb-1.5">
+                  <Megaphone className="h-4 w-4" />
+                  <span className="text-xs font-bold">{lang === 'en' ? 'Social Posts' : 'منشورات سوشل ميديا'}</span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-slate-400">
+                  {lang === 'en' ? 'Platform-native copy for Instagram, X, and LinkedIn.' : 'نصوص مصممة خصيصاً لإنستغرام وإكس ولينكد إن.'}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3.5">
+                <div className="flex items-center gap-2 text-purple-500 mb-1.5">
+                  <Package className="h-4 w-4" />
+                  <span className="text-xs font-bold">{lang === 'en' ? 'Product Description' : 'وصف المنتج'}</span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-slate-400">
+                  {lang === 'en' ? 'Persuasive, benefit-led copy ready to publish.' : 'نص مقنع يركز على الفائدة، جاهز للنشر.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'lead-finder' && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3">
+                  <div className="text-[11px] font-semibold text-slate-500 uppercase">
+                    {lang === 'en' ? 'Step 1: Search' : 'الخطوة 1: البحث'}
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                    {lang === 'en' ? 'Targeted Niche & Location' : 'مجال وموقع جغرافي مستهدف'}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    {lang === 'en' ? 'Search a specific business type and city' : 'بحث في نوع أعمال ومدينة محددة'}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-indigo-500/40 bg-indigo-50/50 dark:bg-indigo-950/20 p-3">
+                  <div className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase">
+                    {lang === 'en' ? 'Step 2: Evidence' : 'الخطوة 2: الأدلة'}
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                    {lang === 'en' ? 'No-Website Identification' : 'تحديد الأعمال بلا موقع'}
+                  </div>
+                  <div className="text-xs text-indigo-600/80 dark:text-indigo-400/80 mt-1">
+                    {lang === 'en' ? 'Only social pages or directory listings found' : 'فقط صفحات سوشل ميديا أو قوائم أدلة'}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3">
+                  <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase">
+                    {lang === 'en' ? 'Step 3: Outreach' : 'الخطوة 3: التواصل'}
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                    {lang === 'en' ? 'Free Demo + Warm Email' : 'موقع تجريبي مجاني + رسالة تواصل'}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    {lang === 'en' ? 'A real working demo, not just a pitch' : 'موقع تجريبي حقيقي وشغال، لا عرض بيع فقط'}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -331,7 +424,7 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
               size="sm"
               onClick={onRequestDemo}
             >
-              <span>{lang === 'en' ? 'Request a walkthrough for your organization' : 'طلب عرض توضيحي خاص بمؤسستك'}</span>
+              <span>{lang === 'en' ? 'Request a walkthrough for your organization' : 'اطلب جولة توضيحية خاصة بمؤسستك'}</span>
               <ArrowUpRight className={`h-3.5 w-3.5 ${isRtl ? 'rotate-[-90deg]' : ''}`} />
             </QuantumButton>
           </div>

@@ -4,6 +4,7 @@ import { ParticleBackground } from './components/ParticleBackground';
 import { Elyvori3DBackground } from './components/Elyvori3DBackground';
 import { FloatingSideLogo } from './components/FloatingSideLogo';
 import { Hero } from './components/Hero';
+import { LiveStatsSection } from './components/LiveStatsSection';
 import { ServicesSection } from './components/ServicesSection';
 import { PricingSection } from './components/PricingSection';
 import { ContactDemoSection } from './components/ContactDemoSection';
@@ -143,7 +144,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
                 <span>
-                  {lang === 'en' ? 'Authenticated Session Active:' : 'الجلسة موثقة ونشطة:'}{' '}
+                  {lang === 'en' ? 'Authenticated Session Active:' : 'جلسة موثقة ونشطة:'}{' '}
                   <strong className="text-white">{auth.organizationName || auth.userEmail}</strong>
                 </span>
               </div>
@@ -161,7 +162,10 @@ export default function App() {
           onRequestDemo={() => scrollTo('demo')}
         />
 
-        {/* 4 Core Services Section */}
+        {/* Live Stats Bar - real numbers pulled from actual build history */}
+        <LiveStatsSection lang={lang} />
+
+        {/* 6 Core Services Section */}
         <ServicesSection
           lang={lang}
           onRequestDemo={() => scrollTo('demo')}

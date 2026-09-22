@@ -114,13 +114,21 @@ export function PricingSection({ lang, onSelectPlan }: PricingSectionProps) {
                         <span className="text-slate-500">{lang === 'en' ? 'Marketing Agent:' : 'وكيل التسويق:'}</span>
                         <span className="font-semibold text-right">{tier.serviceCoverage.marketingAgent}</span>
                       </li>
+                      <li className="flex items-center justify-between">
+                        <span className="text-slate-500">{lang === 'en' ? 'Content Agent:' : 'وكيل المحتوى:'}</span>
+                        <span className="font-semibold text-right">{tier.serviceCoverage.contentAgent}</span>
+                      </li>
+                      <li className="flex items-center justify-between">
+                        <span className="text-slate-500">{lang === 'en' ? 'Lead Discovery:' : 'اكتشاف العملاء:'}</span>
+                        <span className="font-semibold text-right">{tier.serviceCoverage.leadFinder}</span>
+                      </li>
                     </ul>
                   </div>
 
                   {/* Feature List */}
                   <div className="mt-6 space-y-2.5">
                     <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      {lang === 'en' ? 'Included Capabilities' : 'المزايا المشمولة'}
+                      {lang === 'en' ? 'Included Capabilities' : 'الإمكانيات المشمولة'}
                     </div>
                     {tier.features.map((feat, fIdx) => (
                       <div key={fIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
