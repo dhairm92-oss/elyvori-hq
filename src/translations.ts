@@ -14,11 +14,11 @@ export const translations = {
       badge: 'Production-Grade AI Solutions',
       titleHighlight: 'Intelligent Systems',
       titleRest: 'for Real Business Growth',
-      subtitle: 'Six dedicated AI services engineered to deliver sellable digital products, bespoke websites and mobile applications, smart hiring workflows, automated bilingual marketing, ready-to-use content, and warm lead discovery.',
+      subtitle: 'Seven dedicated AI services engineered to deliver sellable digital products, bespoke websites and mobile applications, smart hiring workflows, automated bilingual marketing, ready-to-use content, warm lead discovery, and honest AI job matching.',
       ctaPrimary: 'Start Your Project',
-      ctaSecondary: 'Explore 6 Core Services',
+      ctaSecondary: 'Explore 7 Core Services',
       stats: [
-        { value: '6 Core', label: 'Specialized AI Services' },
+        { value: '7 Core', label: 'Specialized AI Services' },
         { value: '100% Real', label: 'Backends & DBs Built' },
         { value: 'EN / AR', label: 'Native Bilingual Support' },
         { value: 'Instant', label: 'Market Gap Analysis' },
@@ -26,7 +26,7 @@ export const translations = {
     },
     services: {
       sectionBadge: 'Core Solutions',
-      sectionTitle: 'Six Purpose-Built AI Services',
+      sectionTitle: 'Seven Purpose-Built AI Services',
       sectionSubtitle: 'Replace disjointed tools and generic prompts with integrated, end-to-end AI capabilities that produce real commercial deliverables.',
       items: [
         {
@@ -119,6 +119,21 @@ export const translations = {
           metrics: 'Shows up with a finished demo, not a pitch',
           iconName: 'Search' as const,
         },
+        {
+          id: 'career-agent',
+          title: 'Career Agent',
+          shortDesc: 'Deeply analyzes a resume, searches real current job openings, and writes a personalized cover letter for each genuine match.',
+          fullDesc: 'Parses technical skills, experience, and education from a real resume, searches live job listings matching that profile, scores each opening honestly against actual skills, and drafts a ready-to-send cover letter for the strongest matches - delivered as a complete report by email.',
+          badge: 'Talent & Job Matching',
+          deliverables: [
+            'Deep resume parsing into a structured skill profile',
+            'Real, current job listings searched live - never invented',
+            'Honest 0-100% fit scoring against actual skills',
+            'A personalized, ready-to-send cover letter per top match',
+          ],
+          metrics: 'Real listings, honestly scored, ready to send',
+          iconName: 'Briefcase' as const,
+        },
       ],
       interactivePreview: 'Live Capability Snapshot',
       viewAllSpecs: 'View Full Architecture Specifications',
@@ -126,8 +141,8 @@ export const translations = {
     pricing: {
       sectionBadge: 'Unified Pricing',
       sectionTitle: 'Simple, Transparent Investment',
-      sectionSubtitle: 'Every single plan provides full access to all six services. Choose the tier that matches your active project volume.',
-      coverageLabel: 'All 6 Services Included in Every Tier:',
+      sectionSubtitle: 'Every single plan provides full access to all seven services. Choose the tier that matches your active project volume.',
+      coverageLabel: 'All 7 Services Included in Every Tier:',
       servicesList: [
         'Digital Products Builder',
         'Website & App Engineering',
@@ -135,6 +150,7 @@ export const translations = {
         'Bilingual Marketing Agent',
         'Content Creation Agent',
         'Lead Discovery Agent',
+        'Career Agent',
       ],
       tiers: [
         {
@@ -160,6 +176,7 @@ export const translations = {
             marketingAgent: '10 bilingual social posts / month',
             contentAgent: '1 content package (trial)',
             leadFinder: '1 trial lead-discovery search',
+            careerAgent: '1 trial job match report',
           },
           cta: 'Get Started Free',
         },
@@ -187,6 +204,7 @@ export const translations = {
             marketingAgent: 'Full ongoing bilingual campaigns',
             contentAgent: 'Up to 10 full content packages / month',
             leadFinder: 'Lead discovery in 3 niches/cities per month',
+            careerAgent: 'Up to 5 job match reports per month',
           },
           cta: 'Upgrade to Starter',
         },
@@ -214,6 +232,7 @@ export const translations = {
             marketingAgent: 'Autonomous multi-channel marketing campaigns',
             contentAgent: 'Unlimited content packages (articles, scripts, posts)',
             leadFinder: 'Unlimited lead discovery across any niche or city',
+            careerAgent: 'Unlimited job matching and cover letters',
           },
           cta: 'Choose Pro',
         },
@@ -286,11 +305,11 @@ export const translations = {
       badge: 'حلول ذكاء اصطناعي للإنتاج الفعلي',
       titleHighlight: 'أنظمة ذكية',
       titleRest: 'لتحقيق نمو حقيقي للأعمال',
-      subtitle: 'ست خدمات متخصصة في الذكاء الاصطناعي تم تصميمها لتقديم منتجات رقمية قابلة للبيع، وبناء مواقع وتطبيقات جوال مخصصة، وإدارة التوظيف الذكية، وحملات تسويقية ثنائية اللغة مؤتمتة، ومحتوى جاهز للنشر، واكتشاف عملاء محتملين.',
+      subtitle: 'سبع خدمات متخصصة في الذكاء الاصطناعي تم تصميمها لتقديم منتجات رقمية قابلة للبيع، وبناء مواقع وتطبيقات جوال مخصصة، وإدارة التوظيف الذكية، وحملات تسويقية ثنائية اللغة مؤتمتة، ومحتوى جاهز للنشر، واكتشاف عملاء محتملين، ومطابقة وظائف صادقة بالذكاء الاصطناعي.',
       ctaPrimary: 'ابدأ مشروعك الآن',
-      ctaSecondary: 'استكشف الخدمات الست',
+      ctaSecondary: 'استكشف الخدمات السبع',
       stats: [
-        { value: '٦ خدمات', label: 'حلول ذكاء اصطناعي متخصصة' },
+        { value: '٧ خدمات', label: 'حلول ذكاء اصطناعي متخصصة' },
         { value: '١٠٠٪ حقيقي', label: 'خوادم وقواعد بيانات كاملة' },
         { value: 'عربي / إنجليزي', label: 'دعم ثنائي اللغة أصيل' },
         { value: 'فوري', label: 'تحليل فجوات السوق' },
@@ -298,7 +317,7 @@ export const translations = {
     },
     services: {
       sectionBadge: 'الحلول الأساسية',
-      sectionTitle: 'ست خدمات ذكاء اصطناعي هادفة',
+      sectionTitle: 'سبع خدمات ذكاء اصطناعي هادفة',
       sectionSubtitle: 'استبدل الأدوات المتفرقة والأوامر العامة بقدرات متكاملة تنتج مخرجات تجارية حقيقية جاهزة للعمل.',
       items: [
         {
@@ -391,6 +410,21 @@ export const translations = {
           metrics: 'يصل بعرض جاهز، لا بعرض بيع فقط',
           iconName: 'Search' as const,
         },
+        {
+          id: 'career-agent',
+          title: 'وكيل التوظيف',
+          shortDesc: 'يحلل السيرة الذاتية بعمق، يبحث عن وظائف حقيقية متاحة الآن، ويكتب رسالة تغطية مخصصة لكل تطابق حقيقي.',
+          fullDesc: 'يستخرج المهارات التقنية والخبرة والتعليم من سيرة ذاتية حقيقية، يبحث عن وظائف حقيقية متاحة الآن تطابق هذا الملف، يقيّم كل وظيفة بصدق مقابل المهارات الفعلية، ويكتب رسالة تغطية جاهزة للإرسال لأفضل التطابقات - يوصلك كتقرير كامل بالإيميل.',
+          badge: 'التوظيف ومطابقة الوظائف',
+          deliverables: [
+            'تحليل عميق للسيرة الذاتية بملف مهارات منظم',
+            'وظائف حقيقية متاحة الآن، يُبحث عنها حياً - لا اختلاق',
+            'تقييم تطابق صادق من 0 إلى 100٪ مقابل المهارات الفعلية',
+            'رسالة تغطية مخصصة وجاهزة للإرسال لكل تطابق قوي',
+          ],
+          metrics: 'وظائف حقيقية، بتقييم صادق، جاهزة للإرسال',
+          iconName: 'Briefcase' as const,
+        },
       ],
       interactivePreview: 'نظرة عامة على الإمكانيات الفعلية',
       viewAllSpecs: 'عرض المواصفات المعمارية الكاملة',
@@ -398,8 +432,8 @@ export const translations = {
     pricing: {
       sectionBadge: 'تسعير موحد',
       sectionTitle: 'استثمار بسيط وشفاف',
-      sectionSubtitle: 'كل خطة من الخطط تمنحك وصولاً كاملاً لجميع الخدمات الست. اختر الفئة التي تناسب حجم مشاريعك النشطة.',
-      coverageLabel: 'الخدمات الست مشمولة بالكامل في كل خطة:',
+      sectionSubtitle: 'كل خطة من الخطط تمنحك وصولاً كاملاً لجميع الخدمات السبع. اختر الفئة التي تناسب حجم مشاريعك النشطة.',
+      coverageLabel: 'الخدمات السبع مشمولة بالكامل في كل خطة:',
       servicesList: [
         'أداة بناء المنتجات الرقمية',
         'هندسة وتطوير المواقع والتطبيقات',
@@ -407,6 +441,7 @@ export const translations = {
         'وكيل التسويق ثنائي اللغة',
         'وكيل صناعة المحتوى',
         'وكيل اكتشاف العملاء',
+        'وكيل التوظيف',
       ],
       tiers: [
         {
@@ -432,6 +467,7 @@ export const translations = {
             marketingAgent: '10 منشورات تسويقية ثنائية اللغة شهرياً',
             contentAgent: 'حزمة محتوى واحدة (تجريبية)',
             leadFinder: 'بحث تجريبي واحد عن عملاء محتملين',
+            careerAgent: 'تقرير مطابقة وظائف تجريبي واحد',
           },
           cta: 'ابدأ مجاناً الآن',
         },
@@ -459,6 +495,7 @@ export const translations = {
             marketingAgent: 'حملات تسويقية ثنائية اللغة مستمرة بالكامل',
             contentAgent: 'حتى 10 حزم محتوى كاملة شهرياً',
             leadFinder: 'اكتشاف عملاء في 3 مجالات/مدن شهرياً',
+            careerAgent: 'حتى 5 تقارير مطابقة وظائف شهرياً',
           },
           cta: 'ترقية إلى ستارتر',
         },
@@ -486,6 +523,7 @@ export const translations = {
             marketingAgent: 'حملات تسويقية آلية متكاملة عبر كافة المنصات',
             contentAgent: 'حزم محتوى غير محدودة (مقالات، سكربتات، منشورات)',
             leadFinder: 'اكتشاف عملاء غير محدود بأي عدد من المجالات والمدن',
+            careerAgent: 'مطابقة وظائف ورسائل تغطية غير محدودة',
           },
           cta: 'اختر باقة برو',
         },
@@ -501,7 +539,7 @@ export const translations = {
         emailLabel: 'البريد الإلكتروني المهني',
         emailPlaceholder: 'ahmed@company.com',
         messageLabel: 'تفاصيل المشروع واهتماماتك بالخدمات',
-        messagePlaceholder: 'يرجى توضيح أي من خدماتنا الست تحتاجها (مثل موقع ويب مع خادم، أو تسويق ثنائي اللغة، أو نظام إدارة التوظيف) مع الجدول الزمني المتوقع...',
+        messagePlaceholder: 'يرجى توضيح أي من خدماتنا السبع تحتاجها (مثل موقع ويب مع خادم، أو تسويق ثنائي اللغة، أو نظام إدارة التوظيف) مع الجدول الزمني المتوقع...',
         submitBtn: 'إرسال الطلب',
         sendingBtn: 'جاري إرسال الطلب...',
         successTitle: 'تم استلام طلبك بنجاح!',

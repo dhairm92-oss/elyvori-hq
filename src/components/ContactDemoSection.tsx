@@ -1,5 +1,5 @@
-import { useState, FormEvent } from 'react';
-import { Send, CheckCircle2, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { useState, FormEvent, useRef } from 'react';
+import { Send, CheckCircle2, AlertCircle, Loader2, Sparkles, Paperclip, X, FileText } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
 import { QuantumButton } from './QuantumButton';
@@ -15,6 +15,35 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  // Optional resume attachment - when present, the request routes to the
+  // Career Agent pipeline instead of the general demo-request flow, so
+  // a candidate can get real job matches straight from this same form
+  // without needing to find the standalone Career Agent page.
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resumeLabels = {
+    attach: lang === 'en' ? 'Attach resume (optional)' : 'إرفاق سيرة ذاتية (اختياري)',
+    hint:
+      lang === 'en'
+        ? 'Have a resume? Attach it as a PDF and we\'ll find real matching jobs for you instead.'
+        : 'عندك سيرة ذاتية؟ أرفقها بصيغة PDF وسنجد لك وظائف حقيقية مطابقة بدلاً من ذلك.',
+    pdfOnly: lang === 'en' ? 'Please attach a PDF file.' : 'الرجاء إرفاق ملف بصيغة PDF.',
+  };
+
+  const handleFileChange = (file: File | null) => {
+    if (!file) {
+      setResumeFile(null);
+      return;
+    }
+    if (file.type !== 'application/pdf') {
+      setResumeError(resumeLabels.pdfOnly);
+      return;
+    }
+    setResumeError(null);
+    setResumeFile(file);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,17 +53,32 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
     setErrorMessage('');
 
     try {
-      const response = await fetch('https://elyvori-api.onrender.com/public/demo-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          message: message.trim(),
-        }),
-      });
+      let response: Response;
+
+      if (resumeFile) {
+        // A resume is attached - route to the Career Agent pipeline
+        // directly, reusing the same email field from this form.
+        const formData = new FormData();
+        formData.append('resume', resumeFile);
+        formData.append('email', email.trim());
+
+        response = await fetch('https://elyvori-api.onrender.com/public/career-agent', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        response = await fetch('https://elyvori-api.onrender.com/public/demo-request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            message: message.trim(),
+          }),
+        });
+      }
 
       if (!response.ok) {
         let errDetail = '';
@@ -51,6 +95,7 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
       setName('');
       setEmail('');
       setMessage('');
+      setResumeFile(null);
     } catch (err: any) {
       console.warn('Demo request error:', err);
       // If server took too long or returned network error, explain clearly
@@ -58,7 +103,7 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
         err?.message ||
           (lang === 'en'
             ? 'Failed to deliver inquiry to backend. If the Render instance is spinning up, please retry shortly.'
-            : 'تعذر إرسال الطلب إلى الخادم. إذا كان الخادم في مرحلة التهيئة، يرجى المحاولة بعد قليل.')
+            : 'تعذر إرسال الطلب إلى الخادم. إذا كان الخادم في مرحلة التشغيل، يرجى المحاولة بعد قليل.')
       );
       setStatus('error');
     }
@@ -193,6 +238,44 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
                   disabled={status === 'loading'}
                   className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-950/80 px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors"
                 />
+              </div>
+
+              {/* Optional resume attachment - small button, not a full
+                  dropzone, since this is a secondary path on the general
+                  form (the dedicated Career Agent page is the primary
+                  experience for job seekers). */}
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                />
+                {resumeFile ? (
+                  <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs">
+                    <FileText className="h-4 w-4 text-emerald-500 shrink-0" />
+                    <span className="text-slate-700 dark:text-slate-300 truncate flex-1">{resumeFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleFileChange(null)}
+                      className="text-slate-400 hover:text-rose-500 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+                  >
+                    <Paperclip className="h-3.5 w-3.5" />
+                    {resumeLabels.attach}
+                  </button>
+                )}
+                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">{resumeLabels.hint}</p>
+                {resumeError && <p className="mt-1 text-[11px] text-rose-500">{resumeError}</p>}
               </div>
 
               {/* Submit button & endpoint disclosure */}

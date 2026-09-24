@@ -122,6 +122,10 @@ export function PricingSection({ lang, onSelectPlan }: PricingSectionProps) {
                         <span className="text-slate-500">{lang === 'en' ? 'Lead Discovery:' : 'اكتشاف العملاء:'}</span>
                         <span className="font-semibold text-right">{tier.serviceCoverage.leadFinder}</span>
                       </li>
+                      <li className="flex items-center justify-between">
+                        <span className="text-slate-500">{lang === 'en' ? 'Career Agent:' : 'وكيل التوظيف:'}</span>
+                        <span className="font-semibold text-right">{tier.serviceCoverage.careerAgent}</span>
+                      </li>
                     </ul>
                   </div>
 
