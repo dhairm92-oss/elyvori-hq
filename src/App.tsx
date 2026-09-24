@@ -13,6 +13,7 @@ import { ContactDemoSection } from './components/ContactDemoSection';
 import { Footer } from './components/Footer';
 import { CyberFirewallWidget } from './components/CyberFirewallWidget';
 import { LoginGateModal } from './components/LoginGateModal';
+import { CareerAgentPage } from './components/CareerAgentPage';
 import { Language, Theme, AuthState } from './types';
 import { translations } from './translations';
 import { ShieldCheck } from 'lucide-react';
@@ -45,6 +46,10 @@ export default function App() {
 
   // Controls Login Gate modal visibility
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+
+  // Controls whether the standalone Career Agent page is shown instead
+  // of the main marketing site.
+  const [showCareerAgent, setShowCareerAgent] = useState<boolean>(false);
 
   // Sync theme class to document
   useEffect(() => {
@@ -132,9 +137,13 @@ export default function App() {
         auth={auth}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onSignOut={handleSignOut}
+        onOpenCareerAgent={() => setShowCareerAgent(true)}
       />
 
       {/* Main Page Layout */}
+      {showCareerAgent ? (
+        <CareerAgentPage lang={lang} onBack={() => setShowCareerAgent(false)} />
+      ) : (
       <main className="relative z-10">
         {/* Authenticated Confirmation Banner */}
         {auth.isAuthenticated && (
@@ -194,6 +203,7 @@ export default function App() {
         {/* Contact / Demo Form (POST to https://elyvori-api.onrender.com/public/demo-request) */}
         <ContactDemoSection lang={lang} />
       </main>
+      )}
 
       {/* Footer */}
       <Footer lang={lang} theme={theme} />

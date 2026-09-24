@@ -1,4 +1,4 @@
-import { Sun, Moon, Globe, LogIn, LogOut, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Sun, Moon, Globe, LogIn, LogOut, CheckCircle, ShieldCheck, Briefcase } from 'lucide-react';
 import { Logo } from './Logo';
 import { QuantumButton } from './QuantumButton';
 import { Language, Theme, AuthState } from '../types';
@@ -12,6 +12,7 @@ interface NavbarProps {
   auth: AuthState;
   onOpenAuthModal: () => void;
   onSignOut: () => void;
+  onOpenCareerAgent: () => void;
 }
 
 export function Navbar({
@@ -22,6 +23,7 @@ export function Navbar({
   auth,
   onOpenAuthModal,
   onSignOut,
+  onOpenCareerAgent,
 }: NavbarProps) {
   const t = translations[lang];
   const isDark = theme === 'dark';
@@ -73,6 +75,18 @@ export function Navbar({
             className="text-slate-600 hover:text-cyan-500 dark:text-slate-300 dark:hover:text-cyan-400 transition-colors"
           >
             {t.nav.demo}
+          </button>
+          {/* Career Agent - visually distinct (gradient badge) since it's
+              a standalone, high-value feature worth calling out, not just
+              another scroll link. */}
+          <button
+            id="nav-link-career-agent"
+            type="button"
+            onClick={onOpenCareerAgent}
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 border border-indigo-500/20 px-3 py-1 text-indigo-600 dark:text-indigo-400 hover:from-indigo-500/20 hover:to-emerald-500/20 transition-colors"
+          >
+            <Briefcase className="h-3.5 w-3.5" />
+            <span>{lang === 'en' ? 'Career Agent' : 'وكيل التوظيف'}</span>
           </button>
         </nav>
 
