@@ -14,6 +14,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  History,
 } from 'lucide-react';
 import { Language } from '../types';
 
@@ -51,6 +52,12 @@ interface CareerAgentResult {
 // until the pipeline finishes, then renders the report inline.
 export function CareerAgentPage({ lang, onBack }: CareerAgentPageProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyEmail, setHistoryEmail] = useState('');
+  const [historyItems, setHistoryItems] = useState<
+    Array<{ jobId: string; completedAt: string; candidateName: string | null; matchCount: number }> | null
+  >(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [stage, setStage] = useState<Stage>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -106,6 +113,12 @@ export function CareerAgentPage({ lang, onBack }: CareerAgentPageProps) {
     copied: lang === 'en' ? 'Copied!' : 'تم النسخ!',
     emailBackup: lang === 'en' ? "A full copy of this report was also sent to your email." : 'تم إرسال نسخة كاملة من هذا التقرير إلى بريدك الإلكتروني أيضاً.',
     noMatches: lang === 'en' ? 'No genuine job matches were found this time - try again shortly.' : 'لم يتم العثور على وظائف مطابقة حقيقية هذه المرة - حاول مرة أخرى بعد قليل.',
+    viewHistory: lang === 'en' ? 'View my past reports' : 'عرض تقاريري السابقة',
+    hideHistory: lang === 'en' ? 'Hide past reports' : 'إخفاء التقارير السابقة',
+    historyEmailPrompt: lang === 'en' ? 'Enter the email you used before' : 'أدخل الإيميل الذي استخدمته سابقاً',
+    loadHistory: lang === 'en' ? 'Load' : 'تحميل',
+    noHistory: lang === 'en' ? 'No past reports found for that email.' : 'لا توجد تقارير سابقة لهذا الإيميل.',
+    matchesWord: lang === 'en' ? 'matches' : 'تطابق',
   };
 
   useEffect(() => {
@@ -113,6 +126,37 @@ export function CareerAgentPage({ lang, onBack }: CareerAgentPageProps) {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, []);
+
+  const loadHistory = async () => {
+    if (!historyEmail.includes('@')) return;
+    setHistoryLoading(true);
+    setHistoryItems(null);
+    try {
+      const res = await fetch(
+        `https://elyvori-api.onrender.com/public/career-agent/history?email=${encodeURIComponent(historyEmail)}`,
+      );
+      const data = await res.json();
+      setHistoryItems(Array.isArray(data) ? data : []);
+    } catch {
+      setHistoryItems([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const openPastReport = async (jobId: string) => {
+    try {
+      const res = await fetch(`https://elyvori-api.onrender.com/public/career-agent/${jobId}`);
+      const data = await res.json();
+      if (data.status === 'done' && data.result) {
+        setResult(data.result);
+        setStage('done');
+        setShowHistory(false);
+      }
+    } catch {
+      // silently ignore - the person can just try again
+    }
+  };
 
   const handleFileSelect = (selected: File | null) => {
     if (!selected) return;
@@ -210,13 +254,67 @@ export function CareerAgentPage({ lang, onBack }: CareerAgentPageProps) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-10"
-        >
-          <ArrowLeft className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
-          {t.back}
-        </button>
+        <div className="flex items-center justify-between mb-10">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
+            {t.back}
+          </button>
+          {stage !== 'done' && (
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            >
+              <History className="h-3.5 w-3.5" />
+              {showHistory ? t.hideHistory : t.viewHistory}
+            </button>
+          )}
+        </div>
+
+        {showHistory && stage !== 'done' && (
+          <div className="mb-10 rounded-xl border border-slate-800 bg-slate-900/50 p-5">
+            <p className="text-xs text-slate-400 mb-3">{t.historyEmailPrompt}</p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={historyEmail}
+                onChange={(e) => setHistoryEmail(e.target.value)}
+                placeholder={t.emailPlaceholder}
+                className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
+              />
+              <button
+                onClick={loadHistory}
+                disabled={historyLoading}
+                className="shrink-0 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white text-xs font-semibold px-4 transition-colors"
+              >
+                {historyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.loadHistory}
+              </button>
+            </div>
+            {historyItems && historyItems.length === 0 && (
+              <p className="text-xs text-slate-500 mt-3">{t.noHistory}</p>
+            )}
+            {historyItems && historyItems.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {historyItems.map((item) => (
+                  <button
+                    key={item.jobId}
+                    onClick={() => openPastReport(item.jobId)}
+                    className="w-full flex items-center justify-between rounded-lg border border-slate-800 hover:border-indigo-500/40 bg-slate-950/40 px-4 py-2.5 text-left transition-colors"
+                  >
+                    <span className="text-xs text-slate-300">
+                      {new Date(item.completedAt).toLocaleDateString()}
+                    </span>
+                    <span className="text-xs font-semibold text-indigo-400">
+                      {item.matchCount} {t.matchesWord}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {stage !== 'done' && (
           <div className="text-center mb-12">
