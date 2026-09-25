@@ -12,7 +12,7 @@ import { PricingSection } from './components/PricingSection';
 import { ContactDemoSection } from './components/ContactDemoSection';
 import { Footer } from './components/Footer';
 import { CyberFirewallWidget } from './components/CyberFirewallWidget';
-import { LoginGateModal } from './components/LoginGateModal';
+import { VoiceWidget } from `./components/VoiceWidget`;`nimport { LoginGateModal } from './components/LoginGateModal';
 import { CareerAgentPage } from './components/CareerAgentPage';
 import { Language, Theme, AuthState } from './types';
 import { translations } from './translations';
@@ -219,7 +219,9 @@ export default function App() {
         theme={theme}
         auth={auth}
         onSuccessAuth={handleSuccessAuth}
-      />
+      />`n      {/* Voice Assistant Widget */}`n      <VoiceWidget lang={lang} />`n
     </div>
   );
 }
+
+
