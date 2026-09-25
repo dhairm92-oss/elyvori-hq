@@ -91,7 +91,7 @@ export function VoiceWidget({ lang }: VoiceWidgetProps) {
     if (!isSupported) return;
     stopAll();
     setTranscript(''); setReply('');
-    setVoiceState('listening');
+    setVoiceState('listening'); console.log('[Voice] Started listening');
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const r = new SR();
     recognitionRef.current = r;
@@ -333,3 +333,4 @@ export function VoiceWidget({ lang }: VoiceWidgetProps) {
     </>
   );
 }
+
