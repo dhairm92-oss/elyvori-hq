@@ -302,7 +302,7 @@ export function VoiceWidget({ lang }: VoiceWidgetProps) {
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 opacity-30 blur-xl scale-150" />
           )}
           <button
-            onClick={() => { if (isOpen) { handleClose(); } else { setIsOpen(true); const greeting = lang === 'ar' ? 'مرحباً! كيف يمكنني مساعدتك اليوم؟' : 'Hello! How can I help you today?'; speakWithElevenLabs(greeting); } }}
+            onClick={() => { if (isOpen) { handleClose(); } else { setIsOpen(true); const greeting = lang === 'ar' ? 'مرحباً، كيف أقدر أساعدك؟' : 'Hello! How can I help you today?'; speakWithElevenLabs(greeting); } }}
             className={`voice-float relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br transition-all duration-300 ${
               isOpen
                 ? 'from-slate-700 to-slate-800 shadow-lg'
