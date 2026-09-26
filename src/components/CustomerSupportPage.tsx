@@ -59,6 +59,8 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
   const [orderContext, setOrderContext] = useState('');
   const [channel, setChannel] = useState<Channel>('whatsapp');
   const [businessType, setBusinessType] = useState('');
+  const [ownerEmail, setOwnerEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
   const [result, setResult] = useState<SupportResult | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [copiedResponse, setCopiedResponse] = useState(false);
@@ -99,6 +101,8 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
     compensation: lang === 'en' ? 'Compensation Suggestion' : 'مقترح التعويض',
     riskScore: lang === 'en' ? 'Churn Risk' : 'خطر الفقدان',
     subject: lang === 'en' ? 'Subject' : 'الموضوع',
+    emailLabel: lang === 'en' ? 'Your Email (to receive the report)' : 'إيميلك (لاستلام التقرير)',
+    emailPlaceholder: lang === 'en' ? 'your@email.com' : 'your@email.com',
     noMessage: lang === 'en' ? 'Please paste a customer message.' : 'الرجاء لصق رسالة العميل.',
     error: lang === 'en' ? 'Analysis failed. Please try again.' : 'فشل التحليل. الرجاء المحاولة مرة أخرى.',
     whatsapp: 'WhatsApp',
@@ -134,6 +138,7 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
           channel,
           lang,
           businessType: businessType.trim(),
+          ownerEmail: ownerEmail.trim(),
         }),
       });
       if (!res.ok) {
@@ -143,6 +148,7 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
       const data = await res.json();
       setResult(data);
       setStage('done');
+      if (ownerEmail.trim()) setEmailSent(true);
     } catch (e: any) {
       setErrorMsg(e.message || t.error);
       setStage('error');
@@ -160,6 +166,7 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
   const reset = () => {
     setStage('idle'); setResult(null); setErrorMsg('');
     setCustomerMessage(''); setOrderContext(''); setBusinessType('');
+    setEmailSent(false);
   };
 
   const riskScoreColor = (score: number) =>
@@ -276,6 +283,18 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
                   />
                 </div>
 
+                {/* Owner email */}
+                <div className="mb-5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">{t.emailLabel}</label>
+                  <input
+                    type="email"
+                    value={ownerEmail}
+                    onChange={e => setOwnerEmail(e.target.value)}
+                    placeholder={t.emailPlaceholder}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-sky-500 focus:outline-none transition-colors"
+                  />
+                </div>
+
                 {errorMsg && (
                   <div className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">{errorMsg}</div>
                 )}
@@ -296,7 +315,19 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
         {stage === 'done' && result && (
           <div className="space-y-4">
 
-            {/* Top metrics row */}
+            {/* Email sent banner */}
+        {emailSent && (
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 flex items-center gap-3">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+            <p className="text-sm text-emerald-300">
+              {lang === 'en'
+                ? `📧 Full support report sent to ${ownerEmail}`
+                : `📧 تم إرسال تقرير الدعم الكامل إلى ${ownerEmail}`}
+            </p>
+          </div>
+        )}
+
+        {/* Top metrics row */}
             <div className="grid grid-cols-3 gap-3">
               {/* Tone */}
               <div className={`rounded-xl border ${toneConfig[result.sentimentAnalysis.tone].border} ${toneConfig[result.sentimentAnalysis.tone].bg} p-4 text-center`}>
