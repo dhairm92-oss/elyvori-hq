@@ -20,6 +20,7 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
   // a candidate can get real job matches straight from this same form
   // without needing to find the standalone Career Agent page.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [isContractMode, setIsContractMode] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,6 +92,8 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
         throw new Error(errDetail || `Request failed with status ${response.status}`);
       }
 
+      const responseData = await response.json().catch(() => ({}));
+      setIsContractMode((responseData as any).mode === 'contract_analysis');
       setStatus('success');
       setName('');
       setEmail('');
@@ -151,7 +154,11 @@ export function ContactDemoSection({ lang }: ContactDemoSectionProps) {
                 {t.demo.form.successTitle}
               </h3>
               <p className="max-w-md mx-auto text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                {t.demo.form.successMessage}
+                {isContractMode
+                  ? (lang === 'en'
+                    ? '\u2696\ufe0f Your contract analysis is underway. A detailed forensic risk report with red flags and counter-proposals will arrive in your inbox within 2 minutes.'
+                    : '\u2696\ufe0f \u062c\u0627\u0631\u064a \u062a\u062d\u0644\u064a\u0644 \u0639\u0642\u062f\u0643 \u0627\u0644\u0622\u0646. \u062a\u0642\u0631\u064a\u0631 \u0645\u062e\u0627\u0637\u0631 \u062a\u0641\u0635\u064a\u0644\u064a \u0633\u064a\u0635\u0644 \u0625\u0644\u0649 \u0628\u0631\u064a\u062f\u0643 \u062e\u0644\u0627\u0644 \u062f\u0642\u064a\u0642\u062a\u064a\u0646.')
+                  : t.demo.form.successMessage}
               </p>
               <div className="pt-4">
                 <button
