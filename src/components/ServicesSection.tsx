@@ -17,6 +17,7 @@ import {
   ArrowUpRight,
   Search,
   Briefcase,
+  Scale,
 } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
@@ -47,6 +48,7 @@ export function ServicesSection({ lang, onRequestDemo }: ServicesSectionProps) {
     FileText: FileText,
     Search: Search,
     Briefcase: Briefcase,
+    Scale: Scale,
   };
 
   const totalServices = t.services.items.length;
