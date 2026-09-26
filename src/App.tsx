@@ -17,6 +17,7 @@ import { LoginGateModal } from './components/LoginGateModal';
 import { CareerAgentPage } from './components/CareerAgentPage';
 import { ContractAnalyzerPage } from './components/ContractAnalyzerPage';
 import { CustomerSupportPage } from './components/CustomerSupportPage';
+import { MobileSplash } from './components/MobileSplash';
 import { Language, Theme, AuthState } from './types';
 import { translations } from './translations';
 import { ShieldCheck } from 'lucide-react';
@@ -45,6 +46,13 @@ export default function App() {
       organizationName: organizationName || null,
       isAuthenticated: Boolean(token),
     };
+  });
+
+  // Mobile splash: show on first visit on mobile devices only
+  const [showMobileSplash, setShowMobileSplash] = useState<boolean>(() => {
+    const isMobile = window.innerWidth < 768;
+    const hasSeenSplash = localStorage.getItem('elyvori_mobile_auth');
+    return isMobile && !hasSeenSplash;
   });
 
   // Controls Login Gate modal visibility
@@ -114,6 +122,19 @@ export default function App() {
   };
 
   const t = translations[lang];
+
+  // Show mobile splash on first mobile visit
+  if (showMobileSplash) {
+    return (
+      <MobileSplash
+        lang={lang}
+        onComplete={() => {
+          localStorage.setItem('elyvori_mobile_auth', 'true');
+          setShowMobileSplash(false);
+        }}
+      />
+    );
+  }
 
   return (
     <div
