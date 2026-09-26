@@ -477,3 +477,4 @@ export function CustomerSupportPage({ lang, onBack }: CustomerSupportPageProps) 
     </div>
   );
 }
+ 
