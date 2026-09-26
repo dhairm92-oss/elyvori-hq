@@ -15,6 +15,7 @@ import { CyberFirewallWidget } from './components/CyberFirewallWidget';
 import { VoiceWidget } from "./components/VoiceWidget";
 import { LoginGateModal } from './components/LoginGateModal';
 import { CareerAgentPage } from './components/CareerAgentPage';
+import { ContractAnalyzerPage } from './components/ContractAnalyzerPage';
 import { Language, Theme, AuthState } from './types';
 import { translations } from './translations';
 import { ShieldCheck } from 'lucide-react';
@@ -51,6 +52,7 @@ export default function App() {
   // Controls whether the standalone Career Agent page is shown instead
   // of the main marketing site.
   const [showCareerAgent, setShowCareerAgent] = useState<boolean>(false);
+  const [showContractAnalyzer, setShowContractAnalyzer] = useState<boolean>(false);
 
   // Sync theme class to document
   useEffect(() => {
@@ -139,10 +141,13 @@ export default function App() {
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onSignOut={handleSignOut}
         onOpenCareerAgent={() => setShowCareerAgent(true)}
+        onOpenContractAnalyzer={() => setShowContractAnalyzer(true)}
       />
 
       {/* Main Page Layout */}
-      {showCareerAgent ? (
+      {showContractAnalyzer ? (
+        <ContractAnalyzerPage lang={lang} onBack={() => setShowContractAnalyzer(false)} />
+      ) : showCareerAgent ? (
         <CareerAgentPage lang={lang} onBack={() => setShowCareerAgent(false)} />
       ) : (
       <main className="relative z-10">
