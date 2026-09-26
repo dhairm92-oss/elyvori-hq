@@ -1,4 +1,4 @@
-import { Sun, Moon, Globe, LogIn, LogOut, CheckCircle, ShieldCheck, Briefcase, Scale } from 'lucide-react';
+import { Sun, Moon, Globe, LogIn, LogOut, CheckCircle, ShieldCheck, Briefcase, Scale, HeadphonesIcon } from 'lucide-react';
 import { Logo } from './Logo';
 import { QuantumButton } from './QuantumButton';
 import { Language, Theme, AuthState } from '../types';
@@ -14,6 +14,7 @@ interface NavbarProps {
   onSignOut: () => void;
   onOpenCareerAgent: () => void;
   onOpenContractAnalyzer: () => void;
+  onOpenCustomerSupport: () => void;
 }
 
 export function Navbar({
@@ -26,6 +27,7 @@ export function Navbar({
   onSignOut,
   onOpenCareerAgent,
   onOpenContractAnalyzer,
+  onOpenCustomerSupport,
 }: NavbarProps) {
   const t = translations[lang];
   const isDark = theme === 'dark';
@@ -98,6 +100,15 @@ export function Navbar({
           >
             <Scale className="h-3.5 w-3.5" />
             <span>{lang === 'en' ? 'Contract AI' : 'محلل العقود'}</span>
+          </button>
+          <button
+            id="nav-link-customer-support"
+            type="button"
+            onClick={onOpenCustomerSupport}
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500/10 to-blue-500/10 border border-sky-500/20 px-3 py-1 text-sky-600 dark:text-sky-400 hover:from-sky-500/20 hover:to-blue-500/20 transition-colors"
+          >
+            <HeadphonesIcon className="h-3.5 w-3.5" />
+            <span>{lang === 'en' ? 'Support AI' : 'دعم العملاء'}</span>
           </button>
         </nav>
 

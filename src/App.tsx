@@ -16,6 +16,7 @@ import { VoiceWidget } from "./components/VoiceWidget";
 import { LoginGateModal } from './components/LoginGateModal';
 import { CareerAgentPage } from './components/CareerAgentPage';
 import { ContractAnalyzerPage } from './components/ContractAnalyzerPage';
+import { CustomerSupportPage } from './components/CustomerSupportPage';
 import { Language, Theme, AuthState } from './types';
 import { translations } from './translations';
 import { ShieldCheck } from 'lucide-react';
@@ -53,6 +54,7 @@ export default function App() {
   // of the main marketing site.
   const [showCareerAgent, setShowCareerAgent] = useState<boolean>(false);
   const [showContractAnalyzer, setShowContractAnalyzer] = useState<boolean>(false);
+  const [showCustomerSupport, setShowCustomerSupport] = useState<boolean>(false);
 
   // Sync theme class to document
   useEffect(() => {
@@ -142,10 +144,13 @@ export default function App() {
         onSignOut={handleSignOut}
         onOpenCareerAgent={() => setShowCareerAgent(true)}
         onOpenContractAnalyzer={() => setShowContractAnalyzer(true)}
+        onOpenCustomerSupport={() => setShowCustomerSupport(true)}
       />
 
       {/* Main Page Layout */}
-      {showContractAnalyzer ? (
+      {showCustomerSupport ? (
+        <CustomerSupportPage lang={lang} onBack={() => setShowCustomerSupport(false)} />
+      ) : showContractAnalyzer ? (
         <ContractAnalyzerPage lang={lang} onBack={() => setShowContractAnalyzer(false)} />
       ) : showCareerAgent ? (
         <CareerAgentPage lang={lang} onBack={() => setShowCareerAgent(false)} />
