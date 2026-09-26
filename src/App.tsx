@@ -156,26 +156,6 @@ export default function App() {
         <CareerAgentPage lang={lang} onBack={() => setShowCareerAgent(false)} />
       ) : (
       <main className="relative z-10">
-        {/* Authenticated Confirmation Banner */}
-        {auth.isAuthenticated && (
-          <div
-            id="auth-active-banner"
-            className="border-b border-emerald-500/30 bg-emerald-950/40 px-4 py-2 backdrop-blur-md"
-          >
-            <div className="mx-auto flex max-w-7xl items-center justify-between text-xs text-emerald-300">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                <span>
-                  {lang === 'en' ? 'Authenticated Session Active:' : 'جلسة موثقة ونشطة:'}{' '}
-                  <strong className="text-white">{auth.organizationName || auth.userEmail}</strong>
-                </span>
-              </div>
-              <span className="font-mono text-[10px] text-emerald-400/80">
-                TOKEN: {auth.token?.slice(0, 14)}...
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Hero Section */}
         <Hero
