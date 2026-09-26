@@ -1,4 +1,4 @@
-import { Sun, Moon, Globe, LogIn, LogOut, CheckCircle, ShieldCheck, Briefcase } from 'lucide-react';
+import { Sun, Moon, Globe, LogIn, LogOut, CheckCircle, ShieldCheck, Briefcase, Scale } from 'lucide-react';
 import { Logo } from './Logo';
 import { QuantumButton } from './QuantumButton';
 import { Language, Theme, AuthState } from '../types';
@@ -13,6 +13,7 @@ interface NavbarProps {
   onOpenAuthModal: () => void;
   onSignOut: () => void;
   onOpenCareerAgent: () => void;
+  onOpenContractAnalyzer: () => void;
 }
 
 export function Navbar({
@@ -24,6 +25,7 @@ export function Navbar({
   onOpenAuthModal,
   onSignOut,
   onOpenCareerAgent,
+  onOpenContractAnalyzer,
 }: NavbarProps) {
   const t = translations[lang];
   const isDark = theme === 'dark';
@@ -87,6 +89,15 @@ export function Navbar({
           >
             <Briefcase className="h-3.5 w-3.5" />
             <span>{lang === 'en' ? 'Career Agent' : 'وكيل التوظيف'}</span>
+          </button>
+          <button
+            id="nav-link-contract-analyzer"
+            type="button"
+            onClick={onOpenContractAnalyzer}
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 px-3 py-1 text-violet-600 dark:text-violet-400 hover:from-violet-500/20 hover:to-purple-500/20 transition-colors"
+          >
+            <Scale className="h-3.5 w-3.5" />
+            <span>{lang === 'en' ? 'Contract AI' : 'محلل العقود'}</span>
           </button>
         </nav>
 
