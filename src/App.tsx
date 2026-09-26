@@ -17,6 +17,7 @@ import { LoginGateModal } from './components/LoginGateModal';
 import { CareerAgentPage } from './components/CareerAgentPage';
 import { ContractAnalyzerPage } from './components/ContractAnalyzerPage';
 import { CustomerSupportPage } from './components/CustomerSupportPage';
+import { NegotiationPage } from './components/NegotiationPage';
 import { Language, Theme, AuthState } from './types';
 import { translations } from './translations';
 import { ShieldCheck } from 'lucide-react';
@@ -55,6 +56,7 @@ export default function App() {
   const [showCareerAgent, setShowCareerAgent] = useState<boolean>(false);
   const [showContractAnalyzer, setShowContractAnalyzer] = useState<boolean>(false);
   const [showCustomerSupport, setShowCustomerSupport] = useState<boolean>(false);
+  const [showNegotiation, setShowNegotiation] = useState<boolean>(false);
 
   // Sync theme class to document
   useEffect(() => {
@@ -145,10 +147,13 @@ export default function App() {
         onOpenCareerAgent={() => setShowCareerAgent(true)}
         onOpenContractAnalyzer={() => setShowContractAnalyzer(true)}
         onOpenCustomerSupport={() => setShowCustomerSupport(true)}
+        onOpenNegotiation={() => setShowNegotiation(true)}
       />
 
       {/* Main Page Layout */}
-      {showCustomerSupport ? (
+      {showNegotiation ? (
+        <NegotiationPage lang={lang} onBack={() => setShowNegotiation(false)} />
+      ) : showCustomerSupport ? (
         <CustomerSupportPage lang={lang} onBack={() => setShowCustomerSupport(false)} />
       ) : showContractAnalyzer ? (
         <ContractAnalyzerPage lang={lang} onBack={() => setShowContractAnalyzer(false)} />
