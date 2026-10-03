@@ -212,3 +212,44 @@ html.light [class*="aspect-"]:has(> img) [class*="text-indigo-"] { color: #A5B4F
 html.light [class*="aspect-"]:has(> img) [class*="text-fuchsia-"] { color: #F0ABFC !important; }
 html.light [class*="aspect-"]:has(> img) [class*="border-white/"] { border-color: rgba(255, 255, 255, 0.12) !important; }
 /* ===== /ELYVORI-3D-CAPTIONS ===== */
+
+/* ===== ELYVORI-STATS ===== */
+/* stats row */
+html.light [class*="divide-y"][class*="sm:grid-cols-3"] > * { border-color: rgba(15, 23, 42, 0.10) !important; }
+@media (max-width: 639px) {
+  [class*="divide-y"][class*="sm:grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
+  [class*="divide-y"][class*="sm:grid-cols-3"] > * {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    text-align: center;
+    gap: 8px !important;
+    padding: 14px 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  html.light [class*="divide-y"][class*="sm:grid-cols-3"] > * {
+    background: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.25);
+  }
+  [class*="divide-y"][class*="sm:grid-cols-3"] > * > :first-child { width: 36px !important; height: 36px !important; border-radius: 12px; }
+  [class*="divide-y"][class*="sm:grid-cols-3"] > * > :first-child svg { width: 18px; height: 18px; }
+  [class*="divide-y"][class*="sm:grid-cols-3"] [class*="text-2xl"] { font-size: 1.3rem !important; line-height: 1.2 !important; }
+  [class*="divide-y"][class*="sm:grid-cols-3"] [class*="text-xs"] { font-size: 11px !important; line-height: 1.4 !important; margin-top: 2px !important; }
+}
+
+/* day mode: logo text readable on the white header */
+html.light header [style*="rgb(255, 255, 255) 0%"] {
+  background-image: linear-gradient(135deg, #0E7490 0%, #4F46E5 55%, #A21CAF 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  filter: none !important;
+}
+
+/* very small phones: header fits */
+@media (max-width: 360px) {
+  header .text-xl { font-size: 1.05rem !important; }
+  header [class*="tracking-[0.2em]"] { letter-spacing: 0.12em !important; }
+}
+/* ===== /ELYVORI-STATS ===== */
