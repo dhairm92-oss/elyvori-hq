@@ -130,10 +130,8 @@ export default function App() {
       } ${lang === 'ar' ? 'font-cairo' : 'font-sans'}`}
     >
       {/* Particle Canvas Background */}
-      <ParticleBackground theme={theme} />
 
       {/* 3D Holographic Monumental Background Name (Elyvori) with Gyro/Mouse Perspective */}
-      <Elyvori3DBackground theme={theme} lang={lang} />
 
       {/* Floating Animated & Glowing Side Logo Widget (Stays in motion, glows, interactive) */}
       <div className="hidden md:contents"><FloatingSideLogo isDark={theme === 'dark'} lang={lang} /></div>
