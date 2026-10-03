@@ -26,7 +26,7 @@ import { ProjectTracker } from './components/ProjectTracker';
 
 export default function App() {
   // Theme state: defaults to dark for premium look, saved in localStorage
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('elyvori_theme') === 'light' ? 'light' : 'dark'));
 
   // Language state: defaults to English, saved in localStorage
   const [lang, setLang] = useState<Language>(() => {
