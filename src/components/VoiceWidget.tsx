@@ -14,6 +14,10 @@ interface VoiceWidgetProps {
 
 const API = 'https://elyvori-api.onrender.com';
 
+// Only one widget renders, even if <VoiceWidget/> is mounted more than once
+let elvOwner: object | null = null;
+const ELV_RELEASE = 'elv-widget-release';
+
 const WELCOME_EN = `👋 Hello! I'm **Elyvori AI** — your autonomous business engine.\n\nI can help you with:\n\n🔥 **Digital Products** — Build & sell PDF products automatically\n💻 **Websites & Apps** — Full-stack builds in minutes\n📢 **Marketing** — Bilingual EN/AR campaigns\n👥 **Recruitment** — AI-powered hiring CRM\n📄 **Contracts** — Instant risk analysis\n\nWhat can I build for you today?`;
 const WELCOME_AR = `👋 مرحباً! أنا **إليفوري AI** — محرك نمو أعمالك.\n\nأستطيع مساعدتك في:\n\n🔥 **المنتجات الرقمية** — بناء وبيع PDF تلقائياً\n💻 **المواقع والتطبيقات** — بناء متكامل في دقائق\n📢 **التسويق** — حملات ثنائية اللغة\n👥 **التوظيف** — نظام توظيف ذكي\n📄 **العقود** — تحليل فوري للمخاطر\n\nماذا أبني لك اليوم؟`;
 
@@ -38,6 +42,23 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+  const ownerKey = useRef({});
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    const claim = () => {
+      if (!elvOwner) { elvOwner = ownerKey.current; setIsOwner(true); }
+    };
+    claim();
+    window.addEventListener(ELV_RELEASE, claim);
+    return () => {
+      window.removeEventListener(ELV_RELEASE, claim);
+      if (elvOwner === ownerKey.current) {
+        elvOwner = null;
+        window.dispatchEvent(new Event(ELV_RELEASE));
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (open) { setUnread(0); setTimeout(() => inputRef.current?.focus(), 400); }
@@ -97,6 +118,8 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
   };
 
+  if (!isOwner) return null;
+
   return (
     <>
       <style>{`
@@ -127,7 +150,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         .mic-btn.active{background:linear-gradient(135deg,#ef4444,#dc2626);animation:micPulse 1s infinite;box-shadow:0 0 16px rgba(239,68,68,0.5)}
         .mic-btn.idle{background:rgba(255,255,255,0.08)}
         .send-btn{width:34px;height:34px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.25s}
-        @media(max-width:480px){.elv-btn-wrap{bottom:20px;right:20px}.elv-btn{width:56px;height:56px}.elv-chat{bottom:88px;right:16px;width:calc(100vw - 32px);border-radius:22px}.elv-input{padding:13px 90px 13px 16px}}
+        @media(max-width:767px){.elv-btn-wrap{bottom:calc(20px + env(safe-area-inset-bottom));right:16px}.elv-btn{width:56px;height:56px;animation:elvPulse 2.4s ease-in-out infinite}.elv-chat{bottom:calc(88px + env(safe-area-inset-bottom));right:16px;height:min(560px,calc(100dvh - 130px));width:calc(100vw - 32px);border-radius:22px}.elv-input{padding:13px 90px 13px 16px}}
       `}</style>
 
       {/* Chat Window */}

@@ -68,3 +68,8 @@ img, video, canvas {
   }
 }
 /* ===== /ELYVORI-MOBILE-FIX ===== */
+
+/* ELYVORI-WIDGETS-SPACE */
+@media (max-width: 767px) {
+  footer { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important; }
+}

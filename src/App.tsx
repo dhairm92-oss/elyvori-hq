@@ -134,7 +134,7 @@ export default function App() {
       {/* 3D Holographic Monumental Background Name (Elyvori) with Gyro/Mouse Perspective */}
 
       {/* Floating Animated & Glowing Side Logo Widget (Stays in motion, glows, interactive) */}
-      <div className="hidden md:contents"><FloatingSideLogo isDark={theme === 'dark'} lang={lang} /></div>
+      <FloatingSideLogo isDark={theme === 'dark'} lang={lang} />
 
       {/* Navigation Header */}
       <Navbar

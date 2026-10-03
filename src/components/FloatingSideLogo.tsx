@@ -14,8 +14,8 @@ export const FloatingSideLogo: React.FC<FloatingSideLogoProps> = ({ isDark = tru
     <aside
       id="floating-side-brand-widget"
       aria-label="Brand floating badge"
-      className={`fixed top-1/3 z-50 transition-all duration-300 pointer-events-auto ${
-        isRtl ? 'left-3 sm:left-6' : 'right-3 sm:right-6'
+      className={`fixed z-50 transition-all duration-300 pointer-events-auto left-4 bottom-[calc(20px+env(safe-area-inset-bottom))] md:bottom-auto md:top-1/3 ${
+        isRtl ? 'md:left-6' : 'md:left-auto md:right-6'
       }`}
     >
       <div className="relative group">
@@ -36,7 +36,7 @@ export const FloatingSideLogo: React.FC<FloatingSideLogoProps> = ({ isDark = tru
           title={isRtl ? 'شعار إليفوري المتوهج - اضغط للتكبير' : 'Elyvori Floating 3D Emblem - Click to expand'}
         >
           {/* Animated 3D Micro Core */}
-          <div className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-indigo-500 p-[1.5px] shadow-lg shadow-cyan-500/40 animate-[bounce_3s_ease-in-out_infinite]">
+          <div className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-indigo-500 p-[1.5px] shadow-lg shadow-cyan-500/40 md:animate-[bounce_3s_ease-in-out_infinite]">
             <div
               className={`w-full h-full rounded-[10px] flex items-center justify-center ${
                 isDark ? 'bg-slate-950' : 'bg-slate-900'
@@ -85,8 +85,8 @@ export const FloatingSideLogo: React.FC<FloatingSideLogoProps> = ({ isDark = tru
         {/* Modal tooltip when clicked */}
         {isExpanded && (
           <div
-            className={`absolute top-full mt-3 w-64 p-4 rounded-2xl border backdrop-blur-2xl shadow-2xl transition-all animate-in fade-in zoom-in-95 ${
-              isRtl ? 'left-0' : 'right-0'
+            className={`absolute bottom-full mb-3 md:bottom-auto md:mb-0 md:top-full md:mt-3 w-64 max-w-[calc(100vw-32px)] p-4 rounded-2xl border backdrop-blur-2xl shadow-2xl transition-all animate-in fade-in zoom-in-95 left-0 ${
+              isRtl ? '' : 'md:left-auto md:right-0'
             } ${
               isDark
                 ? 'bg-slate-900/95 border-indigo-500/30 text-white shadow-indigo-950/80'
