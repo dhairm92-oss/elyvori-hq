@@ -1,7 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
-import { ParticleBackground } from './components/ParticleBackground';
-import { Elyvori3DBackground } from './components/Elyvori3DBackground';
 import { FloatingSideLogo } from './components/FloatingSideLogo';
 import { Hero } from './components/Hero';
 import { LiveStatsSection } from './components/LiveStatsSection';
