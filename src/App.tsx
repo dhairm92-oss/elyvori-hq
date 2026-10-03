@@ -136,7 +136,7 @@ export default function App() {
       <Elyvori3DBackground theme={theme} lang={lang} />
 
       {/* Floating Animated & Glowing Side Logo Widget (Stays in motion, glows, interactive) */}
-      <FloatingSideLogo isDark={theme === 'dark'} lang={lang} />
+      <div className="hidden md:contents"><FloatingSideLogo isDark={theme === 'dark'} lang={lang} /></div>
 
       {/* Navigation Header */}
       <Navbar

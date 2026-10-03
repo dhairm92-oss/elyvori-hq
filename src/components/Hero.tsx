@@ -61,7 +61,7 @@ export function Hero({ lang, onExploreServices, onRequestDemo }: HeroProps) {
         {/* Subtitle */}
         <p
           id="hero-subtitle"
-          className="mx-auto mt-6 max-w-3xl text-base sm:text-lg text-slate-400 leading-relaxed"
+          className="mx-auto mt-6 max-w-3xl text-base sm:text-lg text-slate-200 leading-relaxed"
         >
           {t.hero.subtitle}
         </p>
@@ -94,7 +94,7 @@ export function Hero({ lang, onExploreServices, onRequestDemo }: HeroProps) {
           <LiveDemoAnimation lang={lang} />
         </div>
 
-        <Hero3DVisuals lang={lang} />
+        <div className="hidden md:contents"><Hero3DVisuals lang={lang} /></div>
 
         {/* Stats Strip */}
         <div
@@ -116,7 +116,7 @@ export function Hero({ lang, onExploreServices, onRequestDemo }: HeroProps) {
                 style={{ textShadow: '0 0 20px rgba(0,229,255,0.4)' }}>
                 {st.value}
               </span>
-              <span className="mt-1 text-xs text-slate-500 text-center">{st.label}</span>
+              <span className="mt-1 text-xs text-slate-200 text-center">{st.label}</span>
             </div>
           ))}
         </div>
