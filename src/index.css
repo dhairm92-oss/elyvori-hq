@@ -249,7 +249,10 @@ html.light header [style*="rgb(255, 255, 255) 0%"] {
 
 /* very small phones: header fits */
 @media (max-width: 360px) {
-  header .text-xl { font-size: 1.05rem !important; }
-  header [class*="tracking-[0.2em]"] { letter-spacing: 0.12em !important; }
+  header .text-xl { font-size: 1rem !important; }
+  header [class*="tracking-[0.2em]"] { font-size: 9px !important; letter-spacing: 0.08em !important; }
+  header [class*="gap-2"] { gap: 6px !important; }
+  header a [class*="gap-3"] { gap: 8px !important; }
+  header button { min-width: 34px !important; min-height: 34px !important; padding-inline: 8px !important; }
 }
 /* ===== /ELYVORI-STATS ===== */
