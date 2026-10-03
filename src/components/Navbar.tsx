@@ -193,7 +193,7 @@ export function Navbar({
             </button>
 
             {/* Theme Toggle */}
-            <button
+            <button aria-label="Toggle day / night mode" title="Day / Night"
               type="button"
               onClick={onToggleTheme}
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 transition-all"
@@ -202,7 +202,7 @@ export function Navbar({
             </button>
 
             {/* Hamburger */}
-            <button
+            <button aria-label="Menu" title="Menu"
               type="button"
               onClick={() => setMobileOpen(v => !v)}
               className="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 transition-all"
