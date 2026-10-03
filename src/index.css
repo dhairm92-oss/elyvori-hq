@@ -256,3 +256,20 @@ html.light header [style*="rgb(255, 255, 255) 0%"] {
   header button { min-width: 34px !important; min-height: 34px !important; padding-inline: 8px !important; }
 }
 /* ===== /ELYVORI-STATS ===== */
+
+/* ===== ELYVORI-SERVICE-PILLS ===== */
+@media (max-width: 1023px) {
+  .flex.items-center.justify-between.gap-3.mb-5:has(> span.rounded-full.border) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+    row-gap: 12px !important;
+  }
+  .flex.items-center.justify-between.gap-3.mb-5:has(> span.rounded-full.border) > span.rounded-full.border {
+    max-width: 100%;
+    border-radius: 10px !important;
+    line-height: 1.45;
+    padding: 5px 10px !important;
+  }
+}
+/* ===== /ELYVORI-SERVICE-PILLS ===== */
