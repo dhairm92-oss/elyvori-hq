@@ -1,0 +1,354 @@
+import { useState, useEffect, useRef } from 'react';
+import { Language } from '../types';
+
+interface CheckoutPageProps {
+  lang: Language;
+  auth: { isAuthenticated: boolean; token?: string; user?: any };
+  initialPlan?: 'starter' | 'pro';
+  onClose: () => void;
+  onOpenAuthModal: () => void;
+}
+
+const STRIPE_PK = 'pk_test_51ULMudCuVv4Dnc23g4SMwOq49DoMFfHgf1BTAbT7C669bz6pfkrajOGzIeJwRgGJxxIa7Su2xWuUB4df6wHWowix0016zhm838';
+const API = 'https://elyvori-api.onrender.com';
+
+export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onOpenAuthModal }: CheckoutPageProps) {
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>(initialPlan);
+  const [step, setStep] = useState<'plan' | 'payment' | 'success'>('plan');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [name, setName] = useState(auth.user?.name || '');
+  const [email, setEmail] = useState(auth.user?.email || '');
+  const [stripeLoaded, setStripeLoaded] = useState(false);
+  const cardRef = useRef<any>(null);
+  const stripeRef = useRef<any>(null);
+  const elementsRef = useRef<any>(null);
+  const isAr = lang === 'ar';
+
+  const plans = {
+    starter: { name: isAr ? 'ستارتر' : 'Starter', price: 19, color: '#00E5FF', shadow: 'rgba(0,229,255,0.3)', gradient: 'linear-gradient(135deg,#00E5FF,#00B8D4)' },
+    pro: { name: isAr ? 'برو' : 'Pro', price: 29, color: '#7C3AED', shadow: 'rgba(124,58,237,0.3)', gradient: 'linear-gradient(135deg,#7C3AED,#5B21B6)' },
+  };
+  const plan = plans[selectedPlan];
+
+  // Load Stripe.js
+  useEffect(() => {
+    if (window.Stripe) { setStripeLoaded(true); return; }
+    const script = document.createElement('script');
+    script.src = 'https://js.stripe.com/v3/';
+    script.onload = () => setStripeLoaded(true);
+    document.head.appendChild(script);
+  }, []);
+
+  // Mount Stripe card element when on payment step
+  useEffect(() => {
+    if (step !== 'payment' || !stripeLoaded || cardRef.current?.hasChildNodes()) return;
+    const timer = setTimeout(() => {
+      try {
+        const stripe = (window as any).Stripe(STRIPE_PK);
+        stripeRef.current = stripe;
+        const elements = stripe.elements({
+          appearance: {
+            theme: 'night',
+            variables: {
+              colorPrimary: plan.color,
+              colorBackground: '#0A0C1A',
+              colorText: '#ffffff',
+              colorDanger: '#ef4444',
+              fontFamily: 'Inter, Cairo, sans-serif',
+              borderRadius: '12px',
+              spacingUnit: '4px',
+            },
+          },
+        });
+        elementsRef.current = elements;
+        const card = elements.create('card', {
+          style: {
+            base: {
+              color: '#ffffff',
+              fontFamily: 'Inter, Cairo, sans-serif',
+              fontSize: '16px',
+              '::placeholder': { color: 'rgba(255,255,255,0.3)' },
+            },
+          },
+          hidePostalCode: true,
+        });
+        card.mount('#stripe-card-element');
+        card.on('change', (e: any) => {
+          if (e.error) setError(e.error.message);
+          else setError('');
+        });
+      } catch (e) { console.error(e); }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [step, stripeLoaded]);
+
+  const handlePay = async () => {
+    if (!auth.isAuthenticated) { onOpenAuthModal(); return; }
+    if (!stripeRef.current || !elementsRef.current) return;
+    setLoading(true); setError('');
+    try {
+      // Create payment intent
+      const res = await fetch(`${API}/public/stripe/create-checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: selectedPlan, customerEmail: email, organizationId: auth.user?.organizationId || 'default' }),
+      });
+      const data = await res.json() as any;
+      // If we get a URL, redirect to Stripe hosted page
+      if (data.url) { window.location.href = data.url; return; }
+      // If we get clientSecret, use Elements
+      if (data.clientSecret) {
+        const card = elementsRef.current.getElement('card');
+        const result = await stripeRef.current.confirmCardPayment(data.clientSecret, {
+          payment_method: { card, billing_details: { name, email } },
+        });
+        if (result.error) { setError(result.error.message); }
+        else { setStep('success'); }
+      } else {
+        setError(isAr ? 'حدث خطأ، حاول مرة أخرى' : 'Something went wrong. Please try again.');
+      }
+    } catch { setError(isAr ? 'تعذر الاتصال بالخادم' : 'Could not connect. Please try again.'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+        .co-overlay{position:fixed;inset:0;z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;background:rgba(2,4,15,0.97);backdrop-filter:blur(24px);}
+        .co-wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;}
+        .co-topbar{position:sticky;top:0;z-index:10;width:100%;max-width:480px;background:rgba(2,4,15,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;padding:14px 20px;box-sizing:border-box;}
+        .co-card{width:100%;max-width:480px;padding:0 16px;box-sizing:border-box;}
+        .plan-pill{display:flex;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:4px;gap:4px;}
+        .pill-btn{flex:1;padding:10px 16px;border:none;border-radius:100px;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.25s;white-space:nowrap;}
+        .pill-cyan{background:linear-gradient(135deg,#00E5FF,#00B8D4);color:#000;box-shadow:0 0 20px rgba(0,229,255,0.35);}
+        .pill-purple{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 0 20px rgba(124,58,237,0.35);}
+        .pill-off{background:transparent;color:rgba(255,255,255,0.35);}
+        .inp{width:100%;padding:15px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:#fff;font-size:15px;box-sizing:border-box;outline:none;transition:border 0.2s;font-family:Inter,Cairo,sans-serif;}
+        .inp:focus{border-color:var(--plan-color);}
+        .inp::placeholder{color:rgba(255,255,255,0.3);}
+        .stripe-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px;}
+        .cta{width:100%;padding:18px;border:none;border-radius:16px;font-size:17px;font-weight:900;cursor:pointer;transition:all 0.3s;font-family:Inter,Cairo,sans-serif;}
+        .badge-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+        .badge{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 6px;text-align:center;}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;}
+      `}</style>
+
+      <div className="co-overlay" dir={isAr ? 'rtl' : 'ltr'} style={{ '--plan-color': plan.color } as any}>
+        <div className="co-wrap">
+
+          {/* Top bar */}
+          <div className="co-topbar">
+            <button onClick={step === 'payment' ? () => setStep('plan') : onClose} style={{
+              background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.1)',
+              color:'rgba(255,255,255,0.7)',borderRadius:12,width:38,height:38,
+              cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
+            }}>
+              {step === 'payment' ? '←' : '✕'}
+            </button>
+            <div style={{background:'linear-gradient(135deg,#00E5FF,#7C3AED)',borderRadius:10,padding:'6px 16px'}}>
+              <span style={{color:'#000',fontSize:14,fontWeight:900,fontFamily:'Inter,sans-serif'}}>ELYVORI</span>
+            </div>
+            <div style={{width:38}} />
+          </div>
+
+          <div className="co-card">
+
+            {/* ═══ STEP 1: PLAN ═══ */}
+            {step === 'plan' && (
+              <>
+                <div style={{textAlign:'center',padding:'28px 0 20px'}}>
+                  <h1 style={{color:'#fff',fontSize:26,fontWeight:900,margin:'0 0 6px',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                    {isAr ? 'اختر خطتك' : 'Choose Your Plan'}
+                  </h1>
+                  <p style={{color:'rgba(255,255,255,0.4)',fontSize:14,margin:0,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                    {isAr ? 'جميع الوكلاء العشرة — إلغاء في أي وقت' : 'All 10 AI agents — cancel anytime'}
+                  </p>
+                </div>
+
+                {/* Toggle */}
+                <div className="plan-pill" style={{marginBottom:20,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                  <button className={`pill-btn ${selectedPlan==='starter' ? 'pill-cyan' : 'pill-off'}`} onClick={() => setSelectedPlan('starter')}>
+                    {isAr ? 'ستارتر — $19' : 'Starter — $19'}
+                  </button>
+                  <button className={`pill-btn ${selectedPlan==='pro' ? 'pill-purple' : 'pill-off'}`} onClick={() => setSelectedPlan('pro')}>
+                    {isAr ? 'برو — $29 ⭐' : 'Pro — $29 ⭐'}
+                  </button>
+                </div>
+
+                {/* Plan card */}
+                <div style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${plan.color}30`,borderRadius:20,padding:'24px 20px',marginBottom:16,boxShadow:`0 0 40px ${plan.shadow}15`}}>
+                  <div style={{display:'flex',alignItems:'flex-end',gap:4,marginBottom:4,justifyContent: isAr ? 'flex-end' : 'flex-start'}}>
+                    <span style={{fontSize:52,fontWeight:900,lineHeight:1,color:plan.color,fontFamily:'Inter,sans-serif'}}>${plan.price}</span>
+                    <span style={{color:'rgba(255,255,255,0.35)',fontSize:15,paddingBottom:8}}>{isAr ? '/شهر' : '/mo'}</span>
+                  </div>
+                  <div style={{height:1,background:'rgba(255,255,255,0.06)',margin:'16px 0'}} />
+                  {(isAr
+                    ? selectedPlan==='starter'
+                      ? ['٥ مشاريع نشطة','جميع الوكلاء العشرة','بناء مواقع وتطبيقات حقيقية','حملات تسويقية ثنائية اللغة','دعم فني بالإيميل']
+                      : ['مشاريع غير محدودة','جميع الوكلاء العشرة','بناء ويب وأندرويد مخصص','محرك تسويق مؤسسي','مدير حساب مخصص','ضمان تشغيل ٩٩.٩٪']
+                    : selectedPlan==='starter'
+                      ? ['5 active projects','All 10 AI agents','Full-stack website & app builds','Bilingual marketing campaigns','Email & chat support']
+                      : ['Unlimited projects','All 10 AI agents','Custom web & Android builds','Enterprise marketing engine','Dedicated account manager','99.9% uptime SLA']
+                  ).map((f,i) => (
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,0.04)',flexDirection: isAr ? 'row-reverse' : 'row'}}>
+                      <div style={{width:20,height:20,borderRadius:7,flexShrink:0,background:`${plan.color}20`,border:`1px solid ${plan.color}50`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                        <span style={{color:plan.color,fontSize:11,fontWeight:900}}>✓</span>
+                      </div>
+                      <span style={{color:'rgba(255,255,255,0.75)',fontSize:14,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className="cta"
+                  onClick={() => auth.isAuthenticated ? setStep('payment') : onOpenAuthModal()}
+                  style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff',boxShadow:`0 8px 32px ${plan.shadow}`,marginBottom:14}}
+                >
+                  {isAr ? `متابعة — $${plan.price}/شهر ←` : `Continue — $${plan.price}/mo →`}
+                </button>
+
+                <div className="badge-row" style={{marginBottom:16}}>
+                  {[{i:'🔒',l:isAr?'دفع آمن':'Secure'},{i:'↩️',l:isAr?'إلغاء مجاني':'Cancel Free'},{i:'⚡',l:isAr?'فوري':'Instant'}].map((b,i)=>(
+                    <div key={i} className="badge">
+                      <div style={{fontSize:18,marginBottom:3}}>{b.i}</div>
+                      <div style={{color:'rgba(255,255,255,0.4)',fontSize:11,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>{b.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* ═══ STEP 2: PAYMENT ═══ */}
+            {step === 'payment' && (
+              <>
+                <div style={{textAlign:'center',padding:'28px 0 20px'}}>
+                  <div style={{display:'inline-block',background:plan.gradient,borderRadius:12,padding:'4px 14px',marginBottom:10}}>
+                    <span style={{color:selectedPlan==='starter'?'#000':'#fff',fontSize:13,fontWeight:800,fontFamily:'Inter,sans-serif'}}>
+                      {plan.name} — ${plan.price}{isAr?'/شهر':'/mo'}
+                    </span>
+                  </div>
+                  <h1 style={{color:'#fff',fontSize:24,fontWeight:900,margin:'0 0 6px',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                    {isAr ? 'بيانات الدفع' : 'Payment Details'}
+                  </h1>
+                  <p style={{color:'rgba(255,255,255,0.4)',fontSize:13,margin:0,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                    {isAr ? 'مشفّر ومحمي بـ Stripe' : 'Encrypted & secured by Stripe'}
+                  </p>
+                </div>
+
+                <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:16}}>
+                  {/* Name */}
+                  <div>
+                    <label style={{color:'rgba(255,255,255,0.5)',fontSize:12,fontWeight:600,display:'block',marginBottom:6,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                      {isAr ? 'الاسم الكامل' : 'Full Name'}
+                    </label>
+                    <input
+                      className="inp"
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder={isAr ? 'محمد عبدالله' : 'John Smith'}
+                      style={{textAlign: isAr ? 'right' : 'left'}}
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label style={{color:'rgba(255,255,255,0.5)',fontSize:12,fontWeight:600,display:'block',marginBottom:6,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                      {isAr ? 'البريد الإلكتروني' : 'Email Address'}
+                    </label>
+                    <input
+                      className="inp"
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      style={{textAlign: isAr ? 'right' : 'left'}}
+                    />
+                  </div>
+
+                  {/* Card */}
+                  <div>
+                    <label style={{color:'rgba(255,255,255,0.5)',fontSize:12,fontWeight:600,display:'block',marginBottom:6,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                      {isAr ? 'بيانات البطاقة' : 'Card Details'}
+                    </label>
+                    <div className="stripe-box">
+                      {!stripeLoaded ? (
+                        <div style={{color:'rgba(255,255,255,0.4)',fontSize:14,textAlign:'center',padding:8}}>
+                          {isAr ? 'جاري تحميل نموذج الدفع...' : 'Loading payment form...'}
+                        </div>
+                      ) : (
+                        <div id="stripe-card-element" ref={cardRef} />
+                      )}
+                    </div>
+                    <p style={{color:'rgba(255,255,255,0.25)',fontSize:11,margin:'6px 0 0',fontFamily:'Inter,sans-serif',textAlign: isAr ? 'right' : 'left'}}>
+                      {isAr ? 'للاختبار: 4242 4242 4242 4242 — أي تاريخ — أي CVV' : 'Test: 4242 4242 4242 4242 — any date — any CVV'}
+                    </p>
+                  </div>
+                </div>
+
+                {error && (
+                  <div style={{background:'rgba(239,68,68,0.1)',border:'1px solid rgba(239,68,68,0.25)',borderRadius:12,padding:'12px 16px',marginBottom:14,color:'#f87171',fontSize:13,textAlign:'center',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  className="cta"
+                  onClick={handlePay}
+                  disabled={loading || !name.trim() || !email.trim()}
+                  style={{
+                    background: loading || !name.trim() || !email.trim() ? 'rgba(255,255,255,0.08)' : plan.gradient,
+                    color: loading || !name.trim() || !email.trim() ? 'rgba(255,255,255,0.3)' : selectedPlan==='starter' ? '#000' : '#fff',
+                    boxShadow: loading ? 'none' : `0 8px 32px ${plan.shadow}`,
+                    cursor: loading || !name.trim() || !email.trim() ? 'not-allowed' : 'pointer',
+                    marginBottom:14,
+                  }}
+                >
+                  {loading ? (
+                    <><span className="spinner"/>{isAr ? 'جاري المعالجة...' : 'Processing...'}</>
+                  ) : (
+                    isAr ? `💳 ادفع $${plan.price} الآن` : `💳 Pay $${plan.price} Now`
+                  )}
+                </button>
+
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,marginBottom:20}}>
+                  <span style={{fontSize:14}}>🔒</span>
+                  <span style={{color:'rgba(255,255,255,0.25)',fontSize:11,fontFamily:'Inter,sans-serif'}}>
+                    {isAr ? 'مشفّر بـ SSL — لا نحتفظ ببيانات بطاقتك' : 'SSL encrypted — we never store your card'}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {/* ═══ STEP 3: SUCCESS ═══ */}
+            {step === 'success' && (
+              <div style={{textAlign:'center',padding:'60px 20px'}}>
+                <div style={{fontSize:64,marginBottom:20}}>🎉</div>
+                <h1 style={{color:'#10B981',fontSize:28,fontWeight:900,margin:'0 0 12px',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                  {isAr ? 'تم الاشتراك بنجاح!' : 'Payment Successful!'}
+                </h1>
+                <p style={{color:'rgba(255,255,255,0.5)',fontSize:15,margin:'0 0 32px',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                  {isAr ? 'مرحباً بك في إليفوري! تفقد إيميلك للتفاصيل.' : 'Welcome to Elyvori! Check your email for details.'}
+                </p>
+                <button onClick={onClose} style={{
+                  background:'linear-gradient(135deg,#10B981,#059669)',color:'#000',
+                  border:'none',borderRadius:16,padding:'16px 40px',
+                  fontSize:16,fontWeight:900,cursor:'pointer',
+                  fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif',
+                }}>
+                  {isAr ? 'ابدأ الآن 🚀' : 'Get Started 🚀'}
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+declare global { interface Window { Stripe: any; } }
