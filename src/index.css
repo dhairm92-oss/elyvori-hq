@@ -182,3 +182,18 @@ html.light :is([class*="text-emerald-500"], [class*="text-emerald-600"]) { color
   footer :is(a, button) { display: inline-flex; align-items: center; min-height: 32px; }
 }
 /* ===== /ELYVORI-AUDIT-POLISH ===== */
+
+/* ===== ELYVORI-AUDIT-POLISH-2 ===== */
+/* day mode: light-grey list text + fuchsia labels a bit deeper */
+html.light :is(.text-slate-400, .text-gray-400) { color: #475569; }
+html.light :is([style^="color: rgb(213, 0, 249)"], [style*="; color: rgb(213, 0, 249)"]) { color: #A21CAF !important; }
+html.light :is([style^="color: rgb(59, 130, 246)"], [style*="; color: rgb(59, 130, 246)"]) { color: #1D4ED8 !important; }
+
+/* night mode: indigo labels a bit lighter */
+html.dark :is([style^="color: rgb(99, 102, 241)"], [style*="; color: rgb(99, 102, 241)"]) { color: #818CF8 !important; }
+
+/* mobile: 10px inline labels (e.g. product interest chips) -> 11px */
+@media (max-width: 767px) {
+  [style*="font-size: 10px"]:not(.elv-btn *) { font-size: 11px !important; }
+}
+/* ===== /ELYVORI-AUDIT-POLISH-2 ===== */
