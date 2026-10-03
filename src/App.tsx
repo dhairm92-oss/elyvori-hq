@@ -129,6 +129,22 @@ export default function App() {
 
   const t = translations[lang];
 
+
+  // ELYVORI-ASSISTANT-ACTIONS: the AI chat (VoiceWidget) can open pages and modals
+  useEffect(() => {
+    const onAssistantAction = (e: Event) => {
+      const type = (e as CustomEvent).detail?.type;
+      if (type === 'auth') setIsAuthModalOpen(true);
+      if (type === 'career') setShowCareerAgent(true);
+      if (type === 'contract') setShowContractAnalyzer(true);
+      if (type === 'support') setShowCustomerSupport(true);
+      if (type === 'negotiation') setShowNegotiation(true);
+      if (type === 'tracker') setShowTracker(true);
+    };
+    window.addEventListener('elyvori:action', onAssistantAction);
+    return () => window.removeEventListener('elyvori:action', onAssistantAction);
+  }, []);
+
   return (
     <div
       id="app-root-container"

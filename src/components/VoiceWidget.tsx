@@ -1,11 +1,64 @@
 import { useState, useRef, useEffect } from 'react';
 import { Language } from '../types';
 
+interface MsgAction {
+  label: string;
+  type?: AssistantAction;
+  url?: string;
+}
+
 interface Message {
   id: number;
   role: 'ai' | 'user';
   text: string;
   time: string;
+  voice?: boolean;
+  actions?: MsgAction[];
+  progress?: { steps: string[]; current: number; done?: boolean; failed?: boolean };
+}
+
+// actions the assistant can trigger on the page (handled in App.tsx)
+type AssistantAction = 'auth' | 'career' | 'contract' | 'support' | 'negotiation' | 'tracker' | 'pricing';
+type Intent = 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
+
+const FREE_SITE_LIMIT = 3;
+const BUILD_TIMEOUT_MS = 6 * 60 * 1000;
+
+function runAction(type: AssistantAction) {
+  window.dispatchEvent(new CustomEvent('elyvori:action', { detail: { type } }));
+  if (type === 'pricing') document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function detectIntent(text: string): Intent {
+  const s = ' ' + text.toLowerCase() + ' ';
+  const has = (...w: string[]) => w.some(x => s.includes(x));
+  const wantsToMake = has('اعمل', 'إعمل', 'ابن', 'إبن', 'بدي', 'بدّي', 'أريد', 'اريد', 'صمم', 'صمّم', 'أنشئ', 'انشئ', 'جهز', 'جهّز',
+    'build', 'make', 'create', 'need', 'want', 'design', 'set up', 'launch');
+  if (has('عقد', 'عقود', 'contract', 'legal', 'قانوني', 'اتفاقية', 'agreement')) return 'contract';
+  if (has('وظيف', 'شغل', 'job', 'career', ' cv', 'resume', 'سيرة ذاتية', 'سيرتي')) return 'career';
+  if (has('دعم العملاء', 'خدمة العملاء', 'customer support', 'شكوى', 'complaint')) return 'support';
+  if (has('تفاوض', 'negotiat')) return 'negotiation';
+  if (has('تتبع مشروع', 'track my project', 'project status', 'حالة مشروعي')) return 'tracker';
+  if (has('موقع', 'website', 'web site', 'landing page', 'صفحة هبوط', 'متجر', 'online store', 'webapp', 'web app') && wantsToMake) return 'website';
+  if (has('سعر', 'أسعار', 'اسعار', 'الخطط', 'باقة', 'باقات', 'اشتراك', 'pricing', 'price', ' plans', 'subscription')) return 'pricing';
+  return null;
+}
+
+function getAuth() {
+  try {
+    const token = localStorage.getItem('elyvori_token');
+    const email = localStorage.getItem('elyvori_user') || 'guest';
+    return { token, email };
+  } catch {
+    return { token: null, email: 'guest' };
+  }
+}
+
+function sitesBuilt(email: string) {
+  try { return Number(localStorage.getItem(`elyvori_sites_built_${email}`) || '0'); } catch { return 0; }
+}
+function addSiteBuilt(email: string) {
+  try { localStorage.setItem(`elyvori_sites_built_${email}`, String(sitesBuilt(email) + 1)); } catch { /* ignore */ }
 }
 
 interface VoiceWidgetProps {
@@ -13,55 +66,118 @@ interface VoiceWidgetProps {
 }
 
 const API = 'https://elyvori-api.onrender.com';
+const SPEAK_KEY = 'elyvori_voice_reply';
 
 // Only one widget renders, even if <VoiceWidget/> is mounted more than once
 let elvOwner: object | null = null;
 const ELV_RELEASE = 'elv-widget-release';
 
+type VoiceState = 'idle' | 'listening' | 'processing';
+
 const TEXT = {
   en: {
     name: 'Elyvori AI',
     status: 'Online · replies instantly',
+    speaking: 'Speaking…',
     welcome:
-      "👋 Hello! I'm **Elyvori AI** — your autonomous business engine.\n\nI can help you with:\n\n🔥 **Digital Products** — build & sell PDF products automatically\n💻 **Websites & Apps** — full-stack builds in minutes\n📢 **Marketing** — bilingual EN/AR campaigns\n👥 **Recruitment** — AI-powered hiring CRM\n📝 **Contracts** — instant risk analysis\n\nWhat can I build for you today?",
+      "👋 Hello! I'm **Elyvori AI** — your autonomous business engine.\n\nTap the 🎙 mic and just talk to me — or type. I can help you with:\n\n🔥 **Digital Products** — build & sell PDF products automatically\n💻 **Websites & Apps** — full-stack builds in minutes\n📢 **Marketing** — bilingual EN/AR campaigns\n👥 **Recruitment & Jobs** — AI-powered hiring and job search\n📝 **Contracts** — instant risk analysis\n\nWhat can I build for you today?",
     placeholder: 'Ask me anything…',
     listening: 'Listening…',
+    speakNow: 'Speak now…',
+    processing: 'Turning your voice into text…',
     suggestions: ['Build me a website', 'Create a digital product', 'Analyze a contract'],
     error: 'Sorry, something went wrong. Please try again.',
     offline: 'Could not connect. Please try again in a moment.',
-    noVoice: "Voice input isn't supported in this browser. You can type your message instead.",
+    micDenied: '🎙 Microphone access is blocked. Allow the microphone for this site in your browser settings, then tap the mic again.',
+    micMissing: '🎙 No microphone was found on this device.',
+    noSpeech: "I didn't catch that. Tap the mic and try again.",
+    sttUnavailable: "Voice input isn't available in this browser yet. Please try Chrome, Edge or Safari — or type your message.",
     footer: 'ELYVORI AI · Powered by Gemini',
     open: 'Open Elyvori AI chat',
     close: 'Close chat',
     reset: 'New conversation',
-    speak: 'Speak',
-    stop: 'Stop listening',
+    speak: 'Talk to Elyvori',
+    stopAndSend: 'Send voice message',
+    cancel: 'Cancel',
     send: 'Send',
+    voiceOn: 'Voice replies on',
+    voiceOff: 'Voice replies off',
+    needLogin: "Sure! To build your website I first need you to sign in — it takes 10 seconds. After that you can use the **free plan (up to 3 websites)** or upgrade.",
+    loginBtn: 'Sign in / Create account',
+    quotaReached: `You've used all **${FREE_SITE_LIMIT} free websites**. Pick a plan to keep building — I'll be right here.`,
+    plansBtn: 'View plans',
+    askDetails: "Great, let's build it! 🚀 Tell me in one message:\n\n• Your business name\n• What you do (e.g. restaurant, clinic, store)\n• Anything you want on the site (menu, booking, WhatsApp, colors…)",
+    building: "On it — give me a moment… ✨ I'm building your website now.",
+    buildSteps: ['Understanding your business', 'Designing the pages', 'Writing the code', 'Publishing your site'],
+    buildDone: '🎉 Your website is ready!',
+    openSite: 'Open my website',
+    buildFailed: "I couldn't finish the build this time. Please try again in a minute — or tap Track Project.",
+    sessionExpired: 'Your session has expired — please sign in again and I will continue.',
+    opening: {
+      contract: "Sure — opening the **Contract Analyzer** for you now. Upload your contract and I'll flag the risks.",
+      career: "Sure — opening the **Career Agent**. Upload your CV and I'll find real jobs that match you.",
+      support: 'Opening **Customer Support AI** for you now.',
+      negotiation: 'Opening the **Negotiation Simulator** now.',
+      tracker: 'Opening your **project tracker** now.',
+      pricing: 'Here are our plans — the **Free plan** lets you build up to 3 websites.',
+    },
   },
   ar: {
     name: 'إليفوري AI',
     status: 'متصل · يرد فوراً',
+    speaking: 'يتحدث الآن…',
     welcome:
-      '👋 مرحباً! أنا **إليفوري AI** — محرّك نمو أعمالك.\n\nأستطيع مساعدتك في:\n\n🔥 **المنتجات الرقمية** — بناء وبيع منتجات PDF تلقائياً\n💻 **المواقع والتطبيقات** — بناء متكامل خلال دقائق\n📢 **التسويق** — حملات ثنائية اللغة (عربي/إنجليزي)\n👥 **التوظيف** — نظام توظيف ذكي\n📝 **العقود** — تحليل فوري للمخاطر\n\nماذا أبني لك اليوم؟',
+      '👋 مرحباً! أنا **إليفوري AI** — محرّك نمو أعمالك.\n\nاضغط على 🎙 المايك واحكِ معي مباشرة — أو اكتب. أستطيع مساعدتك في:\n\n🔥 **المنتجات الرقمية** — بناء وبيع منتجات PDF تلقائياً\n💻 **المواقع والتطبيقات** — بناء متكامل خلال دقائق\n📢 **التسويق** — حملات ثنائية اللغة (عربي/إنجليزي)\n👥 **التوظيف والوظائف** — توظيف ذكي وبحث عن وظائف\n📝 **العقود** — تحليل فوري للمخاطر\n\nماذا أبني لك اليوم؟',
     placeholder: 'اسألني أي شيء…',
     listening: 'جارٍ الاستماع…',
+    speakNow: 'تكلّم الآن…',
+    processing: 'جارٍ تحويل صوتك إلى نص…',
     suggestions: ['ابنِ لي موقعاً', 'أريد منتجاً رقمياً', 'حلّل عقداً'],
     error: 'عذراً، حدث خطأ. حاول مرة أخرى.',
     offline: 'تعذّر الاتصال. حاول مرة أخرى بعد قليل.',
-    noVoice: 'المتصفح لا يدعم الإدخال الصوتي، يمكنك كتابة رسالتك بدلاً من ذلك.',
+    micDenied: '🎙 الوصول للمايكروفون مرفوض. اسمح للموقع باستخدام المايكروفون من إعدادات المتصفح، ثم اضغط على المايك مرة أخرى.',
+    micMissing: '🎙 لم يتم العثور على مايكروفون في هذا الجهاز.',
+    noSpeech: 'لم أسمعك جيداً. اضغط على المايك وحاول مرة أخرى.',
+    sttUnavailable: 'الإدخال الصوتي غير متاح على هذا المتصفح حالياً. جرّب Chrome أو Edge أو Safari — أو اكتب رسالتك.',
     footer: 'ELYVORI AI · مدعوم بالذكاء الاصطناعي',
     open: 'فتح محادثة إليفوري',
     close: 'إغلاق المحادثة',
     reset: 'محادثة جديدة',
-    speak: 'تحدّث',
-    stop: 'إيقاف الاستماع',
+    speak: 'تحدّث مع إليفوري',
+    stopAndSend: 'إرسال الرسالة الصوتية',
+    cancel: 'إلغاء',
     send: 'إرسال',
+    voiceOn: 'الرد الصوتي مفعّل',
+    voiceOff: 'الرد الصوتي متوقف',
+    needLogin: 'أكيد! عشان أبني موقعك لازم تسجّل دخول أولاً — بتاخذ ١٠ ثواني. بعدها بتقدر تستخدم **الخطة المجانية (لحد ٣ مواقع)** أو ترقّي خطتك.',
+    loginBtn: 'تسجيل الدخول / إنشاء حساب',
+    quotaReached: `استخدمت كل **المواقع المجانية (${FREE_SITE_LIMIT})**. اختر خطة عشان نكمل البناء — أنا هون.`,
+    plansBtn: 'عرض الخطط',
+    askDetails: 'تمام، يلا نبنيه! 🚀 احكيلي برسالة وحدة:\n\n• اسم نشاطك\n• شو بتشتغل (مطعم، عيادة، متجر…)\n• شو بدك يكون بالموقع (منيو، حجز، واتساب، ألوان…)',
+    building: 'حاضر، لحظات… ✨ بلّشت أبني موقعك هلأ.',
+    buildSteps: ['فهم نشاطك', 'تصميم الصفحات', 'كتابة الكود', 'نشر الموقع'],
+    buildDone: '🎉 موقعك جاهز!',
+    openSite: 'افتح موقعي',
+    buildFailed: 'ما قدرت أكمّل البناء هالمرة. جرّب كمان دقيقة — أو افتح تتبع المشروع.',
+    sessionExpired: 'انتهت جلستك — سجّل دخول مرة ثانية وبكمّل معك.',
+    opening: {
+      contract: 'أكيد — بفتحلك **محلل العقود** هلأ. ارفع العقد وبطلعلك المخاطر.',
+      career: 'أكيد — بفتحلك **وكيل التوظيف**. ارفع سيرتك الذاتية وبلاقيلك وظائف حقيقية بتناسبك.',
+      support: 'بفتحلك **دعم العملاء الذكي** هلأ.',
+      negotiation: 'بفتحلك **محاكاة التفاوض** هلأ.',
+      tracker: 'بفتحلك **تتبع مشروعك** هلأ.',
+      pricing: 'هاي خططنا — **الخطة المجانية** بتخليك تبني لحد ٣ مواقع.',
+    },
   },
 };
 
 function formatTime(lang?: string) {
   const locale = lang === 'ar' ? 'ar-u-nu-latn' : 'en-US';
   return new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDuration(sec: number) {
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 }
 
 function escapeHtml(s: string) {
@@ -72,6 +188,43 @@ function renderText(text: string) {
   return escapeHtml(text)
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br/>');
+}
+
+// text that is nice to read aloud (no markdown, emoji, urls)
+function speakable(text: string) {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, '')
+    .replace(/\s*\n+\s*/g, '. ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+// convert any recording (webm/ogg/mp4) to 16 kHz mono WAV - accepted by every speech-to-text API
+async function toWav(blob: Blob): Promise<Blob> {
+  const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+  const ctx: AudioContext = new Ctx();
+  const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
+  try { await ctx.close(); } catch { /* ignore */ }
+  const rate = 16000;
+  const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(audio.duration * rate)), rate);
+  const src = off.createBufferSource();
+  src.buffer = audio;
+  src.connect(off.destination);
+  src.start();
+  const data = (await off.startRendering()).getChannelData(0);
+  const view = new DataView(new ArrayBuffer(44 + data.length * 2));
+  const str = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); view.setUint32(4, 36 + data.length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, rate, true); view.setUint32(28, rate * 2, true); view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true); str(36, 'data'); view.setUint32(40, data.length * 2, true);
+  for (let i = 0; i < data.length; i++) {
+    const v = Math.max(-1, Math.min(1, data[i]));
+    view.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+  }
+  return new Blob([view], { type: 'audio/wav' });
 }
 
 /* ---------- icons (inherit currentColor) ---------- */
@@ -92,16 +245,16 @@ const SendIcon = ({ flip }: { flip: boolean }) => (
     <path d="M22 2 15 22l-4-9-9-4 20-7z" />
   </svg>
 );
-const MicIcon = () => (
-  <svg {...svgProps}>
+const MicIcon = ({ size = 18 }: { size?: number }) => (
+  <svg {...svgProps} width={size} height={size}>
     <rect x="9" y="2" width="6" height="12" rx="3" />
     <path d="M5 10a7 7 0 0 0 14 0" />
     <path d="M12 17v5" />
   </svg>
 );
-const StopIcon = () => (
-  <svg {...svgProps}>
-    <rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor" stroke="none" />
+const CheckIcon = () => (
+  <svg {...svgProps} strokeWidth={2.6}>
+    <path d="M20 6 9 17l-5-5" />
   </svg>
 );
 const CloseIcon = ({ size = 18 }: { size?: number }) => (
@@ -114,6 +267,22 @@ const ResetIcon = () => (
   <svg {...svgProps} width={16} height={16}>
     <path d="M3 12a9 9 0 1 0 3-6.7" />
     <path d="M3 3v5h5" />
+  </svg>
+);
+const SpeakerIcon = ({ on }: { on: boolean }) => (
+  <svg {...svgProps} width={16} height={16}>
+    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+    {on ? (
+      <>
+        <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+        <path d="M19 5a10 10 0 0 1 0 14" />
+      </>
+    ) : (
+      <>
+        <path d="m22 9-6 6" />
+        <path d="m16 9 6 6" />
+      </>
+    )}
   </svg>
 );
 
@@ -231,7 +400,43 @@ html.light .elv-root{
 @media (prefers-reduced-motion:reduce){
   .elv-btn,.elv-ring,.elv-ring2,.elv-chat,.elv-row{animation:none!important}
 }
+/* ---------- voice ---------- */
+@keyframes elvRec{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes elvSpin{to{transform:rotate(360deg)}}
+@keyframes elvMicGlow{0%,100%{box-shadow:0 0 0 0 rgba(0,229,255,.35)}50%{box-shadow:0 0 0 6px rgba(0,229,255,0)}}
+.elv-mic{background:transparent;color:var(--elv-chip-text);border:1.5px solid var(--elv-chip-border);animation:elvMicGlow 2.4s ease-in-out infinite}
+.elv-mic:hover{background:var(--elv-chip-bg);color:var(--elv-chip-text)}
+.elv-recbar{display:flex;align-items:center;gap:10px;background:var(--elv-input-bg);border:1px solid rgba(239,68,68,.35);border-radius:16px;padding:5px;box-shadow:0 0 0 3px rgba(239,68,68,.08)}
+.elv-recbar.processing{border-color:var(--elv-chip-border);box-shadow:0 0 0 3px rgba(0,229,255,.08)}
+.elv-recinfo{display:flex;align-items:center;gap:8px;flex-shrink:0;font-size:13px;font-weight:700;color:#EF4444;font-variant-numeric:tabular-nums}
+.elv-recdot{width:9px;height:9px;border-radius:50%;background:#EF4444;animation:elvRec 1s ease-in-out infinite}
+.elv-wave{flex:1;min-width:0;height:30px;display:flex;align-items:center;justify-content:center;gap:3px;overflow:hidden}
+.elv-wave span{width:3px;height:4px;border-radius:3px;background:linear-gradient(180deg,#00E5FF,#7C3AED);transition:height .08s linear}
+.elv-cancel{background:var(--elv-btn-bg);color:var(--elv-muted)}
+.elv-done{background:linear-gradient(135deg,#10B981,#0891B2);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.elv-done:hover{color:#fff;transform:translateY(-1px)}
+.elv-spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--elv-chip-border);border-top-color:#00E5FF;animation:elvSpin .8s linear infinite;flex-shrink:0}
+.elv-proc-text{flex:1;font-size:13px;color:var(--elv-muted);padding-inline:6px}
+.elv-row.draft .elv-bubble{background:transparent!important;color:var(--elv-text)!important;border:1.5px dashed var(--elv-chip-border)!important;opacity:.9}
+.elv-draft-empty{color:var(--elv-muted);font-style:italic}
+.elv-voice-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--elv-muted)}
+.elv-status.talking::before{background:#00E5FF;animation:elvRec 1s ease-in-out infinite}
+.elv-icon-btn.on{color:var(--elv-chip-text);border-color:var(--elv-chip-border)}
+.elv-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.elv-action{border:0;border-radius:12px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,#0891B2,#7C3AED);box-shadow:0 6px 16px -6px rgba(124,58,237,.5);transition:transform .15s}
+.elv-action:hover{transform:translateY(-1px)}
+.elv-progress{display:flex;flex-direction:column;gap:10px;min-width:220px}
+.elv-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--elv-muted)}
+.elv-step-dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;border:2px solid var(--elv-border)}
+.elv-step-dot svg{width:12px;height:12px}
+.elv-step.active{color:var(--elv-text);font-weight:700}
+.elv-step.active .elv-step-dot{border-color:#00E5FF;border-top-color:transparent;animation:elvSpin .8s linear infinite}
+.elv-step.done{color:var(--elv-text)}
+.elv-step.done .elv-step-dot{background:#10B981;border-color:#10B981;color:#fff}
+.elv-step.failed .elv-step-dot{background:#EF4444;border-color:#EF4444;color:#fff}
 `;
+
+const WAVE_BARS = 22;
 
 export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const isAr = lang === 'ar';
@@ -240,16 +445,41 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [listening, setListening] = useState(false);
   const [unread, setUnread] = useState(1);
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, role: 'ai', text: t.welcome, time: formatTime(lang) },
   ]);
+
+  // voice
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  const [draft, setDraft] = useState('');
+  const [seconds, setSeconds] = useState(0);
+  const [speaking, setSpeaking] = useState(false);
+  const [speakOn, setSpeakOn] = useState<boolean>(() => {
+    try { return localStorage.getItem(SPEAK_KEY) !== 'off'; } catch { return true; }
+  });
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<any>(null);
   const ownerKey = useRef({});
   const [isOwner, setIsOwner] = useState(false);
+
+  const recognitionRef = useRef<any>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const rafRef = useRef<number>(0);
+  const timerRef = useRef<number>(0);
+  const waveRef = useRef<HTMLDivElement>(null);
+  const modeRef = useRef<'sr' | 'rec' | null>(null);
+  const cancelledRef = useRef(false);
+  const finalTextRef = useRef('');
+  const draftRef = useRef('');
+  const langRef = useRef(lang);
+  langRef.current = lang;
+  const speakOnRef = useRef(speakOn);
+  speakOnRef.current = speakOn;
 
   // single-instance guard
   useEffect(() => {
@@ -280,7 +510,9 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       const id = setTimeout(() => inputRef.current?.focus(), 350);
       return () => clearTimeout(id);
     }
-  }, [open]);
+    cancelVoice();
+    stopSpeaking();
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     document.body.classList.toggle('elv-chat-open', open);
@@ -290,64 +522,333 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  useEffect(() => () => document.body.classList.remove('elv-chat-open'), []);
+  useEffect(() => () => {
+    document.body.classList.remove('elv-chat-open');
+    cleanupVoice();
+    stopSpeaking();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages, open, loading, listening]);
+  }, [messages, open, loading, draft, voiceState]);
 
+  /* ---------------- speech output ---------------- */
+  function stopSpeaking() {
+    try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+    setSpeaking(false);
+  }
+
+  function speak(text: string) {
+    const synth = window.speechSynthesis;
+    const clean = speakable(text);
+    if (!synth || !clean) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(clean);
+    const code = langRef.current === 'ar' ? 'ar' : 'en';
+    u.lang = code === 'ar' ? 'ar-SA' : 'en-US';
+    const voices = synth.getVoices();
+    const v = voices.find(x => x.lang?.toLowerCase().startsWith(code));
+    if (v) u.voice = v;
+    u.rate = 1;
+    u.onstart = () => setSpeaking(true);
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    synth.speak(u);
+  }
+
+  const toggleSpeak = () => {
+    setSpeakOn(on => {
+      const next = !on;
+      try { localStorage.setItem(SPEAK_KEY, next ? 'on' : 'off'); } catch { /* ignore */ }
+      if (!next) stopSpeaking();
+      return next;
+    });
+  };
+
+  /* ---------------- chat ---------------- */
   const addAi = (text: string) =>
-    setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(lang) }]);
+    setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(langRef.current) }]);
 
-  const sendMessage = async (text?: string) => {
-    const msg = (text ?? input).trim();
-    if (!msg || loading) return;
-    setInput('');
-    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: msg, time: formatTime(lang) }]);
+  const pendingRef = useRef<'details' | null>(null);
+
+  const reply = (text: string, viaVoice: boolean, extra?: Partial<Message>) => {
+    setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(langRef.current), ...extra }]);
+    if (viaVoice && speakOnRef.current) speak(text);
+  };
+
+  const askGemini = async (msg: string, viaVoice: boolean) => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/public/voice/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, lang }),
+        body: JSON.stringify({ message: msg, lang: langRef.current }),
       });
       const data = (await res.json()) as any;
-      addAi(data.reply || data.message || t.error);
+      reply(data.reply || data.message || t.error, viaVoice);
     } catch {
-      addAi(t.offline);
+      reply(t.offline, viaVoice);
     } finally {
       setLoading(false);
     }
   };
 
-  const startListening = () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { addAi(t.noVoice); return; }
-    const recognition = new SR();
-    recognition.lang = isAr ? 'ar-SA' : 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
-    recognition.onerror = () => setListening(false);
-    recognition.onresult = (e: any) => {
-      const transcript = e.results[0][0].transcript;
-      setInput(transcript);
-      setTimeout(() => sendMessage(transcript), 250);
+  const buildWebsite = async (details: string, viaVoice: boolean) => {
+    const { token, email } = getAuth();
+    if (!token) { reply(t.needLogin, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
+
+    reply(t.building, viaVoice);
+    const progId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: progId, role: 'ai', text: '', time: formatTime(langRef.current), progress: { steps: t.buildSteps, current: 0 } }]);
+    const setProg = (p: Partial<NonNullable<Message['progress']>>) =>
+      setMessages(prev => prev.map(m => (m.id === progId && m.progress ? { ...m, progress: { ...m.progress, ...p } } : m)));
+    let step = 0;
+    const ticker = window.setInterval(() => { step = Math.min(step + 1, t.buildSteps.length - 1); setProg({ current: step }); }, 9000);
+
+    const ctrl = new AbortController();
+    const timeout = window.setTimeout(() => ctrl.abort(), BUILD_TIMEOUT_MS);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/orchestrator/command`, {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          text: `Build a complete, modern, responsive website and publish it. Website language: ${langRef.current === 'ar' ? 'Arabic (RTL)' : 'English'}. Business details from the client: ${details}`,
+        }),
+      });
+      if (res.status === 401 || res.status === 403) {
+        setProg({ failed: true });
+        reply(t.sessionExpired, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] });
+        return;
+      }
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as any;
+      const liveUrl: string | undefined = data?.data?.liveUrl || data?.liveUrl;
+      setProg({ current: t.buildSteps.length - 1, done: true });
+      addSiteBuilt(email);
+      const spoken: string = data?.spokenReply || '';
+      if (liveUrl) {
+        reply(`${t.buildDone}${spoken ? '\n\n' + spoken : ''}`, viaVoice, { actions: [{ label: t.openSite, url: liveUrl }] });
+      } else {
+        reply(spoken || t.buildDone, viaVoice, { actions: [{ label: isAr ? 'تتبع مشروعك' : 'Track Project', type: 'tracker' }] });
+      }
+    } catch {
+      setProg({ failed: true });
+      reply(t.buildFailed, viaVoice, { actions: [{ label: isAr ? 'تتبع مشروعك' : 'Track Project', type: 'tracker' }] });
+    } finally {
+      window.clearInterval(ticker);
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
+  };
+
+  const sendMessage = async (text?: string, viaVoice = false) => {
+    const msg = (text ?? input).trim();
+    if (!msg || loading) return;
+    setInput('');
+    stopSpeaking();
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: msg, time: formatTime(langRef.current), voice: viaVoice }]);
+
+    // waiting for the business details of a website
+    if (pendingRef.current === 'details') {
+      pendingRef.current = null;
+      buildWebsite(msg, viaVoice);
+      return;
+    }
+
+    const intent = detectIntent(msg);
+    if (intent === 'website') {
+      const { token, email } = getAuth();
+      if (!token) { reply(t.needLogin, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
+      if (sitesBuilt(email) >= FREE_SITE_LIMIT) { reply(t.quotaReached, viaVoice, { actions: [{ label: t.plansBtn, type: 'pricing' }] }); return; }
+      pendingRef.current = 'details';
+      reply(t.askDetails, viaVoice);
+      return;
+    }
+    if (intent) {
+      reply(t.opening[intent], viaVoice);
+      window.setTimeout(() => runAction(intent), 900);
+      return;
+    }
+    askGemini(msg, viaVoice);
+  };
+
+  const onActionClick = (a: MsgAction) => {
+    if (a.url) { window.open(a.url, '_blank', 'noopener'); return; }
+    if (a.type) runAction(a.type);
+  };
+
+  /* ---------------- speech input ---------------- */
+  function cleanupVoice() {
+    window.clearInterval(timerRef.current);
+    cancelAnimationFrame(rafRef.current);
+    streamRef.current?.getTracks().forEach(tr => tr.stop());
+    streamRef.current = null;
+    try { audioCtxRef.current?.close(); } catch { /* ignore */ }
+    audioCtxRef.current = null;
+    recognitionRef.current = null;
+    recorderRef.current = null;
+    modeRef.current = null;
+    setVoiceState('idle');
+    setDraft('');
+    draftRef.current = '';
+  }
+
+  function startWave(stream: MediaStream) {
+    try {
+      const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx: AudioContext = new Ctx();
+      audioCtxRef.current = ctx;
+      const src = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 64;
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      const tick = () => {
+        analyser.getByteFrequencyData(data);
+        const bars = waveRef.current?.children;
+        if (bars) {
+          for (let i = 0; i < bars.length; i++) {
+            const v = data[(i * 2) % data.length] / 255;
+            (bars[i] as HTMLElement).style.height = `${4 + v * 24}px`;
+          }
+        }
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch { /* wave is decorative */ }
+  }
+
+  function startRecorder(stream: MediaStream) {
+    if (typeof MediaRecorder === 'undefined') {
+      cleanupVoice();
+      addAi(t.sttUnavailable);
+      return;
+    }
+    modeRef.current = 'rec';
+    chunksRef.current = [];
+    const rec = new MediaRecorder(stream);
+    recorderRef.current = rec;
+    rec.ondataavailable = e => { if (e.data.size) chunksRef.current.push(e.data); };
+    rec.onstop = async () => {
+      if (cancelledRef.current) { cleanupVoice(); return; }
+      const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
+      streamRef.current?.getTracks().forEach(tr => tr.stop());
+      cancelAnimationFrame(rafRef.current);
+      window.clearInterval(timerRef.current);
+      setVoiceState('processing');
+      try {
+        let upload: Blob = blob;
+        try { upload = await toWav(blob); } catch { /* send the original recording */ }
+        const fd = new FormData();
+        fd.append('audio', upload, upload.type === 'audio/wav' ? 'voice.wav' : 'voice.webm');
+        fd.append('lang', langRef.current);
+        const res = await fetch(`${API}/public/voice/transcribe`, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as any;
+        const text = (data.text || data.transcript || '').trim();
+        cleanupVoice();
+        if (text) sendMessage(text, true);
+        else addAi(t.noSpeech);
+      } catch {
+        cleanupVoice();
+        addAi(t.sttUnavailable);
+      }
     };
-    recognitionRef.current = recognition;
-    recognition.start();
-  };
+    rec.start();
+  }
 
-  const stopListening = () => {
-    recognitionRef.current?.stop();
-    setListening(false);
-  };
+  async function startVoice() {
+    if (voiceState !== 'idle' || loading) return;
+    stopSpeaking();
+    cancelledRef.current = false;
+    finalTextRef.current = '';
+    draftRef.current = '';
+    setDraft('');
 
-  const resetChat = () =>
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e: any) {
+      addAi(e?.name === 'NotFoundError' ? t.micMissing : t.micDenied);
+      return;
+    }
+    streamRef.current = stream;
+    setVoiceState('listening');
+    setSeconds(0);
+    const started = Date.now();
+    timerRef.current = window.setInterval(() => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      setSeconds(s);
+      if (s >= 60) stopVoice(); // safety limit
+    }, 250);
+    startWave(stream);
+
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { startRecorder(stream); return; }
+
+    modeRef.current = 'sr';
+    const r = new SR();
+    r.lang = langRef.current === 'ar' ? 'ar-SA' : 'en-US';
+    r.continuous = false;
+    r.interimResults = true;
+    r.onresult = (e: any) => {
+      let finalText = '';
+      let interim = '';
+      for (let i = 0; i < e.results.length; i++) {
+        const res = e.results[i];
+        if (res.isFinal) finalText += res[0].transcript;
+        else interim += res[0].transcript;
+      }
+      finalTextRef.current = finalText;
+      const live = (finalText + ' ' + interim).trim();
+      draftRef.current = live;
+      setDraft(live);
+    };
+    r.onerror = (e: any) => {
+      const err = e?.error;
+      if (err === 'no-speech' || err === 'aborted') return; // handled in onend
+      // the browser's speech service is missing or blocked (e.g. Opera, Firefox, some Android
+      // browsers). The microphone itself works, so record the audio and transcribe it on our server.
+      modeRef.current = null;
+      try { recognitionRef.current?.abort(); } catch { /* ignore */ }
+      if (streamRef.current && !cancelledRef.current) startRecorder(streamRef.current);
+    };
+    r.onend = () => {
+      if (modeRef.current !== 'sr') return; // switched to recorder or already cleaned
+      const text = (finalTextRef.current || draftRef.current).trim();
+      const cancelled = cancelledRef.current;
+      cleanupVoice();
+      if (cancelled) return;
+      if (text) sendMessage(text, true);
+      else addAi(t.noSpeech);
+    };
+    recognitionRef.current = r;
+    try { r.start(); } catch { startRecorder(stream); }
+  }
+
+  function stopVoice() {
+    if (modeRef.current === 'sr') recognitionRef.current?.stop();
+    else if (modeRef.current === 'rec' && recorderRef.current?.state === 'recording') recorderRef.current.stop();
+  }
+
+  function cancelVoice() {
+    cancelledRef.current = true;
+    if (modeRef.current === 'sr') { try { recognitionRef.current?.abort(); } catch { /* ignore */ } cleanupVoice(); }
+    else if (modeRef.current === 'rec' && recorderRef.current?.state === 'recording') recorderRef.current.stop();
+    else if (voiceState !== 'idle') cleanupVoice();
+  }
+
+  const resetChat = () => {
+    cancelVoice();
+    stopSpeaking();
     setMessages([{ id: Date.now(), role: 'ai', text: t.welcome, time: formatTime(lang) }]);
+  };
 
   if (!isOwner) return null;
+
+  const busyVoice = voiceState !== 'idle';
 
   return (
     <div className="elv-root">
@@ -364,8 +865,18 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
             </div>
             <div className="elv-head-text">
               <div className="elv-title">{t.name}</div>
-              <div className="elv-status">{t.status}</div>
+              <div className={`elv-status ${speaking ? 'talking' : ''}`}>{speaking ? t.speaking : t.status}</div>
             </div>
+            <button
+              type="button"
+              className={`elv-icon-btn ${speakOn ? 'on' : ''}`}
+              onClick={toggleSpeak}
+              aria-label={speakOn ? t.voiceOn : t.voiceOff}
+              title={speakOn ? t.voiceOn : t.voiceOff}
+              aria-pressed={speakOn}
+            >
+              <SpeakerIcon on={speakOn} />
+            </button>
             <button type="button" className="elv-icon-btn" onClick={resetChat} aria-label={t.reset} title={t.reset}>
               <ResetIcon />
             </button>
@@ -379,20 +890,52 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
               <div key={msg.id} className={`elv-row ${msg.role}`}>
                 {msg.role === 'ai' && <div className="elv-avatar sm">E</div>}
                 <div className="elv-col">
-                  <div className="elv-bubble" dir="auto" dangerouslySetInnerHTML={{ __html: renderText(msg.text) }} />
-                  <div className="elv-time">{msg.time}</div>
+                  {msg.progress ? (
+                    <div className="elv-bubble elv-progress">
+                      {msg.progress.steps.map((st, i) => {
+                        const p = msg.progress!;
+                        const state = p.failed && i === p.current ? 'failed' : p.done || i < p.current ? 'done' : i === p.current ? 'active' : 'todo';
+                        return (
+                          <div key={st} className={`elv-step ${state}`}>
+                            <span className="elv-step-dot">{state === 'done' ? <CheckIcon /> : state === 'failed' ? <CloseIcon size={12} /> : null}</span>
+                            <span>{st}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="elv-bubble" dir="auto" dangerouslySetInnerHTML={{ __html: renderText(msg.text) }} />
+                  )}
+                  {msg.actions && msg.actions.length > 0 && (
+                    <div className="elv-actions">
+                      {msg.actions.map(a => (
+                        <button key={a.label} type="button" className="elv-action" onClick={() => onActionClick(a)}>
+                          {a.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="elv-time">
+                    {msg.voice && (
+                      <span className="elv-voice-tag"><MicIcon size={11} /> </span>
+                    )}
+                    {msg.time}
+                  </div>
                 </div>
               </div>
             ))}
 
-            {listening && (
-              <div className="elv-listening">
-                <MicIcon />
-                <span>{t.listening}</span>
+            {voiceState === 'listening' && (
+              <div className="elv-row user draft">
+                <div className="elv-col">
+                  <div className="elv-bubble" dir="auto">
+                    {draft || <span className="elv-draft-empty">{modeRef.current === 'rec' ? t.listening : t.speakNow}</span>}
+                  </div>
+                </div>
               </div>
             )}
 
-            {loading && (
+            {loading && !messages.some(m => m.progress && !m.progress.done && !m.progress.failed) && (
               <div className="elv-row ai">
                 <div className="elv-avatar sm">E</div>
                 <div className="elv-col">
@@ -405,7 +948,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
             <div ref={bottomRef} />
           </div>
 
-          {messages.length <= 1 && !loading && (
+          {messages.length <= 1 && !loading && !busyVoice && (
             <div className="elv-chips">
               {t.suggestions.map(s => (
                 <button key={s} type="button" className="elv-chip" onClick={() => sendMessage(s)}>
@@ -416,40 +959,66 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
           )}
 
           <div className="elv-composer">
-            <form
-              className="elv-inputbar"
-              onSubmit={e => { e.preventDefault(); sendMessage(); }}
-            >
-              <input
-                ref={inputRef}
-                className="elv-input"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder={listening ? t.listening : t.placeholder}
-                disabled={loading || listening}
-                dir="auto"
-                enterKeyHint="send"
-                aria-label={t.placeholder}
-              />
-              <button
-                type="button"
-                className={`elv-tool ${listening ? 'listening' : ''}`}
-                onClick={listening ? stopListening : startListening}
-                aria-label={listening ? t.stop : t.speak}
-                title={listening ? t.stop : t.speak}
-              >
-                {listening ? <StopIcon /> : <MicIcon />}
-              </button>
-              <button
-                type="submit"
-                className="elv-tool elv-send"
-                disabled={loading || !input.trim()}
-                aria-label={t.send}
-                title={t.send}
-              >
-                <SendIcon flip={isAr} />
-              </button>
-            </form>
+            {voiceState === 'idle' && (
+              <form className="elv-inputbar" onSubmit={e => { e.preventDefault(); sendMessage(); }}>
+                <input
+                  ref={inputRef}
+                  className="elv-input"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder={t.placeholder}
+                  disabled={loading}
+                  dir={input ? 'auto' : isAr ? 'rtl' : 'ltr'}
+                  enterKeyHint="send"
+                  aria-label={t.placeholder}
+                />
+                <button
+                  type="button"
+                  className="elv-tool elv-mic"
+                  onClick={startVoice}
+                  disabled={loading}
+                  aria-label={t.speak}
+                  title={t.speak}
+                >
+                  <MicIcon />
+                </button>
+                <button
+                  type="submit"
+                  className="elv-tool elv-send"
+                  disabled={loading || !input.trim()}
+                  aria-label={t.send}
+                  title={t.send}
+                >
+                  <SendIcon flip={isAr} />
+                </button>
+              </form>
+            )}
+
+            {voiceState === 'listening' && (
+              <div className="elv-recbar">
+                <button type="button" className="elv-tool elv-cancel" onClick={cancelVoice} aria-label={t.cancel} title={t.cancel}>
+                  <CloseIcon />
+                </button>
+                <div className="elv-recinfo">
+                  <span className="elv-recdot" />
+                  <span>{formatDuration(seconds)}</span>
+                </div>
+                <div className="elv-wave" ref={waveRef} aria-hidden="true">
+                  {Array.from({ length: WAVE_BARS }).map((_, i) => <span key={i} />)}
+                </div>
+                <button type="button" className="elv-tool elv-done" onClick={stopVoice} aria-label={t.stopAndSend} title={t.stopAndSend}>
+                  <CheckIcon />
+                </button>
+              </div>
+            )}
+
+            {voiceState === 'processing' && (
+              <div className="elv-recbar processing">
+                <span className="elv-spinner" style={{ marginInlineStart: 10 }} />
+                <span className="elv-proc-text">{t.processing}</span>
+              </div>
+            )}
+
             <p className="elv-foot">{t.footer}</p>
           </div>
         </div>
