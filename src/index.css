@@ -1,5 +1,6 @@
 body { background: #080A12 !important; }
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   html {
@@ -110,8 +111,8 @@ html.light :is(.text-slate-400,.text-gray-400) { color: #64748B; }
 html.light :is([class*="hover:text-white"]):hover { color: #0F172A; }
 
 /* bright accents -> deeper accents (readable on white) */
-html.light :is([class*="text-cyan-200"],[class*="text-cyan-300"],[class*="text-cyan-400"]) { color: #0891B2; }
-html.light :is([class*="text-emerald-300"],[class*="text-emerald-400"]) { color: #059669; }
+html.light :is([class*="text-cyan-200"],[class*="text-cyan-300"],[class*="text-cyan-400"]) { color: #0E7490; }
+html.light :is([class*="text-emerald-300"],[class*="text-emerald-400"]) { color: #047857; }
 html.light :is([class*="text-indigo-300"],[class*="text-indigo-400"]) { color: #4F46E5; }
 html.light :is([class*="text-violet-300"],[class*="text-violet-400"],[class*="text-purple-300"],[class*="text-purple-400"]) { color: #7C3AED; }
 html.light :is([class*="text-fuchsia-300"],[class*="text-fuchsia-400"],[class*="text-pink-300"],[class*="text-pink-400"]) { color: #C026D3; }
@@ -135,8 +136,8 @@ html.light [style*="background: rgba(255, 255, 255, 0.0"]:not(.elv-chat *) {
 html.light [style*="border: 1px solid rgba(255, 255, 255"]:not(.elv-chat *) { border-color: rgba(15, 23, 42, 0.10) !important; }
 
 /* inline text colors */
-html.light [class*="text-[#00E5FF]"], html.light [class*="text-[#00e5ff]"] { color: #0891B2; }
-html.light :is([style^="color: rgb(0, 229, 255)"],[style*="; color: rgb(0, 229, 255)"]):not(.elv-chat *):not(.elv-btn *) { color: #0891B2 !important; }
+html.light [class*="text-[#00E5FF]"], html.light [class*="text-[#00e5ff]"] { color: #0E7490; }
+html.light :is([style^="color: rgb(0, 229, 255)"],[style*="; color: rgb(0, 229, 255)"]):not(.elv-chat *):not(.elv-btn *) { color: #0E7490 !important; }
 html.light :is([style^="color: rgba(255, 255, 255"],[style*="; color: rgba(255, 255, 255"]):not(.elv-chat *):not(.elv-btn *) { color: #475569 !important; }
 html.light :is([style^="color: rgb(255, 255, 255)"],[style*="; color: rgb(255, 255, 255)"],[style^="color: white"],[style*="; color: white"]):not([style*="gradient"]):not(.elv-chat *):not(.elv-btn *) { color: #0F172A !important; }
 html.light :is([style^="color: rgb(148, 163, 184)"],[style*="; color: rgb(148, 163, 184)"]) { color: #64748B !important; }
@@ -158,3 +159,26 @@ header svg:is(.lucide-sun, .lucide-moon) { animation: elvThemeIcon 0.5s cubic-be
   html.theme-anim, html.theme-anim * { transition: none !important; }
 }
 /* ===== /ELYVORI-LIGHT-THEME ===== */
+
+/* ===== ELYVORI-AUDIT-POLISH ===== */
+/* night mode: faded grey text -> readable */
+html.dark :is(.text-slate-600, .text-slate-700, .text-gray-600, .text-gray-700):not([class*="dark:text-"]) { color: #94A3B8; }
+html.dark :is(.text-slate-500, .text-gray-500):not([class*="dark:text-"]) { color: #8B9BB4; }
+html.dark [class*="dark:text-slate-500"] { color: #8B9BB4; }
+html.dark :is([style^="color: rgb(124, 58, 237)"], [style*="; color: rgb(124, 58, 237)"]) { color: #A78BFA !important; }
+
+/* day mode: small grey / green text a bit deeper */
+html.light :is(.text-slate-500, .text-gray-500) { color: #475569; }
+html.light :is([style^="color: rgb(16, 185, 129)"], [style*="; color: rgb(16, 185, 129)"]) { color: #047857 !important; }
+html.light :is([class*="text-emerald-500"], [class*="text-emerald-600"]) { color: #047857; }
+
+@media (max-width: 767px) {
+  /* tiny labels */
+  .text-\[10px\] { font-size: 11px; }
+  .text-\[9px\], .text-\[8px\] { font-size: 10px; }
+
+  /* comfortable tap areas */
+  header button { min-height: 36px; min-width: 36px; }
+  footer :is(a, button) { display: inline-flex; align-items: center; min-height: 32px; }
+}
+/* ===== /ELYVORI-AUDIT-POLISH ===== */

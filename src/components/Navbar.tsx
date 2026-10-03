@@ -126,7 +126,7 @@ export function Navbar({
                           key={i}
                           type="button"
                           onClick={agent.action}
-                          className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-white/5 transition-all group"
+                          className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-white/5 transition-all group"
                         >
                           <div className="flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center"
                             style={{ background: agent.color + '22', border: `1px solid ${agent.color}44` }}>
@@ -222,7 +222,7 @@ export function Navbar({
                 { label: t.nav.demo, id: 'demo' },
               ].map(link => (
                 <button key={link.id} type="button" onClick={() => scrollTo(link.id)}
-                  className="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all text-sm text-left">
+                  className="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-all text-sm text-start">
                   {link.label}
                 </button>
               ))}
