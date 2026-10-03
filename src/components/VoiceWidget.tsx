@@ -21,7 +21,7 @@ interface Message {
 type AssistantAction = 'auth' | 'career' | 'contract' | 'support' | 'negotiation' | 'tracker' | 'pricing';
 type Intent = 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
 
-const FREE_SITE_LIMIT = 3;
+const FREE_SITE_LIMIT = 3; // shown in texts - the real limit is enforced by the API
 const BUILD_TIMEOUT_MS = 6 * 60 * 1000;
 
 function runAction(type: AssistantAction) {
@@ -54,11 +54,21 @@ function getAuth() {
   }
 }
 
-function sitesBuilt(email: string) {
-  try { return Number(localStorage.getItem(`elyvori_sites_built_${email}`) || '0'); } catch { return 0; }
+// free-plan status lives on the server (3 free website builds per account)
+async function fetchFreeSites(token: string): Promise<{ left: number; balance: number; cost: number } | 'auth' | null> {
+  try {
+    const res = await fetch(`${API}/billing/free-sites`, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.status === 401 || res.status === 403) return 'auth';
+    if (!res.ok) return null;
+    const d = (await res.json()) as any;
+    return { left: Number(d.left ?? 0), balance: Number(d.balance ?? 0), cost: Number(d.cost ?? 50) };
+  } catch {
+    return null;
+  }
 }
-function addSiteBuilt(email: string) {
-  try { localStorage.setItem(`elyvori_sites_built_${email}`, String(sitesBuilt(email) + 1)); } catch { /* ignore */ }
+
+function isPublicUrl(u?: string | null) {
+  return !!u && /^https?:\/\//.test(u) && !/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(u);
 }
 
 interface VoiceWidgetProps {
@@ -111,6 +121,8 @@ const TEXT = {
     buildSteps: ['Understanding your business', 'Designing the pages', 'Writing the code', 'Publishing your site'],
     buildDone: '🎉 Your website is ready!',
     openSite: 'Open my website',
+    freeLeft: 'You have **{n} free website(s)** left on the free plan.',
+    buildQueued: "Your website has been built ✅ — I'm finishing the public link. You can follow it in Track Project and we'll email you the link.",
     buildFailed: "I couldn't finish the build this time. Please try again in a minute — or tap Track Project.",
     sessionExpired: 'Your session has expired — please sign in again and I will continue.',
     opening: {
@@ -158,6 +170,8 @@ const TEXT = {
     buildSteps: ['فهم نشاطك', 'تصميم الصفحات', 'كتابة الكود', 'نشر الموقع'],
     buildDone: '🎉 موقعك جاهز!',
     openSite: 'افتح موقعي',
+    freeLeft: 'ضايلك **{n} موقع مجاني** بالخطة المجانية.',
+    buildQueued: 'موقعك انبنى ✅ — بجهّز الرابط العام. بتقدر تتابعه من "تتبع مشروعك" وبنبعثلك الرابط على الإيميل.',
     buildFailed: 'ما قدرت أكمّل البناء هالمرة. جرّب كمان دقيقة — أو افتح تتبع المشروع.',
     sessionExpired: 'انتهت جلستك — سجّل دخول مرة ثانية وبكمّل معك.',
     opening: {
@@ -463,6 +477,8 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const ownerKey = useRef({});
   const autoClosedRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const speakSeqRef = useRef(0);
   const [isOwner, setIsOwner] = useState(false);
 
   const recognitionRef = useRef<any>(null);
@@ -536,26 +552,56 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
 
   /* ---------------- speech output ---------------- */
   function stopSpeaking() {
+    speakSeqRef.current++;
     try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+    try { audioRef.current?.pause(); } catch { /* ignore */ }
+    audioRef.current = null;
     setSpeaking(false);
   }
 
-  function speak(text: string) {
+  function speakWithBrowser(clean: string) {
     const synth = window.speechSynthesis;
-    const clean = speakable(text);
-    if (!synth || !clean) return;
+    if (!synth) return;
     synth.cancel();
     const u = new SpeechSynthesisUtterance(clean);
     const code = langRef.current === 'ar' ? 'ar' : 'en';
     u.lang = code === 'ar' ? 'ar-SA' : 'en-US';
-    const voices = synth.getVoices();
-    const v = voices.find(x => x.lang?.toLowerCase().startsWith(code));
+    const v = synth.getVoices().find(x => x.lang?.toLowerCase().startsWith(code));
     if (v) u.voice = v;
-    u.rate = 1;
     u.onstart = () => setSpeaking(true);
     u.onend = () => setSpeaking(false);
     u.onerror = () => setSpeaking(false);
     synth.speak(u);
+  }
+
+  // natural voice from the API (ElevenLabs); falls back to the browser's own voice
+  async function speak(text: string) {
+    const clean = speakable(text);
+    if (!clean) return;
+    stopSpeaking();
+    const myTurn = ++speakSeqRef.current;
+    try {
+      const ctrl = new AbortController();
+      const tm = window.setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(`${API}/public/voice/speak`, {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: clean.slice(0, 600), lang: langRef.current }),
+      });
+      window.clearTimeout(tm);
+      if (!res.ok) throw new Error(String(res.status));
+      const blob = await res.blob();
+      if (myTurn !== speakSeqRef.current || !blob.size) return; // something newer started
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onplay = () => setSpeaking(true);
+      audio.onended = audio.onerror = () => { setSpeaking(false); URL.revokeObjectURL(url); };
+      await audio.play();
+    } catch {
+      if (myTurn === speakSeqRef.current) speakWithBrowser(clean);
+    }
   }
 
   const toggleSpeak = () => {
@@ -604,7 +650,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   };
 
   const buildWebsite = async (details: string, viaVoice: boolean) => {
-    const { token, email } = getAuth();
+    const { token } = getAuth();
     if (!token) { reply(t.needLogin, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
 
     reply(t.building, viaVoice);
@@ -634,14 +680,21 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       }
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as any;
-      const liveUrl: string | undefined = data?.data?.liveUrl || data?.liveUrl;
-      setProg({ current: t.buildSteps.length - 1, done: true });
-      addSiteBuilt(email);
-      const spoken: string = data?.spokenReply || '';
-      if (liveUrl) {
-        reply(`${t.buildDone}${spoken ? '\n\n' + spoken : ''}`, viaVoice, { actions: [{ label: t.openSite, url: liveUrl }] });
+      if (data?.data?.creditsExhausted) {
+        setProg({ failed: true });
+        reply(t.quotaReached, viaVoice, { actions: [{ label: t.plansBtn, type: 'pricing' }] });
+        return;
+      }
+      const candidates = [data?.data?.publicUrl, data?.data?.liveUrl, data?.liveUrl];
+      const siteUrl: string | undefined = candidates.find(isPublicUrl);
+      if (siteUrl) {
+        setProg({ current: t.buildSteps.length - 1, done: true });
+        reply(t.buildDone, viaVoice, { actions: [{ label: t.openSite, url: siteUrl }] });
+      } else if (data?.intent === 'build_code' || data?.data?.filePaths) {
+        setProg({ current: t.buildSteps.length - 1, done: true });
+        reply(t.buildQueued, viaVoice, { actions: [{ label: isAr ? 'تتبع مشروعك' : 'Track Project', type: 'tracker' }] });
       } else {
-        reply(spoken || t.buildDone, viaVoice, { actions: [{ label: isAr ? 'تتبع مشروعك' : 'Track Project', type: 'tracker' }] });
+        throw new Error('no result');
       }
     } catch {
       setProg({ failed: true });
@@ -669,11 +722,19 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
 
     const intent = detectIntent(msg);
     if (intent === 'website') {
-      const { token, email } = getAuth();
+      const { token } = getAuth();
       if (!token) { reply(t.needLogin, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
-      if (sitesBuilt(email) >= FREE_SITE_LIMIT) { reply(t.quotaReached, viaVoice, { actions: [{ label: t.plansBtn, type: 'pricing' }] }); return; }
+      setLoading(true);
+      const status = await fetchFreeSites(token);
+      setLoading(false);
+      if (status === 'auth') { reply(t.sessionExpired, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
+      if (status && status.left <= 0 && status.balance < status.cost) {
+        reply(t.quotaReached, viaVoice, { actions: [{ label: t.plansBtn, type: 'pricing' }] });
+        return;
+      }
       pendingRef.current = 'details';
-      reply(t.askDetails, viaVoice);
+      const leftNote = status && status.left > 0 ? `\n\n${t.freeLeft.replace('{n}', String(status.left))}` : '';
+      reply(t.askDetails + leftNote, viaVoice);
       return;
     }
     if (intent) {
