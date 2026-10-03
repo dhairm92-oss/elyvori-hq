@@ -462,6 +462,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const ownerKey = useRef({});
+  const autoClosedRef = useRef(false);
   const [isOwner, setIsOwner] = useState(false);
 
   const recognitionRef = useRef<any>(null);
@@ -511,7 +512,8 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       return () => clearTimeout(id);
     }
     cancelVoice();
-    stopSpeaking();
+    if (autoClosedRef.current) autoClosedRef.current = false; // closed by the assistant: let it finish talking
+    else stopSpeaking();
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -570,6 +572,14 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(langRef.current) }]);
 
   const pendingRef = useRef<'details' | null>(null);
+
+  // on phones the chat covers the page: after opening a page/modal, step aside so it is visible
+  const closeOnMobile = () => {
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      autoClosedRef.current = true;
+      setOpen(false);
+    }
+  };
 
   const reply = (text: string, viaVoice: boolean, extra?: Partial<Message>) => {
     setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(langRef.current), ...extra }]);
@@ -668,7 +678,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
     if (intent) {
       reply(t.opening[intent], viaVoice);
-      window.setTimeout(() => runAction(intent), 900);
+      window.setTimeout(() => { runAction(intent); closeOnMobile(); }, 1000);
       return;
     }
     askGemini(msg, viaVoice);
@@ -676,7 +686,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
 
   const onActionClick = (a: MsgAction) => {
     if (a.url) { window.open(a.url, '_blank', 'noopener'); return; }
-    if (a.type) runAction(a.type);
+    if (a.type) { runAction(a.type); closeOnMobile(); }
   };
 
   /* ---------------- speech input ---------------- */
