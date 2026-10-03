@@ -197,3 +197,18 @@ html.dark :is([style^="color: rgb(99, 102, 241)"], [style*="; color: rgb(99, 102
   [style*="font-size: 10px"]:not(.elv-btn *) { font-size: 11px !important; }
 }
 /* ===== /ELYVORI-AUDIT-POLISH-2 ===== */
+
+/* ===== ELYVORI-3D-CAPTIONS ===== */
+/* day mode: overlays that sit on top of photos keep the dark glass look */
+html.light [class*="aspect-"]:has(> img) :is([class*="bg-slate-950"], [class*="bg-slate-900"], [class*="bg-black/"]) {
+  background-color: rgba(2, 6, 23, 0.82) !important;
+  box-shadow: none !important;
+}
+html.light [class*="aspect-"]:has(> img) :is(.text-white, .text-slate-50, .text-slate-100) { color: #FFFFFF !important; }
+html.light [class*="aspect-"]:has(> img) :is(.text-slate-200, .text-slate-300, .text-slate-400) { color: #CBD5E1 !important; }
+html.light [class*="aspect-"]:has(> img) [class*="text-cyan-"] { color: #67E8F9 !important; }
+html.light [class*="aspect-"]:has(> img) [class*="text-emerald-"] { color: #6EE7B7 !important; }
+html.light [class*="aspect-"]:has(> img) [class*="text-indigo-"] { color: #A5B4FC !important; }
+html.light [class*="aspect-"]:has(> img) [class*="text-fuchsia-"] { color: #F0ABFC !important; }
+html.light [class*="aspect-"]:has(> img) [class*="border-white/"] { border-color: rgba(255, 255, 255, 0.12) !important; }
+/* ===== /ELYVORI-3D-CAPTIONS ===== */
