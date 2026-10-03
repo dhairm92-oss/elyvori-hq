@@ -14,9 +14,7 @@ export const FloatingSideLogo: React.FC<FloatingSideLogoProps> = ({ isDark = tru
     <aside
       id="floating-side-brand-widget"
       aria-label="Brand floating badge"
-      className={`fixed z-50 transition-all duration-300 pointer-events-auto left-4 bottom-[calc(20px+env(safe-area-inset-bottom))] md:bottom-auto md:top-1/3 ${
-        isRtl ? 'md:left-6' : 'md:left-auto md:right-6'
-      }`}
+      className="fixed z-50 transition-all duration-300 pointer-events-auto left-4 md:left-7 bottom-[calc(20px+env(safe-area-inset-bottom))] md:bottom-8"
     >
       <div className="relative group">
         {/* Ambient Pulsing Glow Aura behind badge */}
@@ -85,9 +83,7 @@ export const FloatingSideLogo: React.FC<FloatingSideLogoProps> = ({ isDark = tru
         {/* Modal tooltip when clicked */}
         {isExpanded && (
           <div
-            className={`absolute bottom-full mb-3 md:bottom-auto md:mb-0 md:top-full md:mt-3 w-64 max-w-[calc(100vw-32px)] p-4 rounded-2xl border backdrop-blur-2xl shadow-2xl transition-all animate-in fade-in zoom-in-95 left-0 ${
-              isRtl ? '' : 'md:left-auto md:right-0'
-            } ${
+            className={`absolute bottom-full mb-3 w-64 max-w-[calc(100vw-32px)] p-4 rounded-2xl border backdrop-blur-2xl shadow-2xl transition-all animate-in fade-in zoom-in-95 left-0 ${
               isDark
                 ? 'bg-slate-900/95 border-indigo-500/30 text-white shadow-indigo-950/80'
                 : 'bg-white/95 border-indigo-200 text-slate-900 shadow-xl'
