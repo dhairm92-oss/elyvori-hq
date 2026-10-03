@@ -1,80 +1,81 @@
-body { background: #080A12 !important; }
-@import "tailwindcss";
+# -*- coding: utf-8 -*-
+"""
+Elyvori - Day/Night theme that changes the WHOLE site (mobile + laptop)
+Problem: App.tsx always did document.documentElement.classList.add('dark'),
+so in "light" mode only the icon changed and most of the site stayed dark.
+Fix:
+ 1) App.tsx: toggle html.dark / html.light with the real theme + smooth fade
+ 2) index.html: apply saved theme before React loads (no flash) + theme-color
+ 3) index.css: polished light palette for every section (cards, pricing, header...)
+Safe to run more than once. Revert with: git checkout .
+"""
+import os, re, sys
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
-@layer base {
-  html {
-    scroll-behavior: smooth;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  }
+ROOT = os.path.dirname(os.path.abspath(__file__))
+SRC = os.path.join(ROOT, "src")
+changes, warnings = [], []
 
-  [dir="rtl"] {
-    font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
-  }
-}
+def load(p):
+    with open(p, "r", encoding="utf-8") as f:
+        s = f.read()
+    return s.replace("\r\n", "\n"), ("\r\n" in s)
 
-.font-cairo {
-  font-family: 'Cairo', system-ui, sans-serif;
-}
+def save(p, s, crlf):
+    if crlf:
+        s = s.replace("\n", "\r\n")
+    with open(p, "w", encoding="utf-8", newline="") as f:
+        f.write(s)
 
-/* ===== ELYVORI-MOBILE-FIX ===== */
-:root {
-  --ely-text-body: #DCE3EE;
-  --ely-text-muted: #B4BFD0;
-}
+# ------------------------------------------------------------- 1) App.tsx
+app = os.path.join(SRC, "App.tsx")
+s, crlf = load(app)
+if "ELYVORI-THEME-SYNC" in s:
+    changes.append("App.tsx: already patched")
+else:
+    m = re.search(r"localStorage\.setItem\(\s*['\"`]elyvori_theme['\"`]\s*,\s*([A-Za-z_$][\w$]*)\s*\)", s)
+    var = m.group(1) if m else None
+    pat = re.compile(r"document\.documentElement\.classList\.add\(\s*['\"`]dark['\"`]\s*\)\s*;?")
+    if var and pat.search(s):
+        block = (
+            "/* ELYVORI-THEME-SYNC */ {\n"
+            "      const root = document.documentElement;\n"
+            f"      const isDarkTheme = {var} === 'dark';\n"
+            "      root.classList.add('theme-anim');\n"
+            "      root.classList.toggle('dark', isDarkTheme);\n"
+            "      root.classList.toggle('light', !isDarkTheme);\n"
+            "      root.style.colorScheme = isDarkTheme ? 'dark' : 'light';\n"
+            "      document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content', isDarkTheme ? '#080A12' : '#F6F8FC');\n"
+            "      window.setTimeout(() => root.classList.remove('theme-anim'), 450);\n"
+            "    }"
+        )
+        s = pat.sub(lambda _m: block, s, count=1)
+        save(app, s, crlf)
+        changes.append(f"App.tsx: html.dark/light now follows theme (variable: {var})")
+    else:
+        warnings.append("App.tsx: could not find classList.add('dark') + elyvori_theme - send App.tsx to Claude")
 
-html, body, #root {
-  max-width: 100%;
-  overflow-x: clip;
-}
+# ----------------------------------------------------------- 2) index.html
+html_p = os.path.join(ROOT, "index.html")
+h, crlf = load(html_p)
+if "ELYVORI-THEME-BOOT" not in h:
+    boot = (
+        '\n    <!-- ELYVORI-THEME-BOOT -->\n'
+        '    <meta name="theme-color" content="#080A12" />\n'
+        "    <script>(function(){try{var t=localStorage.getItem('elyvori_theme');var d=t!=='light';"
+        "var r=document.documentElement;r.classList.toggle('dark',d);r.classList.toggle('light',!d);"
+        "r.style.colorScheme=d?'dark':'light';var m=document.querySelector('meta[name=\"theme-color\"]');"
+        "if(m)m.setAttribute('content',d?'#080A12':'#F6F8FC');}catch(e){}})();</script>\n"
+    )
+    h = h.replace("</head>", boot + "  </head>", 1)
+    save(html_p, h, crlf)
+    changes.append("index.html: theme applied before load (no flash) + theme-color")
 
-body {
-  font-family: 'Cairo', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  -webkit-text-size-adjust: 100%;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-button, input, textarea, select {
-  font-family: inherit;
-}
-
-img, video, canvas {
-  max-width: 100%;
-  height: auto;
-}
-
-@media (max-width: 767px) {
-  section, header, nav, footer, main {
-    max-width: 100vw;
-  }
-
-  h1 {
-    line-height: 1.45 !important;
-    letter-spacing: 0 !important;
-    word-break: normal;
-    overflow-wrap: anywhere;
-  }
-
-  h2, h3 {
-    line-height: 1.5 !important;
-    letter-spacing: 0 !important;
-  }
-
-  p {
-    line-height: 1.9;
-    letter-spacing: 0;
-    overflow-wrap: anywhere;
-  }
-}
-/* ===== /ELYVORI-MOBILE-FIX ===== */
-
-/* ELYVORI-WIDGETS-SPACE */
-@media (max-width: 767px) {
-  footer { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important; }
-}
-
-/* ===== ELYVORI-LIGHT-THEME ===== */
+# ------------------------------------------------------------ 3) index.css
+CSS = r"""/* ===== ELYVORI-LIGHT-THEME ===== */
 html.light { color-scheme: light; }
 html.light body { background: #F6F8FC; color: #0F172A; }
 
@@ -158,3 +159,20 @@ header svg:is(.lucide-sun, .lucide-moon) { animation: elvThemeIcon 0.5s cubic-be
   html.theme-anim, html.theme-anim * { transition: none !important; }
 }
 /* ===== /ELYVORI-LIGHT-THEME ===== */
+"""
+css_p = os.path.join(SRC, "index.css")
+c, crlf = load(css_p)
+START, END = "/* ===== ELYVORI-LIGHT-THEME ===== */", "/* ===== /ELYVORI-LIGHT-THEME ===== */"
+if START in c:
+    c = re.sub(re.escape(START) + r".*?" + re.escape(END) + r"\n?", lambda _m: CSS, c, flags=re.S)
+else:
+    c = c.rstrip() + "\n\n" + CSS
+save(css_p, c, crlf)
+changes.append("index.css: full light theme palette")
+
+print("\n============ ELYVORI DAY/NIGHT FIX ============")
+for x in changes:
+    print("  +", x)
+for w in warnings:
+    print("  !", w)
+print("===============================================\n")

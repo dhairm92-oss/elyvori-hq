@@ -68,7 +68,16 @@ export default function App() {
   // Sync theme class to document
   useEffect(() => {
     localStorage.setItem('elyvori_theme', theme);
-    document.documentElement.classList.add('dark');
+    /* ELYVORI-THEME-SYNC */ {
+      const root = document.documentElement;
+      const isDarkTheme = theme === 'dark';
+      root.classList.add('theme-anim');
+      root.classList.toggle('dark', isDarkTheme);
+      root.classList.toggle('light', !isDarkTheme);
+      root.style.colorScheme = isDarkTheme ? 'dark' : 'light';
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDarkTheme ? '#080A12' : '#F6F8FC');
+      window.setTimeout(() => root.classList.remove('theme-anim'), 450);
+    }
   }, [theme]);
 
   // Sync language and RTL direction
