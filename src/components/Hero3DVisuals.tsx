@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Sparkles, Shield, Cpu, Zap } from 'lucide-react';
 import { Language } from '../types';
 
-import elyvoriPillarImg from '../assets/images/elyvori_3d_pillar_1789821140182.jpg';
-import elyvoriEmblemImg from '../assets/images/elyvori_3d_emblem_1789821153466.jpg';
-import elyvoriCubeImg from '../assets/images/elyvori_3d_cube_1789821186560.jpg';
+import elyvoriPillarImg from '../assets/images/elyvori_3d_pillar_1789821140182.webp';
+import elyvoriEmblemImg from '../assets/images/elyvori_3d_emblem_1789821153466.webp';
+import elyvoriCubeImg from '../assets/images/elyvori_3d_cube_1789821186560.webp';
 
 interface Hero3DVisualsProps {
   lang: Language;
@@ -77,7 +77,7 @@ export const Hero3DVisuals: React.FC<Hero3DVisualsProps> = ({ lang }) => {
             >
               {/* Image container with floating animation */}
               <div className="relative aspect-[9/14] w-full overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={elyvoriPillarImg}
                   alt="Elyvori 3D Vertical Sculpture Monolith"
                   className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-108 group-hover:rotate-1"
@@ -119,7 +119,7 @@ export const Hero3DVisuals: React.FC<Hero3DVisualsProps> = ({ lang }) => {
                 style={{ transform: 'translateZ(20px)' }}
               >
                 <div className="relative aspect-[16/8] sm:aspect-[16/7] w-full overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={elyvoriEmblemImg}
                     alt="Elyvori 3D Emblem with Glowing Letters"
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
@@ -160,7 +160,7 @@ export const Hero3DVisuals: React.FC<Hero3DVisualsProps> = ({ lang }) => {
                   style={{ transform: 'translateZ(35px)' }}
                 >
                   <div className="relative aspect-square w-full overflow-hidden">
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={elyvoriCubeImg}
                       alt="Elyvori 3D Holographic Cube"
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:rotate-3"

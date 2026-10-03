@@ -31,9 +31,9 @@ export function Hero({ lang, onExploreServices, onRequestDemo }: HeroProps) {
     >
       {/* Background effects */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full opacity-30"
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[min(800px,100vw)] h-[400px] rounded-full opacity-30"
           style={{ background: 'radial-gradient(ellipse, rgba(0,229,255,0.12) 0%, rgba(124,58,237,0.08) 50%, transparent 70%)' }} />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-20"
+        <div className="absolute bottom-0 right-0 w-[min(500px,80vw)] h-[min(500px,80vw)] rounded-full opacity-20"
           style={{ background: 'radial-gradient(ellipse, rgba(213,0,249,0.15) 0%, transparent 70%)' }} />
         <div className="absolute inset-0 opacity-[0.025]"
           style={{ backgroundImage: 'linear-gradient(rgba(0,229,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,1) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
@@ -49,7 +49,7 @@ export function Hero({ lang, onExploreServices, onRequestDemo }: HeroProps) {
         {/* Heading */}
         <h1
           id="hero-title"
-          className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl leading-[1.15]"
+          className="text-[2rem] font-extrabold tracking-normal text-white sm:text-5xl md:text-6xl leading-[1.45] md:leading-[1.25]"
           style={{ textShadow: '0 0 80px rgba(0,229,255,0.15)' }}
         >
           <span style={{ background: 'linear-gradient(135deg, #00E5FF, #7C3AED, #D500F9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>

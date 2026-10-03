@@ -114,7 +114,7 @@ export function Navbar({
                   className="rounded-2xl border border-white/10 bg-slate-900/98 backdrop-blur-xl shadow-2xl overflow-hidden"
                 >
                   <div className="px-4 py-2.5 border-b border-white/5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-300">
                       {lang === 'en' ? '✨ Specialized AI Agents' : '✨ الوكلاء المتخصصون'}
                     </p>
                   </div>
@@ -136,7 +136,7 @@ export function Navbar({
                             <p className="text-sm font-semibold text-white">
                               {lang === 'en' ? agent.labelEn : agent.labelAr}
                             </p>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-[11px] text-slate-500 dark:text-slate-300">
                               {lang === 'en' ? agent.descEn : agent.descAr}
                             </p>
                           </div>
@@ -229,7 +229,7 @@ export function Navbar({
             </div>
 
             <div className="border-t border-white/5 pt-4">
-              <p className="text-[10px] uppercase tracking-widest text-slate-600 mb-2 px-3">
+              <p className="text-[10px] uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-2 px-3">
                 {lang === 'en' ? 'AI Agents' : 'الوكلاء الذكيون'}
               </p>
               {agents.map((agent, i) => {
