@@ -59,7 +59,9 @@ function detectIntent(text: string): Intent {
   // ELYVORI-APP-BUILDER: a real mobile app (Flutter) - not a web app
   const appWord = has('تطبيق', 'تطبيقات', 'ابلكيشن', 'أبلكيشن', 'flutter', 'فلاتر', 'mobile app', 'android app', 'ios app', 'apk', ' app ', ' app.', ' app,', ' an app', ' app?');
   const webApp = has('web app', 'webapp', 'تطبيق ويب');
-  if (appWord && !webApp && (wantsToMake || has('flutter', 'فلاتر', 'apk'))) return 'app';
+  // ELYVORI-APP-INTENT-2: 'تطبيق للمطعم / تطبيق موبايل / an app for my gym' also count, even without a verb
+  const appFor = /تطبيق\s*(ل|لل|موبايل|جوال|اندرويد|أندرويد|خاص|بسيط)/.test(s) || /\b(an? )?(mobile |android )?app (for|to)\b/.test(s);
+  if (appWord && !webApp && (wantsToMake || appFor || has('flutter', 'فلاتر', 'apk'))) return 'app';
   // ELYVORI-DIGITAL-STEMS: any form of منتج + رقمي (منتجاً رقمياً، منتجات رقمية، ...)
   if (/منت[جچ]/.test(s) && /رقم[يىا]/.test(s)) return 'digital';
   if (has('منتج رقمي', 'منتج رقمى', 'منتجات رقمية', 'منتجات رقميه', 'منتج ديجيتال', 'كتاب الكتروني', 'كتاب إلكتروني', 'كتاب تلوين',
@@ -962,7 +964,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
     // a detailed request ("build me an app called X for my clinic: bookings, patients...") goes straight to the builder
     const words = request.trim().split(/\s+/).length;
-    if (words >= 9) { buildApp(request, viaVoice); return; }
+    if (words >= 9 || (words >= 4 && /[:،,—]/.test(request))) { buildApp(request, viaVoice); return; }
     pendingRef.current = 'app';
     reply(T().appAsk, viaVoice);
   };
