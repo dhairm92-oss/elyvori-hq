@@ -195,6 +195,7 @@ html.light .elg-msg.ok{color:#047857}
 .elg-switch{display:block;width:100%;margin-top:14px;border:0;background:transparent;font:inherit;font-size:13.5px;font-weight:700;color:#7C3AED;cursor:pointer;padding:8px}
 html:not(.light) .elg-switch{color:#A78BFA}
 .elg-switch:hover{text-decoration:underline}
+.elg-terms a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .elg-terms{text-align:center;font-size:11.5px;color:var(--g-muted);margin:10px 0 0;line-height:1.6}
 .elg-who{text-align:center;padding:8px 0 4px}
 .elg-who strong{display:block;font-size:15px;margin-top:6px;word-break:break-all}
@@ -489,7 +490,7 @@ export function LoginGateModal({ isOpen, onClose, lang, auth, onSuccessAuth }: L
             <button type="button" className="elg-switch" onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')}>
               {mode === 'signin' ? t.switchToUp : t.switchToIn}
             </button>
-            <p className="elg-terms">{t.terms}</p>
+            <p className="elg-terms">{isAr ? (<>بالمتابعة أنت موافق على <a href="/terms.html" target="_blank" rel="noopener">الشروط</a> و<a href="/privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>.</>) : (<>By continuing you agree to our <a href="/terms.html" target="_blank" rel="noopener">Terms</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</>)}</p>
           </>
         )}
       </div>
