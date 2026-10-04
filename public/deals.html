@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة الصفقات | Elyvori</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>(function(){try{var t=localStorage.getItem('elyvori_theme');var d=t?t==='dark':!matchMedia('(prefers-color-scheme: light)').matches;document.documentElement.classList.add(d?'dark':'light');}catch(e){document.documentElement.classList.add('dark');}})();</script>
+<style>
+:root{--bg:#070a14;--card:#0e1324;--card2:#121a30;--line:#1f2740;--text:#e8ecf7;--muted:#9aa5c0;--accent:#7c5cff;--accent2:#22d3ee;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--wa:#25d366}
+html.light{--bg:#f6f7fb;--card:#fff;--card2:#f3f5fa;--line:#e3e7f0;--text:#141a2b;--muted:#5a6580;--accent:#5b3df5;--accent2:#0891b2}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font-family:'Cairo',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:17px}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff}
+.btn{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#fff}
+.btn.wa{background:var(--wa);border:0;color:#062b14}
+.btn.sm{min-height:34px;padding:5px 11px;font-size:13px}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:clamp(22px,4vw,30px);margin:4px 0 2px;font-weight:800}
+.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.stat b{display:block;font-size:24px;font-weight:800}
+.stat span{color:var(--muted);font-size:13px}
+.stat.money b{color:var(--ok)}
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.search{width:100%;font:inherit;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.deal{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.deal-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.deal-h h3{margin:0;font-size:17px;font-weight:800;line-height:1.4}
+.meta{color:var(--muted);font-size:13px}
+.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.b-new{background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)}
+.b-talk{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.b-win{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.b-lost{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.b-wait{background:var(--card2);color:var(--muted)}
+.rows{display:grid;gap:4px;font-size:14px}
+.rows div{display:flex;gap:8px;min-width:0}
+.rows div span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rows .k{color:var(--muted);flex:0 0 auto}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+details{border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
+.hist{display:grid;gap:6px;margin-top:8px;max-height:260px;overflow:auto}
+.h{font-size:13px;padding:8px 10px;border-radius:10px;background:var(--card2);white-space:pre-wrap;word-break:break-word}
+.h.out{border-inline-start:3px solid var(--accent)}
+.h.in{border-inline-start:3px solid var(--ok)}
+.h small{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}
+.edit{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.edit .row{display:flex;gap:8px}
+.edit input,.edit select{flex:1;min-width:0;font:inherit;font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text)}
+.empty,.msg{text-align:center;color:var(--muted);padding:40px 10px;background:var(--card);border:1px dashed var(--line);border-radius:18px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.brand .t{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="brand" href="/"><span class="logo">E</span><span class="t">Elyvori</span></a>
+  <div style="display:flex;gap:8px">
+    <button class="btn" id="refresh" type="button">↻ تحديث</button>
+    <a class="btn" href="/">الرئيسية</a>
+  </div>
+</div></header>
+<main>
+  <h1>لوحة الصفقات</h1>
+  <p class="sub">كل الشركات اللي لقاها وكيل إليفوري، وشو صار مع كل وحدة. بتتحدث لحالها كل دقيقة.</p>
+  <div id="app"><div class="msg">جاري التحميل…</div></div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function () {
+  var API = 'https://elyvori-api.onrender.com';
+  var app = document.getElementById('app');
+  var state = { deals: [], counts: {}, paidTotal: 0, filter: 'all', q: '' };
+
+  var LABELS = {
+    FOUND: ['تم إيجادها', 'b-wait'], DEMO_READY: ['الموقع التجريبي جاهز', 'b-new'], NO_EMAIL: ['بدون إيميل — واتساب', 'b-new'],
+    QUEUED: ['بالدور (حد يومي)', 'b-wait'], CONTACTED: ['انبعت إيميل', 'b-talk'], WHATSAPP_SENT: ['انبعت واتساب', 'b-talk'],
+    NEGOTIATING: ['بتفاوض', 'b-talk'], CONTRACT_SENT: ['انبعت العقد', 'b-talk'], NEEDS_OWNER: ['بدها إياك', 'b-talk'],
+    PAID: ['دفعت 💰', 'b-win'], WON: ['صفقة ناجحة', 'b-win'], LOST: ['رفضت', 'b-lost'], OPTED_OUT: ['طلبت ما نتواصل', 'b-lost'],
+    NO_REPLY: ['ما ردّت', 'b-lost'], DEMO_FAILED: ['فشل الموقع التجريبي', 'b-lost'], SEND_FAILED: ['فشل الإرسال', 'b-lost']
+  };
+  var GROUPS = {
+    all: ['الكل', null],
+    todo: ['بدها تواصل', ['NO_EMAIL', 'DEMO_READY', 'NEEDS_OWNER', 'SEND_FAILED']],
+    talk: ['شغّالين معها', ['CONTACTED', 'WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'QUEUED']],
+    won: ['دفعت / ناجحة', ['PAID', 'WON']],
+    lost: ['مسكّرة', ['LOST', 'OPTED_OUT', 'NO_REPLY', 'DEMO_FAILED']]
+  };
+  var MANUAL = ['WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'PAID', 'WON', 'LOST', 'NO_REPLY', 'NEEDS_OWNER'];
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function token() { try { return localStorage.getItem('elyvori_token'); } catch (e) { return null; } }
+  function toast(t) { var el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, 2200); }
+  function when(iso) { try { var d = new Date(iso); return d.toLocaleString('ar', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+
+  function api(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() }, opts.headers || {});
+    return fetch(API + path, opts).then(function (r) {
+      if (r.status === 401) throw new Error('auth');
+      if (r.status === 403) throw new Error('forbidden');
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    });
+  }
+
+  function load(silent) {
+    if (!token()) {
+      app.innerHTML = '<div class="msg">لازم تسجّل دخول بحساب فريق إليفوري أول.<br><br><a class="btn primary" href="/">روح سجّل دخول</a></div>';
+      return;
+    }
+    if (!silent && !state.deals.length) app.innerHTML = '<div class="msg">جاري التحميل… (إذا السيرفر نايم بياخد دقيقة)</div>';
+    api('/prospects/deals').then(function (d) {
+      state.deals = d.deals || []; state.counts = d.counts || {}; state.paidTotal = d.paidTotal || 0;
+      render();
+    }).catch(function (e) {
+      if (e.message === 'auth') app.innerHTML = '<div class="msg">انتهت جلستك — سجّل دخول مرة ثانية.<br><br><a class="btn primary" href="/">تسجيل الدخول</a></div>';
+      else if (e.message === 'forbidden') app.innerHTML = '<div class="msg">هاللوحة لفريق إليفوري بس.</div>';
+      else if (!silent) app.innerHTML = '<div class="msg">ما قدرت أحمّل الصفقات. جرّب "تحديث" كمان شوي.</div>';
+    });
+  }
+
+  function count(keys) { var n = 0; keys.forEach(function (k) { n += state.counts[k] || 0; }); return n; }
+
+  function render() {
+    var total = state.deals.length;
+    var html = '<div class="stats">' +
+      '<div class="stat"><b>' + total + '</b><span>كل الشركات</span></div>' +
+      '<div class="stat"><b>' + count(GROUPS.todo[1]) + '</b><span>بدها تواصل منك</span></div>' +
+      '<div class="stat"><b>' + count(GROUPS.talk[1]) + '</b><span>شغّالين معها</span></div>' +
+      '<div class="stat money"><b>$' + state.paidTotal + '</b><span>مدفوع (' + count(GROUPS.won[1]) + ')</span></div>' +
+      '</div>';
+    html += '<div class="filters">' + Object.keys(GROUPS).map(function (k) {
+      var n = k === 'all' ? total : count(GROUPS[k][1]);
+      return '<button class="chip' + (state.filter === k ? ' on' : '') + '" data-f="' + k + '">' + GROUPS[k][0] + ' (' + n + ')</button>';
+    }).join('') + '</div>';
+    html += '<input class="search" id="q" placeholder="ابحث بالاسم أو المدينة أو الرقم…" value="' + esc(state.q) + '">';
+
+    var list = state.deals.filter(function (d) {
+      var g = GROUPS[state.filter][1];
+      if (g && g.indexOf(d.status) < 0) return false;
+      if (state.q) {
+        var hay = (d.businessName + ' ' + (d.city || '') + ' ' + (d.niche || '') + ' ' + (d.phone || '')).toLowerCase();
+        if (hay.indexOf(state.q.toLowerCase()) < 0) return false;
+      }
+      return true;
+    });
+    if (!list.length) {
+      html += '<div class="empty">' + (total ? 'ما في شركات بهالفلتر.' : 'لسا ما في صفقات. اكتب بشات الموقع مثلاً: "دور في دبي على كافيهات ما عندها مواقع"') + '</div>';
+    } else {
+      html += '<div class="grid">' + list.map(card).join('') + '</div>';
+    }
+    app.innerHTML = html;
+  }
+
+  function card(d) {
+    var lab = LABELS[d.status] || [d.status, 'b-wait'];
+    var hist = (d.history || []).slice().reverse().map(function (h) {
+      var who = h.dir === 'out' ? 'إليفوري ←' : h.dir === 'in' ? '→ الزبون' : 'ملاحظة';
+      return '<div class="h ' + esc(h.dir) + '"><small>' + who + ' · ' + esc(when(h.at)) + '</small>' + esc(h.text) + '</div>';
+    }).join('');
+    var opts = '<option value="">غيّر الحالة…</option>' + MANUAL.map(function (s) { return '<option value="' + s + '">' + (LABELS[s] ? LABELS[s][0] : s) + '</option>'; }).join('');
+    return '<article class="deal" data-id="' + esc(d.id) + '">' +
+      '<div class="deal-h"><div><h3>' + esc(d.businessName) + '</h3><div class="meta">' + esc([d.niche, d.city].filter(Boolean).join(' · ')) + ' · ' + esc(when(d.updatedAt)) + '</div></div>' +
+      '<span class="badge ' + lab[1] + '">' + esc(lab[0]) + '</span></div>' +
+      '<div class="rows">' +
+      (d.phone ? '<div><span class="k">📞</span><span dir="ltr">' + esc(d.phone) + '</span></div>' : '') +
+      (d.email ? '<div><span class="k">✉️</span><span dir="ltr">' + esc(d.email) + '</span></div>' : '') +
+      (d.address ? '<div><span class="k">📍</span><span>' + esc(d.address) + '</span></div>' : '') +
+      (d.price ? '<div><span class="k">💵</span><span>$' + esc(d.price) + (d.paidAmount ? ' — مدفوع $' + esc(d.paidAmount) : '') + '</span></div>' : '') +
+      '</div>' +
+      '<div class="acts">' +
+      (d.whatsappUrl ? '<a class="btn wa sm" target="_blank" rel="noopener" href="' + esc(d.whatsappUrl) + '" data-wa="1">💬 واتساب</a>' : '') +
+      (d.demoUrl ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(d.demoUrl) + '">🌐 الموقع التجريبي</a>' : '') +
+      (d.mapsUrl ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(d.mapsUrl) + '">🗺️ الخريطة</a>' : '') +
+      (d.paymentUrl ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(d.paymentUrl) + '">💳 رابط الدفع</a>' : '') +
+      '</div>' +
+      '<div class="edit">' +
+      '<div class="row"><select data-act="status">' + opts + '</select></div>' +
+      (!d.email ? '<div class="row"><input data-act="email" type="email" dir="ltr" placeholder="لقيت إيميلهم؟ حطه والوكيل بيراسلهم"><button class="btn sm primary" data-act="saveEmail">ابعت</button></div>' : '') +
+      '<div class="row"><input data-act="note" placeholder="ملاحظة (مثلاً: حكيت معهم، بدهم منيو)"><button class="btn sm" data-act="saveNote">حفظ</button></div>' +
+      '</div>' +
+      (hist ? '<details><summary>سجل المحادثة (' + (d.history || []).length + ')</summary><div class="hist">' + hist + '</div></details>' : '') +
+      '</article>';
+  }
+
+  function patch(id, body, okMsg) {
+    api('/prospects/deals/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(body) }).then(function (r) {
+      var map = { sent: 'الوكيل بعتلهم الإيميل ✅', queued: 'انحط بالدور لبكرة (الحد اليومي)', 'send-failed': 'ما زبط الإرسال ⚠️' };
+      toast(r.outreach ? (map[r.outreach] || okMsg) : okMsg);
+      load(true);
+    }).catch(function () { toast('ما زبط — جرّب كمان مرة'); });
+  }
+
+  app.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-f],[data-act],[data-wa]');
+    if (!t) return;
+    if (t.dataset.f) { state.filter = t.dataset.f; render(); return; }
+    var card = t.closest('.deal'); if (!card) return;
+    var id = card.dataset.id;
+    if (t.dataset.wa) {
+      var d = state.deals.filter(function (x) { return x.id === id; })[0];
+      if (d && ['NO_EMAIL', 'DEMO_READY', 'FOUND'].indexOf(d.status) >= 0) setTimeout(function () { patch(id, { status: 'WHATSAPP_SENT' }, 'انحفظت: انبعت واتساب'); }, 400);
+      return;
+    }
+    if (t.dataset.act === 'saveEmail') {
+      var v = card.querySelector('[data-act="email"]').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { toast('اكتب إيميل صحيح'); return; }
+      patch(id, { email: v }, 'انحفظ الإيميل');
+    }
+    if (t.dataset.act === 'saveNote') {
+      var n = card.querySelector('[data-act="note"]').value.trim();
+      if (!n) return;
+      patch(id, { note: n }, 'انحفظت الملاحظة');
+    }
+  });
+  app.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.dataset && t.dataset.act === 'status' && t.value) {
+      var id = t.closest('.deal').dataset.id;
+      patch(id, { status: t.value }, 'انحفظت الحالة');
+    }
+  });
+  app.addEventListener('input', function (e) {
+    if (e.target.id === 'q') {
+      state.q = e.target.value;
+      var pos = e.target.selectionStart;
+      render();
+      var q = document.getElementById('q'); q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) {}
+    }
+  });
+  document.getElementById('refresh').onclick = function () { load(false); toast('جاري التحديث…'); };
+  load(false);
+  setInterval(function () {
+    var a = document.activeElement;
+    if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT')) return; // don't disturb typing
+    load(true);
+  }, 60000);
+})();
+</script>
+</body>
+</html>

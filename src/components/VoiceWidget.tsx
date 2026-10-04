@@ -926,6 +926,12 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       return;
     }
 
+    // ELYVORI-DEALS-CMD: open the deals board
+    if (/لوحة الصفقات|الصفقات|صفقاتي|deals board|my deals|open deals/i.test(msg)) {
+      reply(replyLangRef.current === 'ar' ? 'بفتحلك **لوحة الصفقات** هلأ 📊' : 'Opening your **deals board** 📊', viaVoice);
+      window.setTimeout(() => { window.location.href = '/deals.html'; }, 900);
+      return;
+    }
     const intent = detectIntent(msg);
     if (intent === 'prospects') {
       huntProspects(msg, viaVoice);
