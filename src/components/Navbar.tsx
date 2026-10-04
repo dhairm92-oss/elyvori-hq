@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Sun, Moon, Globe, LogIn, LogOut, ShieldCheck,
   Briefcase, Scale, HeadphonesIcon, Menu, X,
-  Handshake, ChevronDown, Sparkles, LayoutGrid, Activity
+  Handshake, ChevronDown, Sparkles, LayoutGrid, Activity, BarChart3
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { Language, Theme, AuthState } from '../types';
@@ -35,6 +35,10 @@ export function Navbar({
   const t = translations[lang];
   const isDark = theme === 'dark';
   const isRtl = lang === 'ar';
+  // ELYVORI-DEALS-NAV: deals board link for the Elyvori team only
+  const OWNER_EMAILS = ['dhairm92@gmail.com'];
+  const signedEmail = String(auth.userEmail || (() => { try { return localStorage.getItem('elyvori_user') || ''; } catch { return ''; } })()).toLowerCase();
+  const isOwner = auth.isAuthenticated && OWNER_EMAILS.includes(signedEmail);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [agentsOpen, setAgentsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -155,6 +159,16 @@ export function Navbar({
             {/* Auth */}
             {auth.isAuthenticated ? (
               <div className="hidden sm:flex items-center gap-2">
+                {isOwner && (
+                  <a
+                    href="/deals.html"
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-black transition-all hover:opacity-90"
+                    style={{ background: 'linear-gradient(135deg, #22c55e, #00E5FF)' }}
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    <span>{lang === 'ar' ? 'الصفقات' : 'Deals'}</span>
+                  </a>
+                )}
                 <div className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   <span className="max-w-[80px] truncate text-[11px]">
@@ -247,6 +261,14 @@ export function Navbar({
             </div>
 
             <div className="border-t border-white/5 pt-4 mt-4 flex flex-col gap-2">
+              {isOwner && (
+                <a href="/deals.html" onClick={closeAll}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold text-black transition-all"
+                  style={{ background: 'linear-gradient(135deg, #22c55e, #00E5FF)' }}>
+                  <BarChart3 className="h-4 w-4" />
+                  <span>{lang === 'ar' ? '📊 لوحة الصفقات' : '📊 Deals board'}</span>
+                </a>
+              )}
               {auth.isAuthenticated ? (
                 <button type="button" onClick={() => { closeAll(); onSignOut(); }}
                   className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-rose-300 hover:bg-rose-950/30 transition-all">
