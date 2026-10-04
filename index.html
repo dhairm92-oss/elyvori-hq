@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- ELYVORI-OAUTH-BOOT -->
+    <script>(function(){try{var h=location.hash;if(!h||h.indexOf('elyvori_auth')<0)return;var p=new URLSearchParams(h.slice(1));var tok=p.get('elyvori_auth');var err=p.get('elyvori_auth_error');if(tok){localStorage.setItem('elyvori_token',tok);var em=p.get('email');if(em)localStorage.setItem('elyvori_user',em);var org=p.get('org');if(org)localStorage.setItem('elyvori_org',org);}if(err){sessionStorage.setItem('elyvori_oauth_error',err);sessionStorage.setItem('elyvori_oauth_reopen','1');}history.replaceState(null,'',location.pathname+location.search);}catch(e){}})();</script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Elyvori | AI Digital Products, Web & App Development, Recruitment CRM, Marketing</title>

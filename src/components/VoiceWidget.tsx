@@ -722,6 +722,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
       lastViaVoiceRef.current = viaVoice;
       setWaitingLogin(true); // continue by itself as soon as the visitor signs in
+      try { sessionStorage.setItem('elyvori_resume', JSON.stringify({ what: 'website', lang: replyLangRef.current, at: Date.now() })); } catch { /* ignore */ }
       return;
     }
     setLoading(true);
@@ -742,6 +743,22 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     reply(T().askDetails + leftNote, viaVoice);
   };
 
+  // came back from Google/GitHub sign-in (full page reload): pick the website request up again
+  useEffect(() => {
+    if (!isOwner) return;
+    try {
+      const raw = sessionStorage.getItem('elyvori_resume');
+      if (!raw) return;
+      const r = JSON.parse(raw);
+      if (Date.now() - (r.at || 0) > 20 * 60 * 1000) { sessionStorage.removeItem('elyvori_resume'); return; }
+      if (!getAuth().token) return;
+      sessionStorage.removeItem('elyvori_resume');
+      replyLangRef.current = r.lang === 'ar' ? 'ar' : 'en';
+      setOpen(true);
+      window.setTimeout(() => { reply(T().loggedIn, false); startWebsiteFlow(false); }, 700);
+    } catch { /* ignore */ }
+  }, [isOwner]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // after "sign in first": watch for the login to finish, then pick the request up again
   useEffect(() => {
     if (!waitingLogin) return;
@@ -750,6 +767,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       if (Date.now() - startedAt > 15 * 60 * 1000) { setWaitingLogin(false); return; }
       if (getAuth().token) {
         setWaitingLogin(false);
+        try { sessionStorage.removeItem('elyvori_resume'); } catch { /* ignore */ }
         setOpen(true);
         window.setTimeout(() => {
           reply(T().loggedIn, lastViaVoiceRef.current);
