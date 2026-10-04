@@ -273,3 +273,14 @@ html.light header [style*="rgb(255, 255, 255) 0%"] {
   }
 }
 /* ===== /ELYVORI-SERVICE-PILLS ===== */
+
+
+/* ELYVORI-MENU-SIGNIN: phone menu - Sign In centered and easier to tap */
+.border-t.pt-4.mt-4.flex.flex-col.gap-2 > button,
+.border-t.pt-4.mt-4.flex.flex-col.gap-2 > a {
+  justify-content: center;
+  text-align: center;
+  min-height: 48px;
+  font-size: 1rem;
+  letter-spacing: .01em;
+}
