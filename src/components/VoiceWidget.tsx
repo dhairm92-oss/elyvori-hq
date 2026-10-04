@@ -680,6 +680,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         signal: ctrl.signal,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
+          intent: 'build_code',
           text: `Build a complete, modern, responsive website and publish it. Website language: ${replyLangRef.current === 'ar' ? 'Arabic (RTL)' : 'English'}. Business details from the client: ${details}`,
         }),
       });
