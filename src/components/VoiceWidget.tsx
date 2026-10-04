@@ -122,6 +122,8 @@ const TEXT = {
     buildDone: '🎉 Your website is ready!',
     openSite: 'Open my website',
     freeLeft: 'You have **{n} free website(s)** left on the free plan.',
+    loggedIn: "You're signed in ✅ — let's build your website!",
+    trackBtn: 'Track Project',
     buildQueued: "Your website has been built ✅ — I'm finishing the public link. You can follow it in Track Project and we'll email you the link.",
     buildFailed: "I couldn't finish the build this time. Please try again in a minute — or tap Track Project.",
     sessionExpired: 'Your session has expired — please sign in again and I will continue.',
@@ -171,6 +173,8 @@ const TEXT = {
     buildDone: '🎉 موقعك جاهز!',
     openSite: 'افتح موقعي',
     freeLeft: 'ضايلك **{n} موقع مجاني** بالخطة المجانية.',
+    loggedIn: 'تمام، سجّلت دخولك ✅ — يلا نبني موقعك!',
+    trackBtn: 'تتبع مشروعك',
     buildQueued: 'موقعك انبنى ✅ — بجهّز الرابط العام. بتقدر تتابعه من "تتبع مشروعك" وبنبعثلك الرابط على الإيميل.',
     buildFailed: 'ما قدرت أكمّل البناء هالمرة. جرّب كمان دقيقة — أو افتح تتبع المشروع.',
     sessionExpired: 'انتهت جلستك — سجّل دخول مرة ثانية وبكمّل معك.',
@@ -564,7 +568,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     if (!synth) return;
     synth.cancel();
     const u = new SpeechSynthesisUtterance(clean);
-    const code = langRef.current === 'ar' ? 'ar' : 'en';
+    const code = replyLangRef.current;
     u.lang = code === 'ar' ? 'ar-SA' : 'en-US';
     const v = synth.getVoices().find(x => x.lang?.toLowerCase().startsWith(code));
     if (v) u.voice = v;
@@ -577,6 +581,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   // natural voice from the API (ElevenLabs); falls back to the browser's own voice
   async function speak(text: string) {
     const clean = speakable(text);
+    const voiceLang = replyLangRef.current;
     if (!clean) return;
     stopSpeaking();
     const myTurn = ++speakSeqRef.current;
@@ -587,7 +592,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         method: 'POST',
         signal: ctrl.signal,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: clean.slice(0, 600), lang: langRef.current }),
+        body: JSON.stringify({ text: clean.slice(0, 600), lang: voiceLang }),
       });
       window.clearTimeout(tm);
       if (!res.ok) throw new Error(String(res.status));
@@ -618,6 +623,11 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(langRef.current) }]);
 
   const pendingRef = useRef<'details' | null>(null);
+  // reply in the language the visitor actually writes/speaks, not only the site language
+  const replyLangRef = useRef<'ar' | 'en'>(isAr ? 'ar' : 'en');
+  const T = () => TEXT[replyLangRef.current];
+  const [waitingLogin, setWaitingLogin] = useState(false);
+  const lastViaVoiceRef = useRef(false);
 
   // on phones the chat covers the page: after opening a page/modal, step aside so it is visible
   const closeOnMobile = () => {
@@ -641,9 +651,9 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         body: JSON.stringify({ message: msg, lang: langRef.current }),
       });
       const data = (await res.json()) as any;
-      reply(data.reply || data.message || t.error, viaVoice);
+      reply(data.reply || data.message || T().error, viaVoice);
     } catch {
-      reply(t.offline, viaVoice);
+      reply(T().offline, viaVoice);
     } finally {
       setLoading(false);
     }
@@ -651,15 +661,15 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
 
   const buildWebsite = async (details: string, viaVoice: boolean) => {
     const { token } = getAuth();
-    if (!token) { reply(t.needLogin, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
+    if (!token) { reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return; }
 
-    reply(t.building, viaVoice);
+    reply(T().building, viaVoice);
     const progId = Date.now() + 1;
-    setMessages(prev => [...prev, { id: progId, role: 'ai', text: '', time: formatTime(langRef.current), progress: { steps: t.buildSteps, current: 0 } }]);
+    setMessages(prev => [...prev, { id: progId, role: 'ai', text: '', time: formatTime(langRef.current), progress: { steps: T().buildSteps, current: 0 } }]);
     const setProg = (p: Partial<NonNullable<Message['progress']>>) =>
       setMessages(prev => prev.map(m => (m.id === progId && m.progress ? { ...m, progress: { ...m.progress, ...p } } : m)));
     let step = 0;
-    const ticker = window.setInterval(() => { step = Math.min(step + 1, t.buildSteps.length - 1); setProg({ current: step }); }, 9000);
+    const ticker = window.setInterval(() => { step = Math.min(step + 1, T().buildSteps.length - 1); setProg({ current: step }); }, 9000);
 
     const ctrl = new AbortController();
     const timeout = window.setTimeout(() => ctrl.abort(), BUILD_TIMEOUT_MS);
@@ -670,35 +680,35 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         signal: ctrl.signal,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          text: `Build a complete, modern, responsive website and publish it. Website language: ${langRef.current === 'ar' ? 'Arabic (RTL)' : 'English'}. Business details from the client: ${details}`,
+          text: `Build a complete, modern, responsive website and publish it. Website language: ${replyLangRef.current === 'ar' ? 'Arabic (RTL)' : 'English'}. Business details from the client: ${details}`,
         }),
       });
       if (res.status === 401 || res.status === 403) {
         setProg({ failed: true });
-        reply(t.sessionExpired, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] });
+        reply(T().sessionExpired, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as any;
       if (data?.data?.creditsExhausted) {
         setProg({ failed: true });
-        reply(t.quotaReached, viaVoice, { actions: [{ label: t.plansBtn, type: 'pricing' }] });
+        reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] });
         return;
       }
       const candidates = [data?.data?.publicUrl, data?.data?.liveUrl, data?.liveUrl];
       const siteUrl: string | undefined = candidates.find(isPublicUrl);
       if (siteUrl) {
-        setProg({ current: t.buildSteps.length - 1, done: true });
-        reply(t.buildDone, viaVoice, { actions: [{ label: t.openSite, url: siteUrl }] });
+        setProg({ current: T().buildSteps.length - 1, done: true });
+        reply(T().buildDone, viaVoice, { actions: [{ label: T().openSite, url: siteUrl }] });
       } else if (data?.intent === 'build_code' || data?.data?.filePaths) {
-        setProg({ current: t.buildSteps.length - 1, done: true });
-        reply(t.buildQueued, viaVoice, { actions: [{ label: isAr ? 'تتبع مشروعك' : 'Track Project', type: 'tracker' }] });
+        setProg({ current: T().buildSteps.length - 1, done: true });
+        reply(T().buildQueued, viaVoice, { actions: [{ label: T().trackBtn, type: 'tracker' }] });
       } else {
         throw new Error('no result');
       }
     } catch {
       setProg({ failed: true });
-      reply(t.buildFailed, viaVoice, { actions: [{ label: isAr ? 'تتبع مشروعك' : 'Track Project', type: 'tracker' }] });
+      reply(T().buildFailed, viaVoice, { actions: [{ label: T().trackBtn, type: 'tracker' }] });
     } finally {
       window.clearInterval(ticker);
       window.clearTimeout(timeout);
@@ -706,11 +716,56 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
   };
 
+  const startWebsiteFlow = async (viaVoice: boolean) => {
+    const { token } = getAuth();
+    if (!token) {
+      reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
+      lastViaVoiceRef.current = viaVoice;
+      setWaitingLogin(true); // continue by itself as soon as the visitor signs in
+      return;
+    }
+    setLoading(true);
+    const status = await fetchFreeSites(token);
+    setLoading(false);
+    if (status === 'auth') {
+      reply(T().sessionExpired, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
+      lastViaVoiceRef.current = viaVoice;
+      setWaitingLogin(true);
+      return;
+    }
+    if (status && status.left <= 0 && status.balance < status.cost) {
+      reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] });
+      return;
+    }
+    pendingRef.current = 'details';
+    const leftNote = status && status.left > 0 ? `\n\n${T().freeLeft.replace('{n}', String(status.left))}` : '';
+    reply(T().askDetails + leftNote, viaVoice);
+  };
+
+  // after "sign in first": watch for the login to finish, then pick the request up again
+  useEffect(() => {
+    if (!waitingLogin) return;
+    const startedAt = Date.now();
+    const id = window.setInterval(() => {
+      if (Date.now() - startedAt > 15 * 60 * 1000) { setWaitingLogin(false); return; }
+      if (getAuth().token) {
+        setWaitingLogin(false);
+        setOpen(true);
+        window.setTimeout(() => {
+          reply(T().loggedIn, lastViaVoiceRef.current);
+          startWebsiteFlow(lastViaVoiceRef.current);
+        }, 600);
+      }
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [waitingLogin]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const sendMessage = async (text?: string, viaVoice = false) => {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
     setInput('');
     stopSpeaking();
+    replyLangRef.current = /[\u0600-\u06FF]/.test(msg) ? 'ar' : /[a-z]/i.test(msg) ? 'en' : (langRef.current === 'ar' ? 'ar' : 'en');
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: msg, time: formatTime(langRef.current), voice: viaVoice }]);
 
     // waiting for the business details of a website
@@ -722,23 +777,11 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
 
     const intent = detectIntent(msg);
     if (intent === 'website') {
-      const { token } = getAuth();
-      if (!token) { reply(t.needLogin, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
-      setLoading(true);
-      const status = await fetchFreeSites(token);
-      setLoading(false);
-      if (status === 'auth') { reply(t.sessionExpired, viaVoice, { actions: [{ label: t.loginBtn, type: 'auth' }] }); return; }
-      if (status && status.left <= 0 && status.balance < status.cost) {
-        reply(t.quotaReached, viaVoice, { actions: [{ label: t.plansBtn, type: 'pricing' }] });
-        return;
-      }
-      pendingRef.current = 'details';
-      const leftNote = status && status.left > 0 ? `\n\n${t.freeLeft.replace('{n}', String(status.left))}` : '';
-      reply(t.askDetails + leftNote, viaVoice);
+      startWebsiteFlow(viaVoice);
       return;
     }
     if (intent) {
-      reply(t.opening[intent], viaVoice);
+      reply(T().opening[intent], viaVoice);
       window.setTimeout(() => { runAction(intent); closeOnMobile(); }, 1000);
       return;
     }
