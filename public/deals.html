@@ -94,13 +94,13 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
     QUEUED: ['بالدور (حد يومي)', 'b-wait'], CONTACTED: ['انبعت إيميل', 'b-talk'], WHATSAPP_SENT: ['انبعت واتساب', 'b-talk'],
     NEGOTIATING: ['بتفاوض', 'b-talk'], CONTRACT_SENT: ['انبعت العقد', 'b-talk'], NEEDS_OWNER: ['بدها إياك', 'b-talk'],
     PAID: ['دفعت 💰', 'b-win'], WON: ['صفقة ناجحة', 'b-win'], LOST: ['رفضت', 'b-lost'], OPTED_OUT: ['طلبت ما نتواصل', 'b-lost'],
-    NO_REPLY: ['ما ردّت', 'b-lost'], ARCHIVED: ['مؤرشفة', 'b-wait'], DEMO_FAILED: ['فشل الموقع التجريبي', 'b-lost'], SEND_FAILED: ['فشل الإرسال', 'b-lost']
+    NO_REPLY: ['ما ردّت', 'b-lost'], ARCHIVED: ['مؤرشفة', 'b-wait'], BUILDING: ['بنبني الموقع الحقيقي ⏳', 'b-talk'], DELIVERED: ['تم التسليم ✅', 'b-win'], DEMO_FAILED: ['فشل الموقع التجريبي', 'b-lost'], SEND_FAILED: ['فشل الإرسال', 'b-lost']
   };
   var GROUPS = {
     all: ['الكل', null],
     todo: ['بدها تواصل', ['NO_EMAIL', 'DEMO_READY', 'NEEDS_OWNER', 'SEND_FAILED']],
-    talk: ['شغّالين معها', ['CONTACTED', 'WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'QUEUED']],
-    won: ['دفعت / ناجحة', ['PAID', 'WON']],
+    talk: ['شغّالين معها', ['CONTACTED', 'WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'QUEUED', 'BUILDING']],
+    won: ['دفعت / ناجحة', ['PAID', 'WON', 'DELIVERED']],
     stuck: ['علقت', ['FOUND', 'DEMO_FAILED', 'SEND_FAILED']],
     lost: ['مسكّرة', ['LOST', 'OPTED_OUT', 'NO_REPLY', 'ARCHIVED']]
   };
@@ -188,6 +188,8 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
       (d.price ? '<div><span class="k">💵</span><span>$' + esc(d.price) + (d.paidAmount ? ' — مدفوع $' + esc(d.paidAmount) : '') + '</span></div>' : '') +
       '</div>' +
       '<div class="acts">' +
+      (d.finalUrl ? '<a class="btn primary sm" target="_blank" rel="noopener" href="' + esc(d.finalUrl) + '">✅ الموقع النهائي</a>' : '') +
+      (['PAID', 'DELIVERED', 'BUILDING'].indexOf(d.status) >= 0 ? '<button class="btn primary sm" data-act="build">' + (d.status === 'DELIVERED' ? '🔁 أعد بناء الموقع' : '🚀 ابنِ الموقع الحقيقي') + '</button>' : '') +
       (['FOUND', 'DEMO_FAILED', 'SEND_FAILED'].indexOf(d.status) >= 0 ? '<button class="btn primary sm" data-act="resume">▶️ كمّل</button>' : '') +
       (d.whatsappUrl ? '<a class="btn wa sm" target="_blank" rel="noopener" href="' + esc(d.whatsappUrl) + '" data-wa="1">💬 واتساب</a>' : '') +
       (d.demoUrl ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(d.demoUrl) + '">🌐 الموقع التجريبي</a>' : '') +
@@ -220,6 +222,15 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
     if (t.dataset.wa) {
       var d = state.deals.filter(function (x) { return x.id === id; })[0];
       if (d && ['NO_EMAIL', 'DEMO_READY', 'FOUND'].indexOf(d.status) >= 0) setTimeout(function () { patch(id, { status: 'WHATSAPP_SENT' }, 'انحفظت: انبعت واتساب'); }, 400);
+      return;
+    }
+    if (t.dataset.act === 'build') {
+      if (!confirm('أبني الموقع الحقيقي هلأ من محتوى الزبون وملاحظاتك؟')) return;
+      t.disabled = true; t.textContent = '⏳ بنبني…';
+      api('/prospects/deals/' + encodeURIComponent(id) + '/build', { method: 'POST', body: '{}' }).then(function (r) {
+        toast(r.started ? 'بلّش البناء — الرابط بيوصلك على تليجرام خلال 5 دقايق' : (r.reason || 'تمام'));
+        setTimeout(function () { load(true); }, 1500);
+      }).catch(function () { toast('ما زبط — جرّب كمان مرة'); t.disabled = false; });
       return;
     }
     if (t.dataset.act === 'resume') {
