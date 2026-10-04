@@ -53,7 +53,9 @@ function detectIntent(text: string): Intent {
   const hunting = has('دور', 'دوّر', 'ابحث', 'إبحث', 'فتش', 'لاقي', 'لاقيلي', 'جيبلي', 'find', 'search', 'look for', 'hunt');
   const targets = has('شركات', 'شركة', 'مطاعم', 'مطعم', 'عيادات', 'عيادة', 'محلات', 'صالونات', 'بزنس', 'business', 'compan', 'restaurant', 'clinic', 'shop', 'store', 'salon');
   const noSite = has('ما عند', 'ماعند', 'مش عند', 'مو عند', 'بدون', 'ليس لديها', 'ليس لها', 'لا تملك', 'without', 'no website', "don't have", "doesn't have", 'no site', 'no app');
-  if (hunting && targets && noSite) return 'prospects';
+  // ELYVORI-PROSPECTS-ANY: any business type - 'search for ... that have no website/app'
+  const siteWord = has('موقع', 'مواقع', 'ويب', 'تطبيق', 'website', 'site', 'web', ' app');
+  if (hunting && noSite && (targets || siteWord)) return 'prospects';
   // ELYVORI-DIGITAL-STEMS: any form of منتج + رقمي (منتجاً رقمياً، منتجات رقمية، ...)
   if (/منت[جچ]/.test(s) && /رقم[يىا]/.test(s)) return 'digital';
   if (has('منتج رقمي', 'منتج رقمى', 'منتجات رقمية', 'منتجات رقميه', 'منتج ديجيتال', 'كتاب الكتروني', 'كتاب إلكتروني', 'كتاب تلوين',
