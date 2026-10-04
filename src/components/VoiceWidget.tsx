@@ -20,7 +20,7 @@ interface Message {
 
 // actions the assistant can trigger on the page (handled in App.tsx)
 type AssistantAction = 'digital' | 'auth' | 'career' | 'contract' | 'support' | 'negotiation' | 'tracker' | 'pricing';
-type Intent = 'digital' | 'prospects' | 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
+type Intent = 'app' | 'digital' | 'prospects' | 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
 
 const FREE_SITE_LIMIT = 3; // shown in texts - the real limit is enforced by the API
 const BUILD_TIMEOUT_MS = 6 * 60 * 1000;
@@ -56,6 +56,10 @@ function detectIntent(text: string): Intent {
   // ELYVORI-PROSPECTS-ANY: any business type - 'search for ... that have no website/app'
   const siteWord = has('موقع', 'مواقع', 'ويب', 'تطبيق', 'website', 'site', 'web', ' app');
   if (hunting && noSite && (targets || siteWord)) return 'prospects';
+  // ELYVORI-APP-BUILDER: a real mobile app (Flutter) - not a web app
+  const appWord = has('تطبيق', 'تطبيقات', 'ابلكيشن', 'أبلكيشن', 'flutter', 'فلاتر', 'mobile app', 'android app', 'ios app', 'apk', ' app ', ' app.', ' app,', ' an app', ' app?');
+  const webApp = has('web app', 'webapp', 'تطبيق ويب');
+  if (appWord && !webApp && (wantsToMake || has('flutter', 'فلاتر', 'apk'))) return 'app';
   // ELYVORI-DIGITAL-STEMS: any form of منتج + رقمي (منتجاً رقمياً، منتجات رقمية، ...)
   if (/منت[جچ]/.test(s) && /رقم[يىا]/.test(s)) return 'digital';
   if (has('منتج رقمي', 'منتج رقمى', 'منتجات رقمية', 'منتجات رقميه', 'منتج ديجيتال', 'كتاب الكتروني', 'كتاب إلكتروني', 'كتاب تلوين',
@@ -152,6 +156,20 @@ const TEXT = {
     trackBtn: 'Track Project',
     buildQueued: "Your website has been built ✅ — I'm finishing the public link. You can follow it in Track Project and we'll email you the link.",
     buildFailed: "I couldn't finish the build this time. Please try again in a minute — or tap Track Project.",
+    appAsk: "Let's build your mobile app 📱✨\n\nTell me in one message:\n• **App name**\n• **What it does** and its main sections (e.g. bookings, products, orders, customers, notes…)\n\nExample: GymPro — an app for my gym: members, subscriptions, classes and payments.",
+    appStart: 'Building it now ⚙️ — Elyvori agents are designing the screens and writing a complete Flutter app (Clean Architecture, offline mode, live updates, tests). About 1–2 minutes.',
+    appSteps: ['Understanding your app', 'Designing the modules', 'Writing the Flutter code', 'Adding tests + CI', 'Publishing the source code'],
+    appDone: '✅ **{name}** is ready!\n\nSections: {modules}\nFiles: **{files}** — Riverpod, GoRouter, offline sync, realtime, tests.\n\n{apk}',
+    appApkBuilding: '📲 The Android **APK** is being built now — the download link arrives on your **email and Telegram** in about 10–15 minutes.',
+    appApkOff: 'ℹ️ The APK builder is not switched on yet — you can download the source code now.',
+    appRepo: '💻 Source code',
+    appZip: '⬇️ Download ZIP',
+    appCi: '🧪 Tests (CI)',
+    appFailed: "Couldn't finish the app this time 😕 — {err}",
+    appLimit: 'You reached the limit of 3 apps per hour ⏳ — try again a bit later.',
+    appTooShort: 'Tell me a little more about the app — its name and the main sections it needs 🙏',
+    appNeedLogin: 'Sure! To build your app, please sign in first — it takes 10 seconds. Then I will build it right away 📱',
+    appLoggedIn: "You're signed in ✅ — let's build your app!",
     huntStart: "On it 🕵️ — the Elyvori agents are searching for businesses without a website, then I'll build the best match a free demo. This takes about 3–5 minutes.",
     huntSteps: ['Searching the market', 'Checking who has no website', 'Building a free demo site', 'Writing the outreach message'],
     huntFound: '🎯 Found **{name}**{why}\n\nFree demo: {url}\n\n**Ready-to-send message:**\n{msg}',
@@ -217,6 +235,20 @@ const TEXT = {
     trackBtn: 'تتبع مشروعك',
     buildQueued: 'موقعك انبنى ✅ — بجهّز الرابط العام. بتقدر تتابعه من "تتبع مشروعك" وبنبعثلك الرابط على الإيميل.',
     buildFailed: 'ما قدرت أكمّل البناء هالمرة. جرّب كمان دقيقة — أو افتح تتبع المشروع.',
+    appAsk: 'يلا نبني تطبيقك 📱✨\n\nاكتبلي برسالة وحدة:\n• **اسم التطبيق**\n• **شو بيعمل** وأهم أقسامه (حجوزات، منتجات، طلبات، زباين، ملاحظات…)\n\nمثال: جيم برو — تطبيق للنادي تبعي: الأعضاء، الاشتراكات، الحصص والدفعات.',
+    appStart: 'بلّشت ⚙️ — وكلاء إليفوري بيصمموا الشاشات وبيكتبوا تطبيق Flutter كامل (Clean Architecture، شغل بدون نت، تحديثات لحظية، اختبارات). تقريباً دقيقة لدقيقتين.',
+    appSteps: ['بفهم فكرة التطبيق', 'بصمم الأقسام', 'بكتب كود Flutter', 'بضيف الاختبارات و CI', 'بنشر الكود'],
+    appDone: '✅ تطبيق **{name}** جاهز!\n\nالأقسام: {modules}\nعدد الملفات: **{files}** — Riverpod، GoRouter، مزامنة بدون نت، تحديثات لحظية، اختبارات.\n\n{apk}',
+    appApkBuilding: '📲 ملف **APK** للأندرويد عم ينبنى هلأ — رابط التحميل بيوصلك على **الإيميل وتليجرام** خلال 10–15 دقيقة تقريباً.',
+    appApkOff: 'ℹ️ بناء ملف APK مش مفعّل لسا — بتقدر تنزّل الكود هلأ.',
+    appRepo: '💻 الكود المصدري',
+    appZip: '⬇️ تحميل ZIP',
+    appCi: '🧪 الاختبارات (CI)',
+    appFailed: 'ما قدرت أكمّل التطبيق هالمرة 😕 — {err}',
+    appLimit: 'وصلت للحد: 3 تطبيقات بالساعة ⏳ — جرّب كمان شوي.',
+    appTooShort: 'احكيلي أكتر عن التطبيق — اسمه وأهم الأقسام اللي بدك ياها 🙏',
+    appNeedLogin: 'أكيد! عشان أبني تطبيقك لازم تسجّل دخول أولاً — بتاخذ ١٠ ثواني، وبعدها ببلّش فوراً 📱',
+    appLoggedIn: 'تمام، سجّلت دخولك ✅ — يلا نبني تطبيقك!',
     huntStart: 'حاضر 🕵️ — وكلاء إليفوري بيدوروا هلأ على شركات ما عندها مواقع، وبعدين ببني لأفضل وحدة موقع تجريبي مجاني. بياخد تقريباً 3–5 دقايق.',
     huntSteps: ['البحث بالسوق', 'التأكد مين ما عنده موقع', 'بناء موقع تجريبي مجاني', 'كتابة رسالة التواصل'],
     huntFound: '🎯 لقيت **{name}**{why}\n\nالموقع التجريبي: {url}\n\n**الرسالة جاهزة للإرسال:**\n{msg}',
@@ -676,11 +708,12 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const addAi = (text: string) =>
     setMessages(prev => [...prev, { id: Date.now() + Math.random(), role: 'ai', text, time: formatTime(langRef.current) }]);
 
-  const pendingRef = useRef<'details' | null>(null);
+  const pendingRef = useRef<'details' | 'app' | null>(null);
   // reply in the language the visitor actually writes/speaks, not only the site language
   const replyLangRef = useRef<'ar' | 'en'>(isAr ? 'ar' : 'en');
   const T = () => TEXT[replyLangRef.current];
   const [waitingLogin, setWaitingLogin] = useState(false);
+  const resumeWhatRef = useRef<'website' | 'app'>('website');
   const lastViaVoiceRef = useRef(false);
 
   // on phones the chat covers the page: after opening a page/modal, step aside so it is visible
@@ -849,6 +882,91 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
   };
 
+  // ELYVORI-APP-BUILDER: build a complete Flutter app on the server
+  const appNameFrom = (text: string): string => {
+    const t = text.trim();
+    const named = t.match(/(?:اسمه|اسمو|إسمه|بإسم|باسم|called|named)\s*[:"'«]?\s*([^\n,.،:"'»—-]{2,40})/i);
+    if (named) return named[1].trim();
+    const head = t.split(/\n|—| - |:|،|,/)[0].trim();
+    if (head && head.length <= 32 && head.split(/\s+/).length <= 4) return head;
+    return '';
+  };
+
+  const buildApp = async (details: string, viaVoice: boolean) => {
+    const { token } = getAuth();
+    if (!token) { reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return; }
+    if (details.replace(/\s+/g, ' ').trim().length < 12) { pendingRef.current = 'app'; reply(T().appTooShort, viaVoice); return; }
+
+    reply(T().appStart, viaVoice);
+    const progId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: progId, role: 'ai', text: '', time: formatTime(langRef.current), progress: { steps: T().appSteps, current: 0 } }]);
+    const setProg = (p: Partial<NonNullable<Message['progress']>>) =>
+      setMessages(prev => prev.map(m => (m.id === progId && m.progress ? { ...m, progress: { ...m.progress, ...p } } : m)));
+    let step = 0;
+    const ticker = window.setInterval(() => { step = Math.min(step + 1, T().appSteps.length - 1); setProg({ current: step }); }, 12000);
+    const ctrl = new AbortController();
+    const timeout = window.setTimeout(() => ctrl.abort(), 5 * 60 * 1000);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/flutter-agent/generate`, {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ appName: appNameFrom(details), description: details }),
+      });
+      if (res.status === 401 || res.status === 403) {
+        setProg({ failed: true });
+        reply(T().sessionExpired, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
+        return;
+      }
+      if (res.status === 429) { setProg({ failed: true }); reply(T().appLimit, viaVoice); return; }
+      const d = (await res.json().catch(() => ({}))) as any;
+      if (!res.ok || !d?.success || !isPublicUrl(d.repoUrl)) {
+        setProg({ failed: true });
+        reply(T().appFailed.replace('{err}', String(d?.error || d?.message || res.status).slice(0, 160)), viaVoice);
+        return;
+      }
+      setProg({ current: T().appSteps.length - 1, done: true });
+      const modules = Array.isArray(d.modules) && d.modules.length
+        ? d.modules.map((m: any) => `**${String(m?.title || m?.key || m)}**`).join('، ')
+        : '—';
+      const text = T().appDone
+        .replace('{name}', String(d.appName || 'App'))
+        .replace('{modules}', modules)
+        .replace('{files}', String(d.fileCount || ''))
+        .replace('{apk}', d.apkStatus === 'building' ? T().appApkBuilding : T().appApkOff);
+      const actions: MsgAction[] = [{ label: T().appRepo, url: d.repoUrl }];
+      if (isPublicUrl(d.zipUrl)) actions.push({ label: T().appZip, url: d.zipUrl });
+      if (isPublicUrl(d.ciUrl)) actions.push({ label: T().appCi, url: d.ciUrl });
+      reply(text, false, { actions });
+      if (viaVoice && speakOnRef.current) speak(T().appDone.split('\n')[0].replace('{name}', String(d.appName || '')));
+    } catch {
+      setProg({ failed: true });
+      reply(T().appFailed.replace('{err}', replyLangRef.current === 'ar' ? 'السيرفر ما رد بالوقت' : 'the server did not answer in time'), viaVoice);
+    } finally {
+      window.clearInterval(ticker);
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
+  };
+
+  const startAppFlow = (request: string, viaVoice: boolean) => {
+    const { token } = getAuth();
+    if (!token) {
+      reply(T().appNeedLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
+      lastViaVoiceRef.current = viaVoice;
+      resumeWhatRef.current = 'app';
+      setWaitingLogin(true);
+      try { sessionStorage.setItem('elyvori_resume', JSON.stringify({ what: 'app', lang: replyLangRef.current, at: Date.now() })); } catch { /* ignore */ }
+      return;
+    }
+    // a detailed request ("build me an app called X for my clinic: bookings, patients...") goes straight to the builder
+    const words = request.trim().split(/\s+/).length;
+    if (words >= 9) { buildApp(request, viaVoice); return; }
+    pendingRef.current = 'app';
+    reply(T().appAsk, viaVoice);
+  };
+
   const startWebsiteFlow = async (viaVoice: boolean) => {
     const { token } = getAuth();
     if (!token) {
@@ -888,7 +1006,10 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       sessionStorage.removeItem('elyvori_resume');
       replyLangRef.current = r.lang === 'ar' ? 'ar' : 'en';
       setOpen(true);
-      window.setTimeout(() => { reply(T().loggedIn, false); startWebsiteFlow(false); }, 700);
+      window.setTimeout(() => {
+        if (r.what === 'app') { reply(T().appLoggedIn, false); pendingRef.current = 'app'; reply(T().appAsk, false); }
+        else { reply(T().loggedIn, false); startWebsiteFlow(false); }
+      }, 700);
     } catch { /* ignore */ }
   }, [isOwner]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -903,8 +1024,8 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         try { sessionStorage.removeItem('elyvori_resume'); } catch { /* ignore */ }
         setOpen(true);
         window.setTimeout(() => {
-          reply(T().loggedIn, lastViaVoiceRef.current);
-          startWebsiteFlow(lastViaVoiceRef.current);
+          if (resumeWhatRef.current === 'app') { resumeWhatRef.current = 'website'; reply(T().appLoggedIn, lastViaVoiceRef.current); pendingRef.current = 'app'; reply(T().appAsk, lastViaVoiceRef.current); }
+          else { reply(T().loggedIn, lastViaVoiceRef.current); startWebsiteFlow(lastViaVoiceRef.current); }
         }, 600);
       }
     }, 1000);
@@ -920,6 +1041,11 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: msg, time: formatTime(langRef.current), voice: viaVoice }]);
 
     // waiting for the business details of a website
+    if (pendingRef.current === 'app') {
+      pendingRef.current = null;
+      buildApp(msg, viaVoice);
+      return;
+    }
     if (pendingRef.current === 'details') {
       pendingRef.current = null;
       buildWebsite(msg, viaVoice);
@@ -933,6 +1059,10 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       return;
     }
     const intent = detectIntent(msg);
+    if (intent === 'app') {
+      startAppFlow(msg, viaVoice);
+      return;
+    }
     if (intent === 'prospects') {
       huntProspects(msg, viaVoice);
       return;
