@@ -165,6 +165,8 @@ const TEXT = {
     appApkBuilding: '📲 The Android **APK** is being built now — the download link arrives on your **email and Telegram** in about 10–15 minutes.',
     appApkOff: 'ℹ️ The APK builder is not switched on yet — you can download the source code now.',
     appRepo: '💻 Source code',
+    appPreview: '🌐 Preview in Chrome',
+    appPreviewNote: '🌐 A live **preview in Chrome** will be ready in about 8–10 minutes (after the tests pass) — open it from the button below.',
     appZip: '⬇️ Download ZIP',
     appCi: '🧪 Tests (CI)',
     appFailed: "Couldn't finish the app this time 😕 — {err}",
@@ -244,6 +246,8 @@ const TEXT = {
     appApkBuilding: '📲 ملف **APK** للأندرويد عم ينبنى هلأ — رابط التحميل بيوصلك على **الإيميل وتليجرام** خلال 10–15 دقيقة تقريباً.',
     appApkOff: 'ℹ️ بناء ملف APK مش مفعّل لسا — بتقدر تنزّل الكود هلأ.',
     appRepo: '💻 الكود المصدري',
+    appPreview: '🌐 جرّبه بالمتصفح',
+    appPreviewNote: '🌐 نسخة **تجربة بالمتصفح** بتكون جاهزة خلال 8–10 دقايق تقريباً (بعد ما تنجح الاختبارات) — افتحها من الزر تحت.',
     appZip: '⬇️ تحميل ZIP',
     appCi: '🧪 الاختبارات (CI)',
     appFailed: 'ما قدرت أكمّل التطبيق هالمرة 😕 — {err}',
@@ -939,8 +943,12 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         .replace('{name}', String(d.appName || 'App'))
         .replace('{modules}', modules)
         .replace('{files}', String(d.fileCount || ''))
-        .replace('{apk}', d.apkStatus === 'building' ? T().appApkBuilding : T().appApkOff);
-      const actions: MsgAction[] = [{ label: T().appRepo, url: d.repoUrl }];
+        .replace('{apk}', d.apkStatus === 'building' ? T().appApkBuilding : T().appApkOff)
+        // ELYVORI-WEB-PREVIEW
+        + (isPublicUrl(d.previewUrl) ? `\n\n${T().appPreviewNote}` : '');
+      const actions: MsgAction[] = [];
+      if (isPublicUrl(d.previewUrl)) actions.push({ label: T().appPreview, url: d.previewUrl });
+      actions.push({ label: T().appRepo, url: d.repoUrl });
       if (isPublicUrl(d.zipUrl)) actions.push({ label: T().appZip, url: d.zipUrl });
       if (isPublicUrl(d.ciUrl)) actions.push({ label: T().appCi, url: d.ciUrl });
       reply(text, false, { actions });
