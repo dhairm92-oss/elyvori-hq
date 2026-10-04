@@ -3,6 +3,7 @@ import { Language } from '../types';
 
 interface MsgAction {
   label: string;
+  copy?: string;
   type?: AssistantAction;
   url?: string;
 }
@@ -19,7 +20,7 @@ interface Message {
 
 // actions the assistant can trigger on the page (handled in App.tsx)
 type AssistantAction = 'auth' | 'career' | 'contract' | 'support' | 'negotiation' | 'tracker' | 'pricing';
-type Intent = 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
+type Intent = 'prospects' | 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
 
 const FREE_SITE_LIMIT = 3; // shown in texts - the real limit is enforced by the API
 const BUILD_TIMEOUT_MS = 6 * 60 * 1000;
@@ -34,6 +35,11 @@ function detectIntent(text: string): Intent {
   const has = (...w: string[]) => w.some(x => s.includes(x));
   const wantsToMake = has('اعمل', 'إعمل', 'ابن', 'إبن', 'بدي', 'بدّي', 'أريد', 'اريد', 'صمم', 'صمّم', 'أنشئ', 'انشئ', 'جهز', 'جهّز',
     'build', 'make', 'create', 'need', 'want', 'design', 'set up', 'launch');
+  // ELYVORI-PROSPECTS: find businesses without a website and pitch them a free demo
+  const hunting = has('دور', 'دوّر', 'ابحث', 'إبحث', 'فتش', 'لاقي', 'لاقيلي', 'جيبلي', 'find', 'search', 'look for', 'hunt');
+  const targets = has('شركات', 'شركة', 'مطاعم', 'مطعم', 'عيادات', 'عيادة', 'محلات', 'صالونات', 'بزنس', 'business', 'compan', 'restaurant', 'clinic', 'shop', 'store', 'salon');
+  const noSite = has('ما عند', 'ماعند', 'مش عند', 'مو عند', 'بدون', 'ليس لديها', 'ليس لها', 'لا تملك', 'without', 'no website', "don't have", "doesn't have", 'no site', 'no app');
+  if (hunting && targets && noSite) return 'prospects';
   if (has('عقد', 'عقود', 'contract', 'legal', 'قانوني', 'اتفاقية', 'agreement')) return 'contract';
   if (has('وظيف', 'شغل', 'job', 'career', ' cv', 'resume', 'سيرة ذاتية', 'سيرتي')) return 'career';
   if (has('دعم العملاء', 'خدمة العملاء', 'customer support', 'شكوى', 'complaint')) return 'support';
@@ -126,6 +132,18 @@ const TEXT = {
     trackBtn: 'Track Project',
     buildQueued: "Your website has been built ✅ — I'm finishing the public link. You can follow it in Track Project and we'll email you the link.",
     buildFailed: "I couldn't finish the build this time. Please try again in a minute — or tap Track Project.",
+    huntStart: "On it 🕵️ — the Elyvori agents are searching for businesses without a website, then I'll build the best match a free demo. This takes about 3–5 minutes.",
+    huntSteps: ['Searching the market', 'Checking who has no website', 'Building a free demo site', 'Writing the outreach message'],
+    huntFound: '🎯 Found **{name}**{why}\n\nFree demo: {url}\n\n**Ready-to-send message:**\n{msg}',
+    huntOthers: '\n\nI also found: {list}. Ask me again to build the next one.',
+    huntNoEmail: '\n\n⚠️ No public email was found — send it on their Instagram/WhatsApp/Google Maps page.',
+    huntNone: "I searched but couldn't confirm a business without a website this time. Try a city or type, e.g. \"clinics in Riyadh without a website\".",
+    huntNoDemo: 'I found **{name}** but couldn’t finish the demo site this time. Try again in a minute.',
+    huntNotAllowed: 'This tool is only available to the Elyvori team.',
+    huntOpenDemo: 'Open demo',
+    huntCopy: 'Copy message',
+    huntEmail: 'Email them',
+    copied: 'Copied ✅',
     sessionExpired: 'Your session has expired — please sign in again and I will continue.',
     opening: {
       contract: "Sure — opening the **Contract Analyzer** for you now. Upload your contract and I'll flag the risks.",
@@ -177,6 +195,18 @@ const TEXT = {
     trackBtn: 'تتبع مشروعك',
     buildQueued: 'موقعك انبنى ✅ — بجهّز الرابط العام. بتقدر تتابعه من "تتبع مشروعك" وبنبعثلك الرابط على الإيميل.',
     buildFailed: 'ما قدرت أكمّل البناء هالمرة. جرّب كمان دقيقة — أو افتح تتبع المشروع.',
+    huntStart: 'حاضر 🕵️ — وكلاء إليفوري بيدوروا هلأ على شركات ما عندها مواقع، وبعدين ببني لأفضل وحدة موقع تجريبي مجاني. بياخد تقريباً 3–5 دقايق.',
+    huntSteps: ['البحث بالسوق', 'التأكد مين ما عنده موقع', 'بناء موقع تجريبي مجاني', 'كتابة رسالة التواصل'],
+    huntFound: '🎯 لقيت **{name}**{why}\n\nالموقع التجريبي: {url}\n\n**الرسالة جاهزة للإرسال:**\n{msg}',
+    huntOthers: '\n\nولقيت كمان: {list}. اطلب مني مرة ثانية وببني للي بعدها.',
+    huntNoEmail: '\n\n⚠️ ما لقيت إيميل عام إلهم — ابعتها على انستغرام أو واتساب أو صفحتهم على خرائط جوجل.',
+    huntNone: 'دورت بس ما قدرت أتأكد من شركة ما عندها موقع هالمرة. جرّب تحدد مدينة أو نوع، مثلاً "عيادات في الرياض ما عندها موقع".',
+    huntNoDemo: 'لقيت **{name}** بس ما قدرت أكمّل الموقع التجريبي هالمرة. جرّب كمان دقيقة.',
+    huntNotAllowed: 'هالأداة متاحة لفريق إليفوري بس.',
+    huntOpenDemo: 'افتح الموقع التجريبي',
+    huntCopy: 'انسخ الرسالة',
+    huntEmail: 'ابعتلهم إيميل',
+    copied: 'تم النسخ ✅',
     sessionExpired: 'انتهت جلستك — سجّل دخول مرة ثانية وبكمّل معك.',
     opening: {
       contract: 'أكيد — بفتحلك **محلل العقود** هلأ. ارفع العقد وبطلعلك المخاطر.',
@@ -717,6 +747,72 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
   };
 
+  // ELYVORI-PROSPECTS: run the prospect-hunter agent on the server
+  const huntProspects = async (request: string, viaVoice: boolean) => {
+    const { token } = getAuth();
+    if (!token) { reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return; }
+
+    reply(T().huntStart, viaVoice);
+    const progId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: progId, role: 'ai', text: '', time: formatTime(langRef.current), progress: { steps: T().huntSteps, current: 0 } }]);
+    const setProg = (p: Partial<NonNullable<Message['progress']>>) =>
+      setMessages(prev => prev.map(m => (m.id === progId && m.progress ? { ...m, progress: { ...m.progress, ...p } } : m)));
+    let step = 0;
+    const ticker = window.setInterval(() => { step = Math.min(step + 1, T().huntSteps.length - 1); setProg({ current: step }); }, 45000);
+    const ctrl = new AbortController();
+    const timeout = window.setTimeout(() => ctrl.abort(), 10 * 60 * 1000);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/orchestrator/command`, {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ intent: 'find_and_pitch_local_prospects', text: request }),
+      });
+      if (res.status === 401 || res.status === 403) {
+        setProg({ failed: true });
+        reply(T().sessionExpired, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] });
+        return;
+      }
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as any;
+      const d = data?.data || {};
+      if (d.notAllowed) { setProg({ failed: true }); reply(T().huntNotAllowed, viaVoice); return; }
+      if (d.creditsExhausted) { setProg({ failed: true }); reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] }); return; }
+      const businesses: any[] = Array.isArray(d.businesses) ? d.businesses : [];
+      if (!businesses.length) { setProg({ failed: true }); reply(T().huntNone, viaVoice); return; }
+      const target = d.target || businesses[0];
+      const name = String(target?.businessName || '');
+      if (!isPublicUrl(d.demoUrl)) { setProg({ failed: true }); reply(T().huntNoDemo.replace('{name}', name), viaVoice); return; }
+
+      setProg({ current: T().huntSteps.length - 1, done: true });
+      const outreach = String(d.outreachDraft || '');
+      const why = target?.evidence ? ` — ${target.evidence}` : '';
+      let text = T().huntFound.replace('{name}', name).replace('{why}', why).replace('{url}', d.demoUrl).replace('{msg}', outreach);
+      const others = businesses.slice(1).map((b: any) => b?.businessName).filter(Boolean);
+      if (others.length) text += T().huntOthers.replace('{list}', others.join('، '));
+      const email = target?.contactEmail ? String(target.contactEmail) : '';
+      if (!email) text += T().huntNoEmail;
+      const actions: MsgAction[] = [
+        { label: T().huntOpenDemo, url: d.demoUrl },
+        { label: T().huntCopy, copy: outreach },
+      ];
+      if (email) {
+        const subject = replyLangRef.current === 'ar' ? `موقع تجريبي مجاني لـ ${name}` : `A free website demo for ${name}`;
+        actions.push({ label: T().huntEmail, url: `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(outreach)}` });
+      }
+      reply(text, false, { actions });
+      if (viaVoice && speakOnRef.current) speak(T().huntFound.split('\n')[0].replace('{name}', name).replace('{why}', ''));
+    } catch {
+      setProg({ failed: true });
+      reply(T().buildFailed, viaVoice);
+    } finally {
+      window.clearInterval(ticker);
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
+  };
+
   const startWebsiteFlow = async (viaVoice: boolean) => {
     const { token } = getAuth();
     if (!token) {
@@ -795,6 +891,10 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
 
     const intent = detectIntent(msg);
+    if (intent === 'prospects') {
+      huntProspects(msg, viaVoice);
+      return;
+    }
     if (intent === 'website') {
       startWebsiteFlow(viaVoice);
       return;
@@ -808,6 +908,11 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   };
 
   const onActionClick = (a: MsgAction) => {
+    if (a.copy !== undefined) {
+      const done = () => reply(T().copied, false);
+      try { navigator.clipboard.writeText(a.copy).then(done, done); } catch { done(); }
+      return;
+    }
     if (a.url) { window.open(a.url, '_blank', 'noopener'); return; }
     if (a.type) { runAction(a.type); closeOnMobile(); }
   };
