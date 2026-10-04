@@ -886,9 +886,12 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
 
   // ELYVORI-APP-BUILDER: build a complete Flutter app on the server
   const appNameFrom = (text: string): string => {
-    const t = text.trim();
+    // ELYVORI-APP-NAME: drop the request words before the name
+    const t = text.trim()
+      .replace(/^(?:(?:ا|إ)?عمل(?:ي|لي| لي)?|ابن(?:ي|يلي)?|بدي|أريد|اريد|صمم(?:لي)?|جهز(?:لي)?|build(?: me)?|make(?: me)?|create(?: me)?|i want|i need)\s+/i, '')
+      .replace(/^(?:(?:لي|إلي|الي)\s+)?(?:an?\s+)?(?:تطبيق|تطبيقًا|تطبيقا|ابلكيشن|أبلكيشن|(?:mobile |android |flutter )?app)\s*(?:موبايل|جوال|اندرويد|أندرويد)?\s*(?:called|named|اسمه|اسمو|باسم|بإسم)?\s*/i, '');
     const named = t.match(/(?:اسمه|اسمو|إسمه|بإسم|باسم|called|named)\s*[:"'«]?\s*([^\n,.،:"'»—-]{2,40})/i);
-    if (named) return named[1].trim();
+    if (named) return named[1].replace(/\s+(?:لل|for\s).*$/i, '').trim();
     const head = t.split(/\n|—| - |:|،|,/)[0].trim();
     if (head && head.length <= 32 && head.split(/\s+/).length <= 4) return head;
     return '';
