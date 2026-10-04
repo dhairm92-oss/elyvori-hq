@@ -94,16 +94,17 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
     QUEUED: ['بالدور (حد يومي)', 'b-wait'], CONTACTED: ['انبعت إيميل', 'b-talk'], WHATSAPP_SENT: ['انبعت واتساب', 'b-talk'],
     NEGOTIATING: ['بتفاوض', 'b-talk'], CONTRACT_SENT: ['انبعت العقد', 'b-talk'], NEEDS_OWNER: ['بدها إياك', 'b-talk'],
     PAID: ['دفعت 💰', 'b-win'], WON: ['صفقة ناجحة', 'b-win'], LOST: ['رفضت', 'b-lost'], OPTED_OUT: ['طلبت ما نتواصل', 'b-lost'],
-    NO_REPLY: ['ما ردّت', 'b-lost'], DEMO_FAILED: ['فشل الموقع التجريبي', 'b-lost'], SEND_FAILED: ['فشل الإرسال', 'b-lost']
+    NO_REPLY: ['ما ردّت', 'b-lost'], ARCHIVED: ['مؤرشفة', 'b-wait'], DEMO_FAILED: ['فشل الموقع التجريبي', 'b-lost'], SEND_FAILED: ['فشل الإرسال', 'b-lost']
   };
   var GROUPS = {
     all: ['الكل', null],
     todo: ['بدها تواصل', ['NO_EMAIL', 'DEMO_READY', 'NEEDS_OWNER', 'SEND_FAILED']],
     talk: ['شغّالين معها', ['CONTACTED', 'WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'QUEUED']],
     won: ['دفعت / ناجحة', ['PAID', 'WON']],
-    lost: ['مسكّرة', ['LOST', 'OPTED_OUT', 'NO_REPLY', 'DEMO_FAILED']]
+    stuck: ['علقت', ['FOUND', 'DEMO_FAILED', 'SEND_FAILED']],
+    lost: ['مسكّرة', ['LOST', 'OPTED_OUT', 'NO_REPLY', 'ARCHIVED']]
   };
-  var MANUAL = ['WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'PAID', 'WON', 'LOST', 'NO_REPLY', 'NEEDS_OWNER'];
+  var MANUAL = ['WHATSAPP_SENT', 'NEGOTIATING', 'CONTRACT_SENT', 'PAID', 'WON', 'LOST', 'NO_REPLY', 'NEEDS_OWNER', 'ARCHIVED'];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function token() { try { return localStorage.getItem('elyvori_token'); } catch (e) { return null; } }
@@ -187,6 +188,7 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
       (d.price ? '<div><span class="k">💵</span><span>$' + esc(d.price) + (d.paidAmount ? ' — مدفوع $' + esc(d.paidAmount) : '') + '</span></div>' : '') +
       '</div>' +
       '<div class="acts">' +
+      (['FOUND', 'DEMO_FAILED', 'SEND_FAILED'].indexOf(d.status) >= 0 ? '<button class="btn primary sm" data-act="resume">▶️ كمّل</button>' : '') +
       (d.whatsappUrl ? '<a class="btn wa sm" target="_blank" rel="noopener" href="' + esc(d.whatsappUrl) + '" data-wa="1">💬 واتساب</a>' : '') +
       (d.demoUrl ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(d.demoUrl) + '">🌐 الموقع التجريبي</a>' : '') +
       (d.mapsUrl ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(d.mapsUrl) + '">🗺️ الخريطة</a>' : '') +
@@ -218,6 +220,14 @@ summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700}
     if (t.dataset.wa) {
       var d = state.deals.filter(function (x) { return x.id === id; })[0];
       if (d && ['NO_EMAIL', 'DEMO_READY', 'FOUND'].indexOf(d.status) >= 0) setTimeout(function () { patch(id, { status: 'WHATSAPP_SENT' }, 'انحفظت: انبعت واتساب'); }, 400);
+      return;
+    }
+    if (t.dataset.act === 'resume') {
+      t.disabled = true; t.textContent = '⏳ الوكيل شغّال…';
+      api('/prospects/deals/' + encodeURIComponent(id) + '/resume', { method: 'POST', body: '{}' }).then(function (r) {
+        toast(r.started ? 'الوكيل كمّل — بيوصلك تقرير على تليجرام خلال 5 دقايق' : r.outreach ? 'انبعت الإيميل ✅' : (r.reason || 'تمام'));
+        setTimeout(function () { load(true); }, 1500);
+      }).catch(function () { toast('ما زبط — جرّب كمان مرة'); t.disabled = false; t.textContent = '▶️ كمّل'; });
       return;
     }
     if (t.dataset.act === 'saveEmail') {
