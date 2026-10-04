@@ -19,13 +19,27 @@ interface Message {
 }
 
 // actions the assistant can trigger on the page (handled in App.tsx)
-type AssistantAction = 'auth' | 'career' | 'contract' | 'support' | 'negotiation' | 'tracker' | 'pricing';
-type Intent = 'prospects' | 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
+type AssistantAction = 'digital' | 'auth' | 'career' | 'contract' | 'support' | 'negotiation' | 'tracker' | 'pricing';
+type Intent = 'digital' | 'prospects' | 'website' | 'contract' | 'career' | 'support' | 'negotiation' | 'pricing' | 'tracker' | null;
 
 const FREE_SITE_LIMIT = 3; // shown in texts - the real limit is enforced by the API
 const BUILD_TIMEOUT_MS = 6 * 60 * 1000;
 
 function runAction(type: AssistantAction) {
+  // ELYVORI-DIGITAL-INTENT: jump to the "Your Own Digital Product" section
+  if (type === 'digital') {
+    const h = Array.from(document.querySelectorAll('h1, h2, h3')).find(
+      (x) => /60/.test(x.textContent || '') && /digital product|منتج/i.test(x.textContent || ''),
+    );
+    const target = (h?.parentElement?.parentElement?.parentElement as HTMLElement | null) || (h as HTMLElement | null) ||
+      document.getElementById('service-card-digital-products');
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => {
+      const input = target?.querySelector('input') as HTMLInputElement | null;
+      input?.focus({ preventScroll: true });
+    }, 900);
+    return;
+  }
   window.dispatchEvent(new CustomEvent('elyvori:action', { detail: { type } }));
   if (type === 'pricing') document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
 }
@@ -40,6 +54,8 @@ function detectIntent(text: string): Intent {
   const targets = has('شركات', 'شركة', 'مطاعم', 'مطعم', 'عيادات', 'عيادة', 'محلات', 'صالونات', 'بزنس', 'business', 'compan', 'restaurant', 'clinic', 'shop', 'store', 'salon');
   const noSite = has('ما عند', 'ماعند', 'مش عند', 'مو عند', 'بدون', 'ليس لديها', 'ليس لها', 'لا تملك', 'without', 'no website', "don't have", "doesn't have", 'no site', 'no app');
   if (hunting && targets && noSite) return 'prospects';
+  if (has('منتج رقمي', 'منتج رقمى', 'منتجات رقمية', 'منتجات رقميه', 'منتج ديجيتال', 'كتاب الكتروني', 'كتاب إلكتروني', 'كتاب تلوين',
+    'دليل pdf', ' pdf', 'digital product', 'ebook', 'e-book', 'coloring book', 'colouring book')) return 'digital';
   if (has('عقد', 'عقود', 'contract', 'legal', 'قانوني', 'اتفاقية', 'agreement')) return 'contract';
   if (has('وظيف', 'شغل', 'job', 'career', ' cv', 'resume', 'سيرة ذاتية', 'سيرتي')) return 'career';
   if (has('دعم العملاء', 'خدمة العملاء', 'customer support', 'شكوى', 'complaint')) return 'support';
@@ -147,6 +163,7 @@ const TEXT = {
     copied: 'Copied ✅',
     sessionExpired: 'Your session has expired — please sign in again and I will continue.',
     opening: {
+      digital: "Let's make it! ✨ Taking you to **Your Own Digital Product** — write your name, email and pick what you love, and the AI builds it in about a minute.",
       contract: "Sure — opening the **Contract Analyzer** for you now. Upload your contract and I'll flag the risks.",
       career: "Sure — opening the **Career Agent**. Upload your CV and I'll find real jobs that match you.",
       support: 'Opening **Customer Support AI** for you now.',
@@ -211,6 +228,7 @@ const TEXT = {
     copied: 'تم النسخ ✅',
     sessionExpired: 'انتهت جلستك — سجّل دخول مرة ثانية وبكمّل معك.',
     opening: {
+      digital: 'يلا نعمله! ✨ بنقلك هلأ على **منتجك الرقمي الخاص** — اكتب اسمك وإيميلك واختار اللي بتحبه، والذكاء الاصطناعي بيجهزه خلال دقيقة تقريباً.',
       contract: 'أكيد — بفتحلك **محلل العقود** هلأ. ارفع العقد وبطلعلك المخاطر.',
       career: 'أكيد — بفتحلك **وكيل التوظيف**. ارفع سيرتك الذاتية وبلاقيلك وظائف حقيقية بتناسبك.',
       support: 'بفتحلك **دعم العملاء الذكي** هلأ.',
