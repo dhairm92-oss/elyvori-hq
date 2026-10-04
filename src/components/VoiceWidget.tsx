@@ -140,6 +140,7 @@ const TEXT = {
     huntNone: "I searched but couldn't confirm a business without a website this time. Try a city or type, e.g. \"clinics in Riyadh without a website\".",
     huntNoDemo: 'I found **{name}** but couldn’t finish the demo site this time. Try again in a minute.',
     huntNotAllowed: 'This tool is only available to the Elyvori team.',
+    huntStarted: '🎯 Found **{n}** {cat} in {city} with no website:\n{list}\n\nThe agents are now building each one a free demo site, emailing them, and handling the replies and the deal. You will get every step on **Telegram and email** 📲',
     huntOpenDemo: 'Open demo',
     huntCopy: 'Copy message',
     huntEmail: 'Email them',
@@ -203,6 +204,7 @@ const TEXT = {
     huntNone: 'دورت بس ما قدرت أتأكد من شركة ما عندها موقع هالمرة. جرّب تحدد مدينة أو نوع، مثلاً "عيادات في الرياض ما عندها موقع".',
     huntNoDemo: 'لقيت **{name}** بس ما قدرت أكمّل الموقع التجريبي هالمرة. جرّب كمان دقيقة.',
     huntNotAllowed: 'هالأداة متاحة لفريق إليفوري بس.',
+    huntStarted: '🎯 لقيت **{n}** ({cat} في {city}) ما عندهم موقع:\n{list}\n\nالوكلاء هلأ بيبنوا لكل واحد موقع تجريبي مجاني، وبيراسلوهم، وبيردوا عليهم وبيكمّلوا الصفقة. كل خطوة بتوصلك على **تليجرام والإيميل** 📲',
     huntOpenDemo: 'افتح الموقع التجريبي',
     huntCopy: 'انسخ الرسالة',
     huntEmail: 'ابعتلهم إيميل',
@@ -758,7 +760,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     const setProg = (p: Partial<NonNullable<Message['progress']>>) =>
       setMessages(prev => prev.map(m => (m.id === progId && m.progress ? { ...m, progress: { ...m.progress, ...p } } : m)));
     let step = 0;
-    const ticker = window.setInterval(() => { step = Math.min(step + 1, T().huntSteps.length - 1); setProg({ current: step }); }, 45000);
+    const ticker = window.setInterval(() => { step = Math.min(step + 1, T().huntSteps.length - 1); setProg({ current: step }); }, 8000);
     const ctrl = new AbortController();
     const timeout = window.setTimeout(() => ctrl.abort(), 10 * 60 * 1000);
     setLoading(true);
@@ -781,6 +783,18 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       if (d.creditsExhausted) { setProg({ failed: true }); reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] }); return; }
       const businesses: any[] = Array.isArray(d.businesses) ? d.businesses : [];
       if (!businesses.length) { setProg({ failed: true }); reply(T().huntNone, viaVoice); return; }
+      // ELYVORI-PROSPECTS-BG: the server now works in the background and reports to Telegram + email
+      if (d.started) {
+        setProg({ current: T().huntSteps.length - 1, done: true });
+        const list = businesses
+          .map((b: any) => `• ${b.businessName}${b.rating ? ` ⭐ ${b.rating}` : ''}${b.phone ? ` — ${b.phone}` : ''}`)
+          .join('\n');
+        reply(
+          T().huntStarted.replace('{n}', String(businesses.length)).replace('{cat}', String(d.category || '')).replace('{city}', String(d.city || '')).replace('{list}', list),
+          viaVoice,
+        );
+        return;
+      }
       const target = d.target || businesses[0];
       const name = String(target?.businessName || '');
       if (!isPublicUrl(d.demoUrl)) { setProg({ failed: true }); reply(T().huntNoDemo.replace('{name}', name), viaVoice); return; }
