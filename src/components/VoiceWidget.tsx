@@ -54,6 +54,8 @@ function detectIntent(text: string): Intent {
   const targets = has('شركات', 'شركة', 'مطاعم', 'مطعم', 'عيادات', 'عيادة', 'محلات', 'صالونات', 'بزنس', 'business', 'compan', 'restaurant', 'clinic', 'shop', 'store', 'salon');
   const noSite = has('ما عند', 'ماعند', 'مش عند', 'مو عند', 'بدون', 'ليس لديها', 'ليس لها', 'لا تملك', 'without', 'no website', "don't have", "doesn't have", 'no site', 'no app');
   if (hunting && targets && noSite) return 'prospects';
+  // ELYVORI-DIGITAL-STEMS: any form of منتج + رقمي (منتجاً رقمياً، منتجات رقمية، ...)
+  if (/منت[جچ]/.test(s) && /رقم[يىا]/.test(s)) return 'digital';
   if (has('منتج رقمي', 'منتج رقمى', 'منتجات رقمية', 'منتجات رقميه', 'منتج ديجيتال', 'كتاب الكتروني', 'كتاب إلكتروني', 'كتاب تلوين',
     'دليل pdf', ' pdf', 'digital product', 'ebook', 'e-book', 'coloring book', 'colouring book')) return 'digital';
   if (has('عقد', 'عقود', 'contract', 'legal', 'قانوني', 'اتفاقية', 'agreement')) return 'contract';
