@@ -189,7 +189,7 @@ export default function App() {
         />
       )}
       {showTracker ? (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', touchAction: 'pan-y' }}>
           <button
             onClick={() => setShowTracker(false)}
             style={{
@@ -198,13 +198,13 @@ export default function App() {
               color: 'white', borderRadius: '50%', width: 40, height: 40,
               cursor: 'pointer', fontSize: 18,
             }}
-          >âœ•</button>
+           aria-label={lang === 'ar' ? 'إغلاق' : 'Close'}>✕</button>
           <ProjectTracker lang={lang} token={auth.token || ''} taskId={trackerTaskId} clientName={trackerClientName} clientEmail={trackerClientEmail} contractId={trackerContractId} />
         </div>
       ) : showKanban && auth.token ? (
         <div className="min-h-screen bg-[#0A0A14] p-6">
           <button onClick={() => setShowKanban(false)} className="mb-6 text-slate-400 hover:text-white flex items-center gap-2 text-sm">
-            â†گ {lang === 'ar' ? 'ط±ط¬ظˆط¹' : 'Back'}
+            {lang === 'ar' ? '→ رجوع' : '← Back'}
           </button>
           <KanbanBoard lang={lang} token={auth.token} />
         </div>
@@ -290,8 +290,6 @@ export default function App() {
         auth={auth}
         onSuccessAuth={handleSuccessAuth}
       />
-      {/* Voice Assistant Widget */}
-      <VoiceWidget lang={lang} />
 
 
     </div>

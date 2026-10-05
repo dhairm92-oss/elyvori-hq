@@ -310,6 +310,9 @@ export function ProjectTracker({ lang, token, taskId, agentType, clientName, cli
       )}
     <div style={{
       minHeight: '100vh',
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden', // ELYVORI-TRACKER-FIXED: glows/particles never make the page slide sideways
       background: 'linear-gradient(135deg, #020408 0%, #050a18 40%, #040810 100%)',
       fontFamily: "'Cairo', 'Inter', sans-serif",
       position: 'relative',
@@ -330,8 +333,8 @@ export function ProjectTracker({ lang, token, taskId, agentType, clientName, cli
         backgroundImage: 'linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px)',
         backgroundSize: '40px 40px',
       }} />
-      <div style={{ position: 'absolute', top: '-20%', left: '20%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(0,229,255,0.06) 0%, transparent 70%)', filter: 'blur(40px)', opacity: glowPulse ? 1 : 0.5, transition: 'opacity 2s' }} />
-      <div style={{ position: 'absolute', bottom: '-10%', right: '10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 70%)', filter: 'blur(40px)', opacity: glowPulse ? 0.5 : 1, transition: 'opacity 2s' }} />
+      <div style={{ position: 'absolute', top: '-20%', left: '20%', width: 'min(600px, 100vw)', height: 600, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(0,229,255,0.06) 0%, transparent 70%)', filter: 'blur(40px)', opacity: glowPulse ? 1 : 0.5, transition: 'opacity 2s' }} />
+      <div style={{ position: 'absolute', bottom: '-10%', right: '10%', width: 'min(500px, 90vw)', height: 500, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 70%)', filter: 'blur(40px)', opacity: glowPulse ? 0.5 : 1, transition: 'opacity 2s' }} />
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1000, margin: '0 auto', padding: '40px 20px' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
@@ -352,7 +355,7 @@ export function ProjectTracker({ lang, token, taskId, agentType, clientName, cli
         <div style={{ background: 'rgba(15,17,26,0.8)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 28, marginBottom: 28, backdropFilter: 'blur(20px)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600 }}>{isAr ? 'التقدم الكلي' : 'Overall Progress'}</span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+            <div dir="ltr" style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
               <span style={{ color: '#00E5FF', fontSize: 32, fontWeight: 900 }}>{progress}</span>
               <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>%</span>
             </div>
@@ -389,7 +392,7 @@ export function ProjectTracker({ lang, token, taskId, agentType, clientName, cli
                   {isDone ? '✓' : step.icon}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                     <span style={{ color: isDone ? '#10b981' : isRunning ? '#00E5FF' : 'rgba(255,255,255,0.4)', fontSize: 15, fontWeight: 700, transition: 'color 0.5s' }}>
                       {isAr ? step.nameAr : step.name}
                     </span>
@@ -421,7 +424,7 @@ export function ProjectTracker({ lang, token, taskId, agentType, clientName, cli
             </div>
             <div ref={logRef} style={{ height: 160, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
               {currentLog.map((log, i) => (
-                <div key={i} style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontFamily: 'monospace', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <div key={i} style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontFamily: 'monospace', padding: '4px 0', overflowWrap: 'anywhere', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <span style={{ color: 'rgba(0,229,255,0.4)', marginRight: 8 }}>[{new Date().toLocaleTimeString()}]</span>
                   {log}
                 </div>

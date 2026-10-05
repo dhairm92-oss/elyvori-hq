@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Language } from '../types';
 
 interface CheckoutPageProps {
@@ -30,6 +31,13 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
     pro: { name: isAr ? 'برو' : 'Pro', price: 29, color: '#7C3AED', shadow: 'rgba(124,58,237,0.3)', gradient: 'linear-gradient(135deg,#7C3AED,#5B21B6)' },
   };
   const plan = plans[selectedPlan];
+
+  // ELYVORI-CHECKOUT-FIX: the page behind stays still while the checkout is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
 
   // Load Stripe.js
   useEffect(() => {
@@ -112,7 +120,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
     finally { setLoading(false); }
   };
 
-  return (
+  return createPortal(
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -146,7 +154,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
               color:'rgba(255,255,255,0.7)',borderRadius:12,width:38,height:38,
               cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
             }}>
-              {step === 'payment' ? '←' : '✕'}
+              {step === 'payment' ? (isAr ? '→' : '←') : '✕'}
             </button>
             <div style={{background:'linear-gradient(135deg,#00E5FF,#7C3AED)',borderRadius:10,padding:'6px 16px'}}>
               <span style={{color:'#000',fontSize:14,fontWeight:900,fontFamily:'Inter,sans-serif'}}>ELYVORI</span>
@@ -171,18 +179,18 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                 {/* Toggle */}
                 <div className="plan-pill" style={{marginBottom:20,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
                   <button className={`pill-btn ${selectedPlan==='starter' ? 'pill-cyan' : 'pill-off'}`} onClick={() => setSelectedPlan('starter')}>
-                    {isAr ? 'ستارتر — $19' : 'Starter — $19'}
+                    {isAr ? <>ستارتر — <bdi>$19</bdi></> : 'Starter — $19'}
                   </button>
                   <button className={`pill-btn ${selectedPlan==='pro' ? 'pill-purple' : 'pill-off'}`} onClick={() => setSelectedPlan('pro')}>
-                    {isAr ? 'برو — $29 ⭐' : 'Pro — $29 ⭐'}
+                    {isAr ? <>برو — <bdi>$29</bdi> ⭐</> : 'Pro — $29 ⭐'}
                   </button>
                 </div>
 
                 {/* Plan card */}
                 <div style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${plan.color}30`,borderRadius:20,padding:'24px 20px',marginBottom:16,boxShadow:`0 0 40px ${plan.shadow}15`}}>
-                  <div style={{display:'flex',alignItems:'flex-end',gap:4,marginBottom:4,justifyContent: isAr ? 'flex-end' : 'flex-start'}}>
-                    <span style={{fontSize:52,fontWeight:900,lineHeight:1,color:plan.color,fontFamily:'Inter,sans-serif'}}>${plan.price}</span>
-                    <span style={{color:'rgba(255,255,255,0.35)',fontSize:15,paddingBottom:8}}>{isAr ? '/شهر' : '/mo'}</span>
+                  <div style={{display:'flex',alignItems:'flex-end',gap:8,marginBottom:4}}>
+                    <span dir="ltr" style={{fontSize:52,fontWeight:900,lineHeight:1,color:plan.color,fontFamily:'Inter,sans-serif'}}>${plan.price}</span>
+                    <span style={{color:'rgba(255,255,255,0.35)',fontSize:15,paddingBottom:8}}>{isAr ? 'شهرياً' : '/mo'}</span>
                   </div>
                   <div style={{height:1,background:'rgba(255,255,255,0.06)',margin:'16px 0'}} />
                   {(isAr
@@ -193,7 +201,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                       ? ['5 active projects','All 10 AI agents','Full-stack website & app builds','Bilingual marketing campaigns','Email & chat support']
                       : ['Unlimited projects','All 10 AI agents','Custom web & Android builds','Enterprise marketing engine','Dedicated account manager','99.9% uptime SLA']
                   ).map((f,i) => (
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,0.04)',flexDirection: isAr ? 'row-reverse' : 'row'}}>
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
                       <div style={{width:20,height:20,borderRadius:7,flexShrink:0,background:`${plan.color}20`,border:`1px solid ${plan.color}50`,display:'flex',alignItems:'center',justifyContent:'center'}}>
                         <span style={{color:plan.color,fontSize:11,fontWeight:900}}>✓</span>
                       </div>
@@ -207,7 +215,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                   onClick={() => auth.isAuthenticated ? setStep('payment') : onOpenAuthModal()}
                   style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff',boxShadow:`0 8px 32px ${plan.shadow}`,marginBottom:14}}
                 >
-                  {isAr ? `متابعة — $${plan.price}/شهر ←` : `Continue — $${plan.price}/mo →`}
+                  {isAr ? <>متابعة — <bdi>${plan.price}</bdi> شهرياً ←</> : `Continue — $${plan.price}/mo →`}
                 </button>
 
                 <div className="badge-row" style={{marginBottom:16}}>
@@ -227,7 +235,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                 <div style={{textAlign:'center',padding:'28px 0 20px'}}>
                   <div style={{display:'inline-block',background:plan.gradient,borderRadius:12,padding:'4px 14px',marginBottom:10}}>
                     <span style={{color:selectedPlan==='starter'?'#000':'#fff',fontSize:13,fontWeight:800,fontFamily:'Inter,sans-serif'}}>
-                      {plan.name} — ${plan.price}{isAr?'/شهر':'/mo'}
+                      {plan.name} — <bdi>${plan.price}</bdi>{isAr ? ' شهرياً' : '/mo'}
                     </span>
                   </div>
                   <h1 style={{color:'#fff',fontSize:24,fontWeight:900,margin:'0 0 6px',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
@@ -250,7 +258,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                       value={name}
                       onChange={e => setName(e.target.value)}
                       placeholder={isAr ? 'محمد عبدالله' : 'John Smith'}
-                      style={{textAlign: isAr ? 'right' : 'left'}}
+                      autoComplete="name"
                     />
                   </div>
 
@@ -265,6 +273,8 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder="you@example.com"
+                      dir="ltr"
+                      autoComplete="email"
                       style={{textAlign: isAr ? 'right' : 'left'}}
                     />
                   </div>
@@ -283,8 +293,8 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                         <div id="stripe-card-element" ref={cardRef} />
                       )}
                     </div>
-                    <p style={{color:'rgba(255,255,255,0.25)',fontSize:11,margin:'6px 0 0',fontFamily:'Inter,sans-serif',textAlign: isAr ? 'right' : 'left'}}>
-                      {isAr ? 'للاختبار: 4242 4242 4242 4242 — أي تاريخ — أي CVV' : 'Test: 4242 4242 4242 4242 — any date — any CVV'}
+                    <p style={{color:'rgba(255,255,255,0.25)',fontSize:11,margin:'6px 0 0',fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                      {isAr ? <>للاختبار: <bdi dir="ltr">4242 4242 4242 4242</bdi> — أي تاريخ — أي CVV</> : 'Test: 4242 4242 4242 4242 — any date — any CVV'}
                     </p>
                   </div>
                 </div>
@@ -310,7 +320,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                   {loading ? (
                     <><span className="spinner"/>{isAr ? 'جاري المعالجة...' : 'Processing...'}</>
                   ) : (
-                    isAr ? `💳 ادفع $${plan.price} الآن` : `💳 Pay $${plan.price} Now`
+                    isAr ? <>💳 ادفع <bdi>${plan.price}</bdi> الآن</> : `💳 Pay $${plan.price} Now`
                   )}
                 </button>
 
@@ -347,7 +357,8 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
 
