@@ -102,6 +102,7 @@ select.search{width:auto}
     <button class="tab on" data-tab="overview" type="button">نظرة عامة</button>
     <button class="tab" data-tab="users" type="button">المستخدمون</button>
     <button class="tab" data-tab="entries" type="button">العمليات</button>
+    <button class="tab" data-tab="commerce" type="button">البطاقات والمبيعات</button>
     <button class="tab" data-tab="audit" type="button">سجل الإجراءات</button>
   </nav>
   <div id="app"><div class="msg">جاري التحميل…</div></div>
@@ -129,7 +130,8 @@ select.search{width:auto}
   var app = document.getElementById('app');
   var state = { tab: 'overview', q: '', type: '', auditQ: '' };
   var SYM = { ILS: '₪', USD: '$', JOD: 'JD' };
-  var TYPES = { transfer: 'تحويل', topup: 'شحن', withdraw: 'سحب', request_pay: 'دفع طلب', reversal: 'استرجاع' };
+  var TYPES = { transfer: 'تحويل', topup: 'شحن', withdraw: 'سحب', request_pay: 'دفع طلب', purchase: 'شراء خدمة', reversal: 'استرجاع' };
+  var TOPUP = { pending: ['بانتظار الدفع', 'p-info'], paid: ['مدفوع', 'p-ok'], failed: ['فشل', 'p-bad'], expired: ['انتهت', 'p-mute'] };
   var STATUS = { active: ['نشط', 'p-ok'], frozen: ['مجمّد', 'p-warn'], closed: ['مغلق', 'p-bad'] };
   var KYC = ['أساسي', 'موثّق', 'موثّق بالكامل'];
   var ERR = {
@@ -144,7 +146,7 @@ select.search{width:auto}
   function group(v) { var s = String(v == null ? '0' : v); var neg = s.charAt(0) === '-'; if (neg) s = s.slice(1); var p = s.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); return (neg ? '-' : '') + p.join('.'); }
   function money(v, c) { return '<span class="ltr">' + esc(group(v)) + ' ' + esc(SYM[c] || c || '') + '</span>'; }
   function party(p) { return p ? esc(p.name || '') + ' <span class="ltr" style="color:var(--muted)">' + esc(p.phone || '') + '</span>' : ''; }
-  function note(d) { return d === 'Sandbox top-up' ? 'شحن تجريبي' : d === 'Sandbox withdrawal' ? 'سحب تجريبي' : (d || ''); }
+  function note(d) { return d === 'Sandbox top-up' ? 'شحن تجريبي' : d === 'Sandbox withdrawal' ? 'سحب تجريبي' : d === 'Card top-up' ? 'شحن بالبطاقة' : (d || ''); }
 
   function api(path, opts) {
     opts = opts || {};
@@ -354,7 +356,9 @@ select.search{width:auto}
     register: 'تسجيل جديد', login: 'دخول', login_new_device: 'دخول من جهاز جديد', pin_wrong: 'رمز سري غلط', pin_locked: 'قفل بعد محاولات خاطئة',
     pin_changed: 'تغيير الرمز السري', device_revoked: 'إخراج جهاز', user_frozen: 'تجميد (أدمن)', user_active: 'تفعيل (أدمن)', user_closed: 'إغلاق (أدمن)',
     kyc_level_set: 'تغيير مستوى التحقق', entry_reversed: 'استرجاع عملية', transfer: 'تحويل', request_created: 'طلب دفع', request_paid: 'دفع طلب',
-    request_declined: 'رفض طلب', request_cancelled: 'إلغاء طلب', topup: 'شحن', withdraw: 'سحب', refresh_reuse_detected: 'محاولة إعادة استخدام جلسة قديمة (أمان)', sandbox_topup: 'شحن تجريبي', sandbox_withdraw: 'سحب تجريبي', velocity_block: 'منع: عمليات كثيرة بوقت قصير'
+    request_declined: 'رفض طلب', request_cancelled: 'إلغاء طلب', topup: 'شحن', withdraw: 'سحب',
+    stripe_topup_started: 'بدء شحن بالبطاقة', stripe_topup_paid: 'شحن بالبطاقة (مدفوع)', stripe_amount_mismatch: 'تنبيه: مبلغ Stripe مختلف', stripe_session_mismatch: 'تنبيه: جلسة Stripe غريبة',
+    purchase: 'شراء خدمة من المحفظة', chat_linked: 'ربط المحفظة بشات الموقع', refresh_reuse_detected: 'محاولة إعادة استخدام جلسة قديمة (أمان)', sandbox_topup: 'شحن تجريبي', sandbox_withdraw: 'سحب تجريبي', velocity_block: 'منع: عمليات كثيرة بوقت قصير'
   };
   function audit() {
     app.innerHTML = '<input class="search" id="aq" type="search" placeholder="فلترة بمعرّف مستخدم أو عملية أو إيميل أدمن…" value="' + esc(state.auditQ) + '"><div id="alist"><div class="msg">جاري التحميل…</div></div>';
@@ -375,8 +379,36 @@ select.search{width:auto}
     }).catch(function (e) { if (e.message === 'auth' || e.message === 'forbidden') fail(e); else box.innerHTML = '<div class="msg">ما قدرت أحمّل السجل.</div>'; });
   }
 
+  // ------------------------------------------------------------- card top-ups + sales
+  function commerce() {
+    app.innerHTML = '<div class="msg">جاري التحميل…</div>';
+    Promise.all([api('/wallet/admin/commerce'), api('/wallet/admin/topups'), api('/wallet/admin/orders')]).then(function (r) {
+      var c = r[0], tops = r[1], orders = r[2], st = c.stripe || {};
+      var stripeState = !st.configured ? '<span class="pill p-bad">Stripe مش مربوط</span>'
+        : st.live ? '<span class="pill p-ok">Stripe حقيقي</span>' : '<span class="pill p-warn">Stripe وضع اختبار</span>';
+      var h = '<div class="stats">' +
+        '<div class="stat"><b>' + stripeState + '</b><span>الدفع بالبطاقة</span></div>' +
+        '<div class="stat"><b>' + (st.webhookSigned ? '<span style="color:var(--ok)">✓ موقّع</span>' : '<span style="color:var(--warn)">بدون توقيع</span>') + '</b><span>Webhook</span></div>' +
+        '<div class="stat"><b>' + (st.realMoney ? '<span style="color:var(--ok)">مفعّلة</span>' : '<span style="color:var(--muted)">مقفلة 🔒</span>') + '</b><span>الأموال الحقيقية</span></div>' +
+        '<div class="stat money"><b>' + ['USD', 'ILS', 'JOD'].map(function (k) { return money((c.revenue || {})[k] || '0', k); }).join('<br>') + '</b><span>مبيعات من المحافظ</span></div></div>';
+      var paidSum = {}; (c.topups || []).forEach(function (t) { if (t.status === 'paid') paidSum[t.currency] = t.total; });
+      h += '<h2>الشحن بالبطاقة</h2><p class="sub">مدفوع: ' + (Object.keys(paidSum).map(function (k) { return money(paidSum[k], k); }).join(' · ') || '—') + '</p>';
+      h += '<div class="list">' + (tops.length ? tops.map(function (t) {
+        var s = TOPUP[t.status] || [t.status, 'p-mute'];
+        return '<div class="row"><span class="pill ' + s[1] + '">' + esc(s[0]) + '</span><div class="main"><b>' + money(t.amount, t.currency) + (t.testMode ? ' <small style="display:inline;color:var(--muted)">(اختبار)</small>' : '') + '</b>' +
+          '<small>' + esc(t.user && t.user.name) + ' <span class="ltr">' + esc(t.user && t.user.phone) + '</span> · ' + esc(when(t.createdAt)) + (t.error ? ' · ' + esc(t.error) : '') + '</small></div>' +
+          '<span class="ltr" style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis">' + esc(t.stripeSessionId || '') + '</span></div>';
+      }).join('') : '<div class="empty">ما في عمليات شحن بالبطاقة لسا.</div>') + '</div>';
+      h += '<h2>مبيعات خدمات إليفوري من المحافظ</h2><div class="list">' + (orders.length ? orders.map(function (o) {
+        return '<div class="row"><span class="pill p-ok">مدفوع</span><div class="main"><b>' + esc(o.label) + ' · ' + money(o.amount, o.currency) + '</b>' +
+          '<small>' + esc(o.user && o.user.name) + ' <span class="ltr">' + esc(o.user && o.user.phone) + '</span> · ' + esc(when(o.createdAt)) + ' · <span class="ltr">' + esc(o.id) + '</span></small></div></div>';
+      }).join('') : '<div class="empty">ما في مبيعات لسا.</div>') + '</div>';
+      app.innerHTML = h;
+    }).catch(fail);
+  }
+
   // ------------------------------------------------------------- tabs
-  var VIEWS = { overview: overview, users: users, entries: entries, audit: audit };
+  var VIEWS = { overview: overview, users: users, entries: entries, commerce: commerce, audit: audit };
   function switchTab(tab) {
     state.tab = tab;
     document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === tab); });

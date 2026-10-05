@@ -6,7 +6,15 @@ interface MsgAction {
   copy?: string;
   type?: AssistantAction;
   url?: string;
+  // ELYVORI-PAY-CHAT: wallet buttons (top up, pay, link...)
+  wallet?: { type: string; payload?: Record<string, unknown> };
 }
+
+type WalletModal =
+  | { mode: 'link' }
+  | { mode: 'pin'; payload: Record<string, unknown>; label: string }
+  | { mode: 'topup' }
+  | null;
 
 interface Message {
   id: number;
@@ -544,6 +552,17 @@ html.light .elv-root{
 .elv-step.done{color:var(--elv-text)}
 .elv-step.done .elv-step-dot{background:#10B981;border-color:#10B981;color:#fff}
 .elv-step.failed .elv-step-dot{background:#EF4444;border-color:#EF4444;color:#fff}
+.elv-wm-bg{position:absolute;inset:0;z-index:20;background:rgba(2,6,23,.55);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.elv-wm{width:100%;background:var(--elv-bg);border:1px solid var(--elv-border);border-radius:20px;padding:16px;box-shadow:0 20px 50px -20px rgba(0,0,0,.6);animation:elvExpand .25s ease both}
+.elv-wm h4{margin:0 0 4px;font-size:16px;font-weight:800}
+.elv-wm p{margin:0 0 12px;font-size:12.5px;opacity:.75;line-height:1.6}
+.elv-wm input,.elv-wm select{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:11px 12px;border-radius:12px;border:1px solid var(--elv-border);background:transparent;color:inherit;margin-bottom:10px;outline:none}
+.elv-wm select option{color:#0f172a}
+.elv-wm input:focus{border-color:#7C3AED}
+.elv-wm .row{display:flex;gap:8px}
+.elv-wm .err{color:#ef4444;font-size:12.5px;margin:-4px 0 8px}
+.elv-wm .btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.elv-wm .ghost{border:1px solid var(--elv-border);background:transparent;color:inherit;border-radius:12px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 `;
 
 const WAVE_BARS = 22;
@@ -718,6 +737,125 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   // reply in the language the visitor actually writes/speaks, not only the site language
   const replyLangRef = useRef<'ar' | 'en'>(isAr ? 'ar' : 'en');
   const T = () => TEXT[replyLangRef.current];
+
+  // ---------------- ELYVORI-PAY-CHAT: Elyvori Pay inside the chat
+  const [walletModal, setWalletModal] = useState<WalletModal>(null);
+  const [wmBusy, setWmBusy] = useState(false);
+  const [wmError, setWmError] = useState('');
+  const [wmPhone, setWmPhone] = useState('');
+  const [wmPin, setWmPin] = useState('');
+  const [wmAmount, setWmAmount] = useState('20');
+  const [wmCurrency, setWmCurrency] = useState('USD');
+
+  const openWalletModal = (m: WalletModal) => { setWmError(''); setWmPin(''); setWalletModal(m); };
+
+  type WalletReply = { ok: boolean; code?: string; message_ar: string; message_en: string; data?: unknown; actions?: { type: string; url?: string; payload?: Record<string, unknown>; label_ar: string; label_en: string }[] };
+
+  const walletFetch = async (path: string, body: unknown, method = 'POST'): Promise<{ status: number; json: any }> => {
+    const { token } = getAuth();
+    const res = await fetch(`${API}${path}`, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: method === 'DELETE' ? undefined : JSON.stringify(body ?? {}),
+    });
+    return { status: res.status, json: await res.json().catch(() => ({})) };
+  };
+
+  const walletCall = async (action: string, params: Record<string, unknown> = {}, viaVoice = false) => {
+    const { token } = getAuth();
+    if (!token) { reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return; }
+    setLoading(true);
+    try {
+      const { status, json } = await walletFetch('/wallet/chat/action', { action, params });
+      if (status === 401 || status === 403) { reply(T().sessionExpired, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return; }
+      const r = json as WalletReply;
+      if (!r || typeof r.message_ar !== 'string') { reply(replyLangRef.current === 'ar' ? 'صار خطأ بالمحفظة، جرّب كمان شوي.' : 'Wallet error, try again shortly.', viaVoice); return; }
+      const ar = replyLangRef.current === 'ar';
+      const actions: MsgAction[] = (r.actions || []).map(a =>
+        a.type === 'open_url' && a.url ? { label: ar ? a.label_ar : a.label_en, url: a.url } : { label: ar ? a.label_ar : a.label_en, wallet: { type: a.type, payload: a.payload } },
+      );
+      reply(ar ? r.message_ar : r.message_en, viaVoice, { actions });
+    } catch {
+      reply(replyLangRef.current === 'ar' ? 'ما قدرت أوصل للمحفظة هلأ (السيرفر ممكن يكون نايم) — جرّب بعد دقيقة.' : 'Could not reach the wallet right now — try again in a minute.', viaVoice);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onWalletAction = (w: NonNullable<MsgAction['wallet']>, label: string) => {
+    switch (w.type) {
+      case 'link_wallet': openWalletModal({ mode: 'link' }); break;
+      case 'prompt_topup': openWalletModal({ mode: 'topup' }); break;
+      case 'confirm_pin': openWalletModal({ mode: 'pin', payload: w.payload || {}, label }); break;
+      case 'check_topup': walletCall('topup_status', w.payload || {}); break;
+      default: walletCall(w.type, w.payload || {});
+    }
+  };
+
+  const submitWalletModal = async () => {
+    if (!walletModal || wmBusy) return;
+    const ar = replyLangRef.current === 'ar';
+    setWmError('');
+    if (walletModal.mode === 'topup') {
+      const amount = wmAmount.trim().replace(',', '.');
+      if (!/^\d{1,6}(\.\d{1,3})?$/.test(amount) || Number(amount) <= 0) { setWmError(ar ? 'اكتب مبلغ صحيح.' : 'Enter a valid amount.'); return; }
+      setWalletModal(null);
+      walletCall('topup', { amount, currency: wmCurrency });
+      return;
+    }
+    if (!/^\d{6}$/.test(wmPin)) { setWmError(ar ? 'الرمز السري 6 أرقام.' : 'The PIN is 6 digits.'); return; }
+    if (walletModal.mode === 'pin') {
+      const payload = walletModal.payload;
+      const pin = wmPin;
+      setWalletModal(null); setWmPin('');
+      walletCall('pay_item', { ...payload, pin });
+      return;
+    }
+    setWmBusy(true);
+    try {
+      const { status, json } = await walletFetch('/wallet/chat/link', { phone: wmPhone.trim(), pin: wmPin });
+      if (status === 401 || status === 403) { setWalletModal(null); reply(T().sessionExpired, false, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return; }
+      if (status >= 400) {
+        const code = String(json?.message || '');
+        setWmError(code === 'pin_locked' ? (ar ? 'انقفلت المحفظة 15 دقيقة بعد محاولات غلط.' : 'Locked for 15 minutes after wrong tries.')
+          : code === 'invalid_phone' ? (ar ? 'رقم الجوال مش صحيح.' : 'Invalid phone number.')
+          : (ar ? 'رقم الجوال أو الرمز السري غلط.' : 'Wrong phone or PIN.'));
+        return;
+      }
+      setWalletModal(null);
+      reply(ar ? `تم ربط محفظتك ✅ (${json?.name || ''})` : `Wallet linked ✅ (${json?.name || ''})`, false);
+      walletCall('balance');
+    } catch {
+      setWmError(ar ? 'ما قدرت أوصل للسيرفر.' : 'Could not reach the server.');
+    } finally {
+      setWmBusy(false);
+      setWmPin('');
+    }
+  };
+
+  /** "رصيدي" / "اشحن محفظتي 20 دولار" / "ادفع من المحفظة" ... -> true when handled. */
+  const walletIntent = (msg: string, viaVoice: boolean): boolean => {
+    const m = msg.toLowerCase();
+    if (/(اشحن|شحن|عبّي|عبي).{0,20}محفظ|top ?up (my )?wallet|add money to (my )?wallet/.test(m)) {
+      const num = m.match(/(\d+(?:[.,]\d{1,3})?)/);
+      const currency = /شيكل|شيقل|₪|ils|nis/.test(m) ? 'ILS' : /دينار|jod|jd/.test(m) ? 'JOD' : 'USD';
+      if (num) walletCall('topup', { amount: num[1].replace(',', '.'), currency }, viaVoice);
+      else { setWmCurrency(currency); openWalletModal({ mode: 'topup' }); reply(replyLangRef.current === 'ar' ? 'قدّيش بدك تشحن؟' : 'How much would you like to add?', viaVoice); }
+      return true;
+    }
+    if (/(ادفع|اشتري|اشترك).{0,25}(من|بال|ب)\s*(ال)?محفظ|pay (with|from) (my )?wallet/.test(m)) { walletCall('catalog', {}, viaVoice); return true; }
+    if (/حركات(ي)?\s*(ال)?محفظ|آخر حركاتي|اخر حركاتي|wallet history/.test(m)) { walletCall('history', {}, viaVoice); return true; }
+    if (/رصيدي|رصيد محفظتي|رصيد المحفظة|كم رصيدي|قديش رصيدي|my balance|wallet balance/.test(m)) { walletCall('balance', {}, viaVoice); return true; }
+    if (/(افصل|فك ربط)\s*(ال)?محفظ|unlink (my )?wallet/.test(m)) {
+      walletFetch('/wallet/chat/link', null, 'DELETE').then(() => reply(replyLangRef.current === 'ar' ? 'تم فصل المحفظة عن حسابك.' : 'Wallet unlinked.', viaVoice)).catch(() => undefined);
+      return true;
+    }
+    if (/(اربط|ربط)\s*(ال)?محفظ|link (my )?wallet/.test(m)) {
+      if (!getAuth().token) { reply(T().needLogin, viaVoice, { actions: [{ label: T().loginBtn, type: 'auth' }] }); return true; }
+      openWalletModal({ mode: 'link' }); return true;
+    }
+    return false;
+  };
   const [waitingLogin, setWaitingLogin] = useState(false);
   const resumeWhatRef = useRef<'website' | 'app'>('website');
   const lastViaVoiceRef = useRef(false);
@@ -1071,6 +1209,8 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       window.setTimeout(() => { window.location.href = '/wallet-admin.html'; }, 900);
       return;
     }
+    // ELYVORI-PAY-CHAT: wallet commands
+    if (walletIntent(msg, viaVoice)) return;
     // ELYVORI-DEALS-CMD: open the deals board
     if (/لوحة الصفقات|الصفقات|صفقاتي|deals board|my deals|open deals/i.test(msg)) {
       reply(replyLangRef.current === 'ar' ? 'بفتحلك **لوحة الصفقات** هلأ 📊' : 'Opening your **deals board** 📊', viaVoice);
@@ -1105,6 +1245,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       return;
     }
     if (a.url) { window.open(a.url, '_blank', 'noopener'); return; }
+    if (a.wallet) { onWalletAction(a.wallet, a.label); return; }
     if (a.type) { runAction(a.type); closeOnMobile(); }
   };
 
@@ -1286,6 +1427,50 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       {open && (
         <div className="elv-chat" dir={isAr ? 'rtl' : 'ltr'} role="dialog" aria-label={t.name}>
           <div className="elv-accent-line" />
+          {walletModal && (
+            <div className="elv-wm-bg" onClick={e => { if (e.target === e.currentTarget && !wmBusy) setWalletModal(null); }}>
+              <form className="elv-wm" onSubmit={e => { e.preventDefault(); submitWalletModal(); }}>
+                {walletModal.mode === 'link' && (
+                  <>
+                    <h4>{isAr ? 'ربط محفظة Elyvori Pay' : 'Link Elyvori Pay'}</h4>
+                    <p>{isAr ? 'مرة وحدة بس: رقم جوال المحفظة ورمزها السري. الرمز ما بينحفظ بالشات.' : 'One time only: your wallet phone and PIN. The PIN is never stored in the chat.'}</p>
+                    <input type="tel" dir="ltr" autoComplete="tel" placeholder="0591234567" value={wmPhone} onChange={e => setWmPhone(e.target.value)} />
+                  </>
+                )}
+                {walletModal.mode === 'pin' && (
+                  <>
+                    <h4>{isAr ? 'تأكيد الدفع' : 'Confirm payment'}</h4>
+                    <p>{walletModal.label}</p>
+                  </>
+                )}
+                {walletModal.mode === 'topup' && (
+                  <>
+                    <h4>{isAr ? 'شحن المحفظة بالبطاقة' : 'Top up by card'}</h4>
+                    <p>{isAr ? 'رح تفتحلك صفحة دفع Stripe الآمنة.' : 'A secure Stripe payment page will open.'}</p>
+                    <div className="row">
+                      <input type="text" inputMode="decimal" dir="ltr" value={wmAmount} onChange={e => setWmAmount(e.target.value)} aria-label={isAr ? 'المبلغ' : 'Amount'} />
+                      <select value={wmCurrency} onChange={e => setWmCurrency(e.target.value)} aria-label={isAr ? 'العملة' : 'Currency'}>
+                        <option value="USD">USD $</option>
+                        <option value="ILS">ILS ₪</option>
+                        <option value="JOD">JOD</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+                {walletModal.mode !== 'topup' && (
+                  <input type="password" inputMode="numeric" autoComplete="off" maxLength={6} dir="ltr" placeholder={isAr ? 'الرمز السري (6 أرقام)' : 'PIN (6 digits)'}
+                    value={wmPin} onChange={e => setWmPin(e.target.value.replace(/\D/g, '').slice(0, 6))} autoFocus />
+                )}
+                {wmError && <div className="err">{wmError}</div>}
+                <div className="btns">
+                  <button type="button" className="ghost" onClick={() => setWalletModal(null)} disabled={wmBusy}>{isAr ? 'إلغاء' : 'Cancel'}</button>
+                  <button type="submit" className="elv-action" disabled={wmBusy}>
+                    {wmBusy ? '…' : walletModal.mode === 'link' ? (isAr ? 'ربط' : 'Link') : walletModal.mode === 'pin' ? (isAr ? 'ادفع' : 'Pay') : (isAr ? 'متابعة' : 'Continue')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           <div className="elv-head">
             <div className="elv-avatar">
