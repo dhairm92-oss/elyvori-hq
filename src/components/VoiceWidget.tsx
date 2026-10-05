@@ -1065,6 +1065,12 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       return;
     }
 
+    // ELYVORI-PAY-ADMIN-CMD: open the Elyvori Pay back office
+    if (/لوحة المحفظة|لوحة تحكم المحفظة|ادارة المحفظة|إدارة المحفظة|wallet admin|elyvori pay admin/i.test(msg)) {
+      reply(replyLangRef.current === 'ar' ? 'بفتحلك **لوحة تحكم Elyvori Pay** هلأ 💳' : 'Opening the **Elyvori Pay back office** 💳', viaVoice);
+      window.setTimeout(() => { window.location.href = '/wallet-admin.html'; }, 900);
+      return;
+    }
     // ELYVORI-DEALS-CMD: open the deals board
     if (/لوحة الصفقات|الصفقات|صفقاتي|deals board|my deals|open deals/i.test(msg)) {
       reply(replyLangRef.current === 'ar' ? 'بفتحلك **لوحة الصفقات** هلأ 📊' : 'Opening your **deals board** 📊', viaVoice);
