@@ -748,6 +748,8 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   const [wmCurrency, setWmCurrency] = useState('USD');
 
   const openWalletModal = (m: WalletModal) => { setWmError(''); setWmPin(''); setWalletModal(m); };
+  // ELYVORI-PIN-GUARD: a payment waiting for its PIN - a 6-digit message is taken as the PIN, never sent to the AI
+  const pendingPinRef = useRef<{ payload: Record<string, unknown>; label: string } | null>(null);
 
   type WalletReply = { ok: boolean; code?: string; message_ar: string; message_en: string; data?: unknown; actions?: { type: string; url?: string; payload?: Record<string, unknown>; label_ar: string; label_en: string }[] };
 
@@ -775,6 +777,13 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
         a.type === 'open_url' && a.url ? { label: ar ? a.label_ar : a.label_en, url: a.url } : { label: ar ? a.label_ar : a.label_en, wallet: { type: a.type, payload: a.payload } },
       );
       reply(ar ? r.message_ar : r.message_en, viaVoice, { actions });
+      const pinAct = actions.find(a => a.wallet?.type === 'confirm_pin');
+      if (pinAct && pinAct.wallet) {
+        pendingPinRef.current = { payload: pinAct.wallet.payload || {}, label: pinAct.label };
+        openWalletModal({ mode: 'pin', payload: pinAct.wallet.payload || {}, label: pinAct.label });
+      } else if (action !== 'pay_item') {
+        pendingPinRef.current = null;
+      }
     } catch {
       reply(replyLangRef.current === 'ar' ? 'ما قدرت أوصل للمحفظة هلأ (السيرفر ممكن يكون نايم) — جرّب بعد دقيقة.' : 'Could not reach the wallet right now — try again in a minute.', viaVoice);
     } finally {
@@ -807,6 +816,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     if (walletModal.mode === 'pin') {
       const payload = walletModal.payload;
       const pin = wmPin;
+      pendingPinRef.current = null;
       setWalletModal(null); setWmPin('');
       walletCall('pay_item', { ...payload, pin });
       return;
@@ -1187,6 +1197,14 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
     setInput('');
+    if (pendingPinRef.current && /^\d{6}$/.test(msg.replace(/\s+/g, ''))) {
+      const pending = pendingPinRef.current;
+      pendingPinRef.current = null;
+      setWalletModal(null);
+      setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: '••••••', time: formatTime(langRef.current) }]);
+      walletCall('pay_item', { ...pending.payload, pin: msg.replace(/\s+/g, '') });
+      return;
+    }
     stopSpeaking();
     replyLangRef.current = /[\u0600-\u06FF]/.test(msg) ? 'ar' : /[a-z]/i.test(msg) ? 'en' : (langRef.current === 'ar' ? 'ar' : 'en');
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: msg, time: formatTime(langRef.current), voice: viaVoice }]);
