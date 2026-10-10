@@ -1,97 +1,312 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr" class="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>مشاريعي | Elyvori</title>
+<meta name="theme-color" content="#080A12">
+<title>My projects | Elyvori</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<script>(function(){try{var t=localStorage.getItem('elyvori_theme');var d=t?t==='dark':!matchMedia('(prefers-color-scheme: light)').matches;document.documentElement.classList.add(d?'dark':'light');}catch(e){document.documentElement.classList.add('dark');}})();</script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+/* same keys as the main site: elyvori_theme (dark default) and elyvori_lang (en default) */
+(function () {
+  var d = document.documentElement, t = 'dark', l = 'en';
+  try { t = localStorage.getItem('elyvori_theme') === 'light' ? 'light' : 'dark'; l = localStorage.getItem('elyvori_lang') === 'ar' ? 'ar' : 'en'; } catch (e) {}
+  d.className = t; d.lang = l; d.dir = l === 'ar' ? 'rtl' : 'ltr'; d.style.colorScheme = t;
+})();
+</script>
 <style>
-:root{--bg:#070a14;--card:#0e1324;--card2:#121a30;--line:#1f2740;--text:#e8ecf7;--muted:#9aa5c0;--accent:#7c5cff;--accent2:#22d3ee;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
-html.light{--bg:#f6f7fb;--card:#fff;--card2:#f3f5fa;--line:#e3e7f0;--text:#141a2b;--muted:#5a6580;--accent:#5b3df5;--accent2:#0891b2}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
-body{font-family:'Cairo',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+:root{
+  --bg:#080A12;--bg2:#0B0F1C;--card:rgba(17,23,40,.72);--card-solid:#111728;--line:rgba(148,163,184,.14);--line2:rgba(148,163,184,.24);
+  --text:#EEF2F8;--body:#DCE3EE;--muted:#9AA6BC;--faint:#6B778C;
+  --cyan:#00E5FF;--violet:#7C3AED;--ok:#22C55E;--warn:#F59E0B;--bad:#F43F5E;
+  --grad:linear-gradient(135deg,#00E5FF 0%,#7C3AED 100%);
+  --glow:0 0 0 1px rgba(0,229,255,.25),0 10px 40px -12px rgba(0,229,255,.35);
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 50px -30px rgba(0,0,0,.9);
+  --r:20px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+html.light{
+  --bg:#F6F8FC;--bg2:#EEF2F9;--card:rgba(255,255,255,.86);--card-solid:#FFFFFF;--line:rgba(15,23,42,.08);--line2:rgba(15,23,42,.14);
+  --text:#0F172A;--body:#1E293B;--muted:#5B6578;--faint:#8A94A6;
+  --glow:0 0 0 1px rgba(124,58,237,.25),0 12px 34px -14px rgba(124,58,237,.35);
+  --shadow:0 1px 2px rgba(15,23,42,.05),0 12px 30px -18px rgba(15,23,42,.25);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);overflow-x:clip}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100vh;min-height:100dvh}
+[dir=rtl] body{font-family:'Cairo','Plus Jakarta Sans',system-ui,sans-serif}
+.theme-anim *,.theme-anim{transition:background-color .35s,border-color .35s,color .35s!important}
+button,input{font:inherit}
 a{color:inherit}
 .ltr{direction:ltr;unicode-bidi:isolate}
-.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.top-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:17px}
-.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff}
-.btn{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;white-space:nowrap}
-.btn:hover{border-color:var(--accent)}
-.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#fff}
-.btn.sm{min-height:32px;padding:4px 10px;font-size:12.5px;border-radius:10px}
-main{max-width:1100px;margin:0 auto;padding:18px 16px 70px}
-h1{font-size:clamp(22px,4vw,30px);margin:4px 0 2px;font-weight:900}
-h2{font-size:18px;margin:26px 0 10px;font-weight:800}
-.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
-.muted{color:var(--muted);font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}
-a.card{display:block;text-decoration:none;transition:border-color .15s,transform .15s}
-a.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
-.pname{font-weight:900;font-size:18px;margin:0 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.psum{color:var(--muted);font-size:13.5px;margin:0 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
-.meter{height:9px;border-radius:999px;background:var(--card2);overflow:hidden;margin:6px 0}
-.meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
-.stats b{color:var(--text)}
-.pill{font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;white-space:nowrap;display:inline-block}
-.p-ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
-.p-warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
-.p-info{background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)}
-.p-off{background:var(--card2);color:var(--muted)}
-.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.tasks{display:grid;gap:8px}
-.task{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-width:0}
-.task .id{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--muted);direction:ltr}
-.task .t{flex:1;min-width:0;font-weight:700}
-.task .t small{display:block;color:var(--muted);font-weight:400;font-size:12px}
-.screens{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.scr{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
-.wf{background:var(--wbg);border-radius:14px;overflow:hidden;border:4px solid #1e293b;display:flex;flex-direction:column;gap:6px;padding-bottom:8px;margin:8px 0;min-height:220px}
-.wf.web{border-width:1px;border-color:var(--line);border-radius:10px}
-.wf .hd{background:var(--wp);color:#fff;padding:10px;font-weight:800;font-size:13px}
-.wf .c{margin:0 8px;border-radius:8px;background:var(--wsf);padding:6px 8px;font-size:11px;color:var(--wtx);border:1px dashed rgba(100,116,139,.45)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.bgfx{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(900px 500px at 85% -10%,rgba(124,58,237,.18),transparent 60%),radial-gradient(700px 420px at 0% 0%,rgba(0,229,255,.12),transparent 60%),var(--bg)}
+html.light .bgfx{background:radial-gradient(900px 500px at 85% -10%,rgba(124,58,237,.10),transparent 60%),radial-gradient(700px 420px at 0% 0%,rgba(0,229,255,.10),transparent 60%),var(--bg)}
+.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:18px;letter-spacing:-.01em}
+.mark{position:relative;width:38px;height:38px;flex:none}
+.mark:before{content:'';position:absolute;inset:-2px;border-radius:13px;background:conic-gradient(from 0deg,#06b6d4,#8b5cf6,#ec4899,#10b981,#06b6d4);animation:spin 4s linear infinite;opacity:.9}
+.mark i{position:absolute;inset:1px;border-radius:11px;background:#0B1020;display:grid;place-items:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.mark:before{animation:none}.sk{animation:none!important}}
+.grow{flex:1}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:40px;height:40px;padding:0 10px;border-radius:12px;border:1px solid var(--line2);background:var(--card);color:var(--text);cursor:pointer;font-weight:800;font-size:13px;text-decoration:none}
+.icon-btn:hover{border-color:var(--cyan)}
+.icon-btn svg{width:18px;height:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .15s,box-shadow .2s,border-color .2s}
+.btn:hover{border-color:var(--cyan)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:0 10px 30px -12px rgba(0,229,255,.6)}
+.btn.primary:hover{box-shadow:0 14px 36px -10px rgba(124,58,237,.7)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:13px;border-radius:11px}
+.btn svg{width:18px;height:18px;flex:none}
+main{max-width:1180px;margin:0 auto;padding:26px 20px calc(80px + var(--safe-b))}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+html.light .eyebrow{color:#0891B2}
+[dir=rtl] .eyebrow{letter-spacing:0}
+.eyebrow:before{content:'';width:18px;height:2px;border-radius:2px;background:var(--grad)}
+h1{font-size:clamp(26px,4.4vw,40px);line-height:1.15;margin:0 0 8px;font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}
+[dir=rtl] h1{letter-spacing:0;line-height:1.35}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:19px;margin:34px 0 14px;font-weight:800;display:flex;align-items:center;gap:10px}
+h2 .count{font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+.lead{color:var(--muted);margin:0;max-width:640px;font-size:15px}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{padding:16px 18px}
+.stat .k{font-size:12.5px;color:var(--muted);font-weight:600}
+.stat .v{font-size:26px;font-weight:800;line-height:1.2;margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+a.pcard{display:flex;flex-direction:column;gap:12px;padding:20px;text-decoration:none;position:relative;overflow:hidden;transition:transform .2s,box-shadow .25s,border-color .25s}
+a.pcard:before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--grad);opacity:0;transition:opacity .25s}
+a.pcard:hover{transform:translateY(-3px);box-shadow:var(--glow);border-color:transparent}
+a.pcard:hover:before{opacity:1}
+a.pcard:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.prow{display:flex;align-items:flex-start;gap:12px}
+.pav{width:46px;height:46px;border-radius:14px;flex:none;display:grid;place-items:center;font-weight:800;font-size:18px;color:#fff;background:var(--grad)}
+.ptitle{min-width:0;flex:1}
+.pname{font-weight:800;font-size:17px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.pdev{font-size:12.5px;color:var(--faint);display:flex;align-items:center;gap:6px;margin-top:2px}
+.pdev svg{width:14px;height:14px}
+.psum{color:var(--muted);font-size:13.5px;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.chip:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.c-ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:color-mix(in srgb,var(--ok) 28%,transparent)}
+html.light .c-ok{color:#15803D}
+.c-warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+html.light .c-warn{color:#B45309}
+.c-info{color:var(--cyan);background:color-mix(in srgb,var(--cyan) 10%,transparent);border-color:color-mix(in srgb,var(--cyan) 28%,transparent)}
+html.light .c-info{color:#0891B2}
+.c-off{color:var(--muted);background:var(--bg2);border-color:var(--line)}
+.c-off:before{background:var(--faint)}
+.bar{height:8px;border-radius:999px;background:var(--bg2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:999px;background:var(--grad)}
+.prog{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+.prog b{color:var(--text)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.metric{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
+.metric .k{font-size:11.5px;color:var(--muted)}
+.metric .v{font-weight:800;font-size:15px;line-height:1.35}
+.upd{font-size:12px;color:var(--faint)}
+.empty{padding:38px 24px;text-align:center}
+.empty .ill{width:84px;height:84px;margin:0 auto 10px;border-radius:24px;display:grid;place-items:center;background:var(--grad);box-shadow:0 18px 40px -14px rgba(124,58,237,.6);color:#fff}
+.empty .ill svg{width:40px;height:40px}
+.steps{display:grid;gap:10px;max-width:560px;margin:18px auto 22px;text-align:start}
+.step{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--bg2);border:1px solid var(--line)}
+.step .n{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--grad);color:#fff;flex:none}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;margin-bottom:14px;min-height:36px}
+.back:hover{color:var(--text)}
+.back svg{width:18px;height:18px}
+[dir=rtl] .flip{transform:scaleX(-1)}
+.dhead{padding:22px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.dmeta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:13px;margin-top:8px}
+.dmeta span{display:inline-flex;align-items:center;gap:6px}
+.dmeta svg{width:15px;height:15px}
+.dactions{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:230px}
+.ring{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(var(--cyan),var(--violet) calc(var(--p)*1%),var(--bg2) 0);display:grid;place-items:center;flex:none}
+.ring i{width:70px;height:70px;border-radius:50%;background:var(--card-solid);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:18px}
+.drow{display:flex;gap:18px;align-items:center;min-width:0}
+.hint{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.hint svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--cyan)}
+.note-card{padding:12px 14px;margin-top:12px}
+.tasks{display:grid;gap:10px}
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px}
+.tid{font-family:ui-monospace,'SF Mono',Consolas,monospace;font-size:12px;color:var(--muted);direction:ltr;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:3px 8px}
+.ttl{font-weight:700;min-width:0;line-height:1.45;overflow-wrap:anywhere}
+.ttl small{display:block;color:var(--faint);font-weight:500;font-size:12.5px;margin-top:2px}
+.tend{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.screens{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.scr{padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.scr .sh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.scr .sh b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.route{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--cyan);direction:ltr;unicode-bidi:isolate}
+html.light .route{color:#0891B2}
+.wf{background:var(--wbg);border-radius:18px;overflow:hidden;border:5px solid #1E293B;display:flex;flex-direction:column;gap:6px;padding-bottom:10px;min-height:240px;box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
+.wf.web{border-width:1px;border-color:var(--line2);border-radius:12px}
+.wf .url{display:flex;gap:4px;align-items:center;padding:6px 8px;background:#0f172a;direction:ltr}
+.wf .url i{width:6px;height:6px;border-radius:50%;background:#334155}
+.wf .hd{background:var(--wp);color:#fff;padding:10px 12px;font-weight:800;font-size:13px}
+.wf .c{margin:0 8px;border-radius:9px;background:var(--wsf);padding:7px 9px;font-size:11px;color:var(--wtx);border:1px dashed rgba(100,116,139,.45)}
 .wf .c.b{background:var(--wp);color:#fff;text-align:center;font-weight:800;border:0;border-radius:999px}
 .wf .c.i{background:var(--wbg);border:1px solid rgba(100,116,139,.6)}
-.wf .c.m{height:52px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,var(--wsf),var(--wsf) 6px,transparent 6px,transparent 12px)}
-.sw{display:flex;gap:10px;flex-wrap:wrap}
-.sw span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
-.sw i{width:16px;height:16px;border-radius:5px;border:1px solid var(--line);display:inline-block}
-.msg{text-align:center;color:var(--muted);padding:36px 14px;background:var(--card);border:1px dashed var(--line);border-radius:18px}
-.note{font-size:12.5px;color:var(--muted);margin-top:8px}
-.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:6px}
-.inp{font:inherit;width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);margin:4px 0 10px;direction:ltr}
-@media (max-width:640px){.brand .t{display:none}.task{flex-wrap:wrap}}
+.wf .c.m{height:54px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,var(--wsf),var(--wsf) 6px,transparent 6px,transparent 12px)}
+.wf .c.n{display:flex;justify-content:space-around;border-style:solid}
+.wf .c.n i{width:14px;height:14px;border-radius:5px;background:var(--wp);opacity:.6}
+.purpose{font-size:12.5px;color:var(--muted)}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+[dir=rtl] .sw{padding:8px 8px 8px 12px}
+.sw i{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2)}
+.sw b{display:block;font-size:13px}
+.sw small{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--muted);direction:ltr;unicode-bidi:isolate}
+.auth{max-width:440px;margin:30px auto;padding:26px}
+.inp{width:100%;min-height:48px;padding:12px 14px;border-radius:14px;border:1px solid var(--line2);background:var(--bg2);color:var(--text);margin:6px 0 10px;direction:ltr;font-size:16px}
+.inp:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.15)}
+.or{display:flex;align-items:center;gap:10px;color:var(--faint);font-size:12.5px;margin:16px 0}
+.or:before,.or:after{content:'';flex:1;height:1px;background:var(--line)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--bad);font-size:13px;min-height:20px;margin-top:8px}
+.sk{background:linear-gradient(90deg,var(--bg2) 25%,var(--line2) 50%,var(--bg2) 75%);background-size:200% 100%;animation:sh 1.3s infinite;border-radius:12px}
+@keyframes sh{to{background-position:-200% 0}}
+.mbar{display:none}
+.toast{position:fixed;inset-inline:16px;bottom:calc(16px + var(--safe-b));z-index:40;max-width:520px;margin:0 auto;padding:12px 16px;border-radius:14px;background:var(--card-solid);border:1px solid var(--line2);box-shadow:var(--shadow);font-size:13.5px;display:none}
+.toast.show{display:block}
+@media (max-width:980px){.stats4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){
+  .top-in{padding:8px 14px;gap:8px}
+  .brand .t{display:none}
+  main{padding:18px 14px calc(96px + var(--safe-b))}
+  .hero{align-items:stretch;margin-bottom:16px}
+  .hero>.btn{width:100%}
+  .grid{grid-template-columns:1fr;gap:12px}
+  a.pcard{padding:16px}
+  .stats4{gap:10px;margin-bottom:16px}
+  .stat{padding:12px 14px}.stat .v{font-size:22px}
+  .dhead{grid-template-columns:1fr;padding:18px}
+  .dactions{display:none}
+  .drow{gap:14px;align-items:flex-start}.ring{width:68px;height:68px}.ring i{width:54px;height:54px;font-size:15px}
+  .task{grid-template-columns:auto 1fr;padding:12px 14px}
+  .tend{grid-column:1/-1;justify-content:flex-start}
+  .screens{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .wf{min-height:200px;border-width:4px}
+  .toast{bottom:calc(84px + var(--safe-b))}
+  .mbar{display:flex;position:fixed;inset-inline:0;bottom:0;z-index:35;padding:10px 14px calc(10px + var(--safe-b));gap:10px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
+  .mbar .btn{flex:1}
+}
+@media (max-width:380px){.metrics{grid-template-columns:1fr 1fr}.metrics .metric:last-child{grid-column:1/-1}.two{grid-template-columns:1fr}.screens{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<div class="bgfx" aria-hidden="true"></div>
 <header class="top"><div class="top-in">
-  <a class="brand" href="/"><span class="logo">E</span><span class="t">Elyvori</span></a>
-  <div style="display:flex;gap:8px">
-    <button class="btn" id="refresh" type="button">↻ تحديث</button>
-    <a class="btn" href="/account.html">حسابي</a>
-  </div>
+  <a class="brand" href="/" aria-label="Elyvori">
+    <span class="mark"><i><svg viewBox="0 0 32 32" width="22" height="22" fill="none" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset=".45" stop-color="#818cf8"/><stop offset=".8" stop-color="#e879f9"/><stop offset="1" stop-color="#34d399"/></linearGradient><linearGradient id="lg2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#c084fc"/></linearGradient></defs><polygon points="16 2,28 8.5,28 23.5,16 30,4 23.5,4 8.5" stroke="url(#lg2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M11 9H22M11 16H19.5M11 23H22M11 9V23" stroke="url(#lg1)" stroke-width="2.6" stroke-linecap="round"/></svg></i></span>
+    <span class="t">Elyvori</span>
+  </a>
+  <span class="grow"></span>
+  <button class="icon-btn" id="langBtn" type="button"></button>
+  <button class="icon-btn" id="themeBtn" type="button"></button>
+  <a class="icon-btn" id="acctBtn" href="/account.html"></a>
 </div></header>
-<main id="app"><div class="msg">…</div></main>
+<main id="app"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (function () {
   var API = 'https://elyvori-api.onrender.com';
   var EXT = 'elyvori.elyvori';
-  var app = document.getElementById('app');
-  var STATE = { done: ['✓ خلصت', 'p-ok'], awaiting: ['⏳ بانتظار موافقتك', 'p-warn'], next: ['→ الجاية', 'p-info'], waiting: ['بتستنى مهام قبلها', 'p-off'], blocked: ['بتستنى مهمة قبلها', 'p-off'], pending: ['لسا', 'p-off'], failed: ['✗ فشلت', 'p-warn'] };
+  var html = document.documentElement, app = document.getElementById('app');
+  var lang = html.lang === 'ar' ? 'ar' : 'en';
+
+  var I = {
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    back: '<svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    pc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+    refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>',
+    coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2 0 0 1 5 0c0 2.5-5 1.5-5 4.5a2.5 2 0 0 0 5 0M12 6v1.5M12 16.5V18"/></svg>',
+    factory: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 21V10l6 4V10l6 4V6l6-3v18H3z"/><path d="M7 17h2M12 17h2M17 17h1"/></svg>'
+  };
+
+  var T = {
+    en: {
+      title: 'My projects', eyebrow: 'Elyvori Factory', lead: 'Everything you built with the Elyvori Factory in VS Code — tasks, screens and credits. Your code never leaves your computer.',
+      newBtn: 'New project in VS Code', refresh: 'Refresh', account: 'My account', projects: 'Projects', tasksDone: 'Tasks done', screens: 'Screens built', credits: 'Credits used',
+      tasks: 'Tasks', screensH: 'Screens', colors: 'Colours', running: 'In progress', done: 'Completed', waiting: 'Needs approval',
+      updated: 'Updated', open: 'Open in VS Code', openTask: 'Open task', all: 'All projects', rev: 'Revision', files: 'files', built: 'Built', planned: 'Planned',
+      st: { done: 'Done', awaiting: 'Awaiting you', next: 'Up next', waiting: 'Waiting', blocked: 'Blocked', pending: 'Not started', failed: 'Failed' },
+      emptyH: 'Start your first project', s1: 'Install the <b>Elyvori</b> extension in VS Code', s2: 'Press <b class="ltr">Sign in with Elyvori</b> and link this computer', s3: 'Press the button below and describe what to build — it appears here by itself',
+      emptyNote: 'Older projects show up as soon as you open them in VS Code while signed in.',
+      deskHint: 'Opens on the computer the project was built on', mobileHint: 'VS Code runs on a computer — open this project from the computer it was built on.',
+      signTitle: 'Sign in', signLead: 'Sign in to see the projects you built with the Elyvori Factory.', email: 'Email', password: 'Password', signBtn: 'Sign in', or: 'or',
+      badLogin: 'Wrong email or password.', net: 'Connection problem — try again.', expired: 'Your session ended — please sign in again.',
+      loadErr: 'Could not load your projects. The server may be waking up — try again in a minute.', notFound: 'This project does not exist or was removed.', back: 'Back',
+      wake: 'Loading… the first request can take up to 30 seconds.', opening: 'Opening VS Code… If nothing happens, make sure VS Code and the Elyvori extension are installed on this computer.'
+    },
+    ar: {
+      title: 'مشاريعي', eyebrow: 'مصنع Elyvori', lead: 'كل اللي بنيته بمصنع Elyvori على VS Code — المهام والشاشات والرصيد. الكود نفسه ما بيطلع من جهازك.',
+      newBtn: 'مشروع جديد بـ VS Code', refresh: 'تحديث', account: 'حسابي', projects: 'المشاريع', tasksDone: 'مهام خلصت', screens: 'شاشات انبنت', credits: 'رصيد مصروف',
+      tasks: 'المهام', screensH: 'الشاشات', colors: 'الألوان', running: 'شغّال', done: 'خلص', waiting: 'بانتظار موافقتك',
+      updated: 'آخر تحديث', open: 'افتح بـ VS Code', openTask: 'افتح المهمة', all: 'كل المشاريع', rev: 'النسخة', files: 'ملفات', built: 'مبنية', planned: 'مخطط لها',
+      st: { done: 'خلصت', awaiting: 'بانتظارك', next: 'الجاية', waiting: 'بتستنى', blocked: 'موقوفة', pending: 'لسا', failed: 'فشلت' },
+      emptyH: 'ابدأ أول مشروع', s1: 'ثبّت إضافة <b>Elyvori</b> على VS Code', s2: 'اضغط <b class="ltr">Sign in with Elyvori</b> واربط جهازك', s3: 'اضغط الزر تحت واكتب شو بدك تبني — المشروع بيطلع هون لحاله',
+      emptyNote: 'مشاريعك القديمة بتظهر أول ما تفتحها بـ VS Code وإنت مسجّل دخول.',
+      deskHint: 'بيفتح على الجهاز اللي انبنى عليه المشروع', mobileHint: 'VS Code بيشتغل على الكمبيوتر — افتح هالمشروع من الجهاز اللي انبنى عليه.',
+      signTitle: 'تسجيل الدخول', signLead: 'سجّل دخول عشان تشوف المشاريع اللي بنيتها بمصنع Elyvori.', email: 'الإيميل', password: 'كلمة السر', signBtn: 'تسجيل الدخول', or: 'أو',
+      badLogin: 'الإيميل أو كلمة السر غلط.', net: 'مشكلة بالاتصال — جرّب كمان مرة.', expired: 'انتهت جلستك — سجّل دخول مرة ثانية.',
+      loadErr: 'ما قدرت أحمّل المشاريع. السيرفر ممكن يكون نايم — جرّب بعد دقيقة.', notFound: 'المشروع مش موجود أو انحذف.', back: 'رجوع',
+      wake: 'جاري التحميل… أول طلب ممكن ياخذ لحد 30 ثانية.', opening: 'بفتحلك VS Code… إذا ما صار اشي، تأكد إن VS Code وإضافة Elyvori مثبّتين على هالجهاز.'
+    }
+  };
+  function t() { return T[lang]; }
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function token() { try { return localStorage.getItem('elyvori_token'); } catch (e) { return null; } }
-  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-  function when(iso) { try { return new Date(iso).toLocaleString('ar', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
   function num(n) { return Number(n || 0).toLocaleString('en-US'); }
   function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
+  function ago(iso) {
+    try {
+      var s = (new Date(iso).getTime() - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
+      var u = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
+      for (var i = 0; i < u.length; i++) if (Math.abs(s) >= u[i][1]) return rtf.format(Math.round(s / u[i][1]), u[i][0]);
+      return rtf.format(0, 'minute');
+    } catch (e) { return ''; }
+  }
   function deep(key, task) { return 'vscode://' + EXT + '/open?project=' + encodeURIComponent(key) + (task ? '&task=' + encodeURIComponent(task) : ''); }
+  var NEW = 'vscode://' + EXT + '/new';
+  var touch = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches && !matchMedia('(min-width:1024px)').matches);
+  function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 5000); }
+  document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href^="vscode://"]'); if (a) toast(t().opening); });
+
+  function chrome() {
+    document.title = t().title + ' | Elyvori';
+    var dark = !html.classList.contains('light');
+    var lb = document.getElementById('langBtn'), tb = document.getElementById('themeBtn'), ab = document.getElementById('acctBtn');
+    lb.textContent = lang === 'ar' ? 'EN' : 'ع'; lb.setAttribute('aria-label', lang === 'ar' ? 'English' : 'العربية'); lb.title = lb.getAttribute('aria-label');
+    tb.innerHTML = dark ? I.sun : I.moon; tb.setAttribute('aria-label', dark ? 'Light mode' : 'Dark mode'); tb.title = tb.getAttribute('aria-label');
+    ab.innerHTML = I.user + '<span class="sr">' + esc(t().account) + '</span>'; ab.title = t().account;
+  }
+  document.getElementById('langBtn').onclick = function () {
+    lang = lang === 'ar' ? 'en' : 'ar'; store('elyvori_lang', lang); html.lang = lang; html.dir = lang === 'ar' ? 'rtl' : 'ltr'; route();
+  };
+  document.getElementById('themeBtn').onclick = function () {
+    var light = !html.classList.contains('light');
+    html.classList.add('theme-anim'); html.classList.toggle('light', light); html.classList.toggle('dark', !light); html.style.colorScheme = light ? 'light' : 'dark';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', light ? '#F6F8FC' : '#080A12');
+    store('elyvori_theme', light ? 'light' : 'dark'); setTimeout(function () { html.classList.remove('theme-anim'); }, 450); chrome();
+  };
+
   function get(path) {
     return fetch(API + path, { headers: { Authorization: 'Bearer ' + token() } }).then(function (r) {
       if (r.status === 401 || r.status === 403) throw new Error('auth');
@@ -101,111 +316,133 @@ a.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
     });
   }
 
+  // ---------------------------------------------------------------- views
+  function skeleton() {
+    var c = '<div class="card" style="padding:20px;display:grid;gap:12px"><div style="display:flex;gap:12px"><div class="sk" style="width:46px;height:46px"></div><div style="flex:1;display:grid;gap:8px"><div class="sk" style="height:16px;width:60%"></div><div class="sk" style="height:12px;width:35%"></div></div></div><div class="sk" style="height:36px"></div><div class="sk" style="height:8px"></div><div class="sk" style="height:46px"></div></div>';
+    app.innerHTML = '<div class="hero"><div style="flex:1"><div class="sk" style="height:14px;width:120px;margin-bottom:12px"></div><div class="sk" style="height:34px;width:260px;max-width:80%;margin-bottom:10px"></div><div class="sk" style="height:14px;width:520px;max-width:90%"></div></div></div>' +
+      '<div class="grid">' + c + c + c + '</div><p class="upd" style="margin-top:14px">' + esc(t().wake) + '</p>';
+  }
+
   function login(msg) {
-    app.innerHTML = '<div class="card" style="max-width:440px;margin:30px auto"><h1>مشاريعي</h1><p class="sub">' + esc(msg || 'سجّل دخول عشان تشوف مشاريع المصنع تبعتك.') + '</p>' +
-      '<form id="lf"><input class="inp" id="em" type="email" placeholder="email@example.com" autocomplete="username" required>' +
-      '<input class="inp" id="pw" type="password" placeholder="••••••••" autocomplete="current-password" required>' +
-      '<button class="btn primary" style="width:100%" id="lb">تسجيل الدخول</button><div class="note" id="ln"></div></form>' +
-      '<div class="note">أو <a href="' + API + '/auth/google/start?redirect=' + encodeURIComponent(location.origin + location.pathname) + '">Google</a> · <a href="' + API + '/auth/github/start?redirect=' + encodeURIComponent(location.origin + location.pathname) + '">GitHub</a></div></div>';
+    var back = location.origin + location.pathname;
+    app.innerHTML = '<div class="card auth"><div class="eyebrow">' + esc(t().eyebrow) + '</div><h1 style="font-size:28px">' + esc(t().signTitle) + '</h1><p class="lead" style="margin-bottom:14px">' + esc(msg || t().signLead) + '</p>' +
+      '<form id="lf" novalidate><label class="sr" for="em">' + esc(t().email) + '</label><input class="inp" id="em" type="email" inputmode="email" placeholder="' + esc(t().email) + '" autocomplete="username" required>' +
+      '<label class="sr" for="pw">' + esc(t().password) + '</label><input class="inp" id="pw" type="password" placeholder="' + esc(t().password) + '" autocomplete="current-password" required>' +
+      '<button class="btn primary" style="width:100%" id="lb" type="submit">' + esc(t().signBtn) + '</button><div class="err" id="ln" role="alert"></div></form>' +
+      '<div class="or">' + esc(t().or) + '</div><div class="two">' +
+      '<a class="btn" href="' + API + '/auth/google/start?redirect=' + encodeURIComponent(back) + '"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.3-1.6 3.8-5.4 3.8-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12s4.3 9.6 9.6 9.6c5.5 0 9.2-3.9 9.2-9.4 0-.6-.1-1.1-.2-1.6H12z"/></svg>Google</a>' +
+      '<a class="btn" href="' + API + '/auth/github/start?redirect=' + encodeURIComponent(back) + '"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7c-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg>GitHub</a></div></div>';
     document.getElementById('lf').onsubmit = function (e) {
       e.preventDefault();
-      var b = document.getElementById('lb'); b.disabled = true;
+      var b = document.getElementById('lb'), n = document.getElementById('ln'); b.disabled = true; n.textContent = '';
       fetch(API + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('em').value, password: document.getElementById('pw').value }) })
-        .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; }); })
         .then(function (r) {
-          if (r.j.accessToken) { set('elyvori_token', r.j.accessToken); if (r.j.user) set('elyvori_user', JSON.stringify(r.j.user)); route(); }
-          else { b.disabled = false; document.getElementById('ln').textContent = 'الإيميل أو كلمة السر غلط.'; }
-        }).catch(function () { b.disabled = false; document.getElementById('ln').textContent = 'مشكلة بالاتصال.'; });
+          if (r.j.accessToken) { store('elyvori_token', r.j.accessToken); if (r.j.user) store('elyvori_user', JSON.stringify(r.j.user)); route(); }
+          else { b.disabled = false; n.textContent = t().badLogin; }
+        }).catch(function () { b.disabled = false; n.textContent = t().net; });
     };
   }
 
   function fail(e) {
-    if (e && e.message === 'auth') return login('انتهت جلستك — سجّل دخول مرة ثانية.');
-    app.innerHTML = '<div class="msg">' + (e && e.message === '404' ? 'المشروع مش موجود أو انحذف.' : 'ما قدرت أحمّل المشاريع. السيرفر ممكن يكون نايم — جرّب بعد دقيقة.') + '<br><br><a class="btn" href="/projects.html">رجوع</a></div>';
+    if (e && e.message === 'auth') return login(t().expired);
+    app.innerHTML = '<div class="card empty"><div class="ill">' + I.info + '</div><p class="lead" style="margin:10px auto 18px">' + esc(e && e.message === '404' ? t().notFound : t().loadErr) + '</p>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn" href="#">' + I.back + esc(t().back) + '</a><button class="btn primary" type="button" id="retry">' + I.refresh + esc(t().refresh) + '</button></div></div>';
+    document.getElementById('retry').onclick = route;
   }
 
-  // ---------------------------------------------------------------- list
   function list() {
-    app.innerHTML = '<div class="msg">جاري تحميل مشاريعك… (أول مرة ممكن ياخذ نص دقيقة)</div>';
+    skeleton();
     get('/devices/projects').then(function (ps) {
-      var h = '<div class="head"><div><h1>مشاريعي</h1><p class="sub">المشاريع اللي بنيتها بمصنع Elyvori بـ VS Code — المهام والشاشات والرصيد. الكود نفسه بيضل على جهازك.</p></div>' +
-        '<a class="btn primary" href="vscode://' + EXT + '/new">＋ مشروع جديد بـ VS Code</a></div>';
+      var h = '<div class="hero"><div><div class="eyebrow">' + esc(t().eyebrow) + '</div><h1><span class="grad-text">' + esc(t().title) + '</span></h1><p class="lead">' + esc(t().lead) + '</p></div>' +
+        '<a class="btn primary" href="' + NEW + '">' + I.plus + esc(t().newBtn) + '</a></div>';
       if (!ps.length) {
-        h += '<div class="card" style="text-align:center;padding:30px 18px"><div style="font-size:42px">🏭</div><h2 style="margin-top:6px">ابدأ أول مشروع</h2>' +
-          '<div class="steps" style="display:grid;gap:10px;max-width:520px;margin:12px auto 18px;text-align:right">' +
-          '<div class="task"><span class="pill p-info">1</span><div class="t">ثبّت إضافة <b>Elyvori</b> على VS Code</div></div>' +
-          '<div class="task"><span class="pill p-info">2</span><div class="t">بالإضافة اضغط <b class="ltr">Sign in with Elyvori</b> واربط جهازك</div></div>' +
-          '<div class="task"><span class="pill p-info">3</span><div class="t">اضغط الزر تحت واكتب شو بدك تبني — المشروع بيطلع هون لحاله</div></div></div>' +
-          '<a class="btn primary" href="vscode://' + EXT + '/new">＋ مشروع جديد بـ VS Code</a>' +
-          '<div class="note">إذا عندك مشاريع قديمة، افتحها بـ VS Code وإنت مسجّل دخول، وبتظهر هون.</div></div>';
-      } else {
-        h += '<div class="grid">' + ps.map(function (p) {
-          var done = p.tasks.done === p.tasks.total && p.tasks.total > 0;
-          return '<a class="card" href="#p=' + encodeURIComponent(p.key) + '"' + (p.rtl ? '' : ' dir="auto"') + '>' +
-            '<div class="head"><div class="pname" dir="auto">' + esc(p.name) + '</div>' +
-            (p.tasks.awaiting ? '<span class="pill p-warn">بانتظار موافقتك</span>' : done ? '<span class="pill p-ok">خلص ✓</span>' : '<span class="pill p-info">شغّال</span>') + '</div>' +
-            '<p class="psum" dir="auto">' + esc(p.summary) + '</p>' +
-            '<div class="muted">المهام <b class="ltr">' + p.tasks.done + '/' + p.tasks.total + '</b></div>' +
-            '<div class="meter"><i style="width:' + pct(p.tasks.done, p.tasks.total) + '%"></i></div>' +
-            '<div class="stats"><span>الشاشات <b class="ltr">' + p.screens.built + '/' + p.screens.total + '</b></span><span>الرصيد <b class="ltr">' + num(p.spent) + '</b></span><span>💻 ' + esc(p.device) + '</span></div>' +
-            '<div class="note">آخر تحديث ' + esc(when(p.updatedAt)) + '</div></a>';
-        }).join('') + '</div>';
+        h += '<div class="card empty"><div class="ill">' + I.factory + '</div><h2 style="justify-content:center;margin:14px 0 4px">' + esc(t().emptyH) + '</h2>' +
+          '<div class="steps"><div class="step"><span class="n">1</span><div>' + t().s1 + '</div></div><div class="step"><span class="n">2</span><div>' + t().s2 + '</div></div><div class="step"><span class="n">3</span><div>' + esc(t().s3) + '</div></div></div>' +
+          '<a class="btn primary" href="' + NEW + '">' + I.plus + esc(t().newBtn) + '</a><p class="upd" style="margin:14px 0 0">' + esc(t().emptyNote) + '</p></div>';
+        app.innerHTML = h; return;
       }
+      var tt = 0, td = 0, st = 0, sb = 0, cr = 0;
+      ps.forEach(function (p) { tt += p.tasks.total; td += p.tasks.done; st += p.screens.total; sb += p.screens.built; cr += p.spent; });
+      h += '<div class="stats4">' +
+        '<div class="card stat"><div class="k">' + esc(t().projects) + '</div><div class="v">' + num(ps.length) + '</div></div>' +
+        '<div class="card stat"><div class="k">' + esc(t().tasksDone) + '</div><div class="v"><span class="ltr">' + num(td) + ' / ' + num(tt) + '</span></div></div>' +
+        '<div class="card stat"><div class="k">' + esc(t().screens) + '</div><div class="v"><span class="ltr">' + num(sb) + ' / ' + num(st) + '</span></div></div>' +
+        '<div class="card stat"><div class="k">' + esc(t().credits) + '</div><div class="v"><span class="grad-text">' + num(cr) + '</span></div></div></div>';
+      h += '<div class="grid">' + ps.map(function (p) {
+        var finished = p.tasks.total > 0 && p.tasks.done === p.tasks.total;
+        var chip = p.tasks.awaiting ? '<span class="chip c-warn">' + esc(t().waiting) + '</span>' : finished ? '<span class="chip c-ok">' + esc(t().done) + '</span>' : '<span class="chip c-info">' + esc(t().running) + '</span>';
+        return '<a class="card pcard" href="#p=' + encodeURIComponent(p.key) + '">' +
+          '<div class="prow"><div class="pav">' + esc((p.name || '?').trim().charAt(0).toUpperCase()) + '</div><div class="ptitle"><div class="pname" dir="auto">' + esc(p.name) + '</div><div class="pdev">' + I.pc + '<span>' + esc(p.device) + '</span></div></div>' + chip + '</div>' +
+          '<p class="psum" dir="auto">' + esc(p.summary) + '</p>' +
+          '<div><div class="prog"><span>' + esc(t().tasks) + '</span><b class="ltr">' + num(p.tasks.done) + '/' + num(p.tasks.total) + '</b></div><div class="bar"><i style="width:' + pct(p.tasks.done, p.tasks.total) + '%"></i></div></div>' +
+          '<div class="metrics"><div class="metric"><div class="k">' + esc(t().screensH) + '</div><div class="v ltr">' + num(p.screens.built) + '/' + num(p.screens.total) + '</div></div>' +
+          '<div class="metric"><div class="k">' + esc(t().credits) + '</div><div class="v">' + num(p.spent) + '</div></div>' +
+          '<div class="metric"><div class="k">' + esc(t().updated) + '</div><div class="v" style="font-size:12.5px;font-weight:700">' + esc(ago(p.updatedAt)) + '</div></div></div></a>';
+      }).join('') + '</div>';
       app.innerHTML = h;
     }).catch(fail);
   }
 
-  // ---------------------------------------------------------------- one project
-  function wire(s, colors) {
+  function wire(s, colors, rtl) {
     var c = colors || {};
     var pick = function () { for (var i = 0; i < arguments.length; i++) if (c[arguments[i]]) return c[arguments[i]]; return ''; };
-    var css = '--wp:' + (pick('primary', 'brand') || '#0891b2') + ';--wbg:' + (pick('background', 'bg') || '#ffffff') + ';--wsf:' + (pick('surface', 'card') || '#f1f5f9') + ';--wtx:' + (pick('text', 'foreground') || '#0f172a');
-    var block = function (t) {
-      var l = t.toLowerCase();
-      if (/(button|btn|cta|fab|زر)/.test(l)) return '<div class="c b" dir="auto">' + esc(t) + '</div>';
-      if (/(field|input|search|form|حقل|بحث|نموذج)/.test(l)) return '<div class="c i" dir="auto">' + esc(t) + '</div>';
-      if (/(image|photo|banner|hero|logo|صورة|بانر)/.test(l)) return '<div class="c m" dir="auto">' + esc(t) + '</div>';
-      return '<div class="c" dir="auto">' + esc(t) + '</div>';
+    var css = '--wp:' + (pick('primary', 'brand') || '#7C3AED') + ';--wbg:' + (pick('background', 'bg') || '#ffffff') + ';--wsf:' + (pick('surface', 'card') || '#f1f5f9') + ';--wtx:' + (pick('text', 'foreground') || '#0f172a');
+    var block = function (x) {
+      var l = x.toLowerCase();
+      if (/(bottom|tab bar|tabs|سفلي|تبويب)/.test(l)) return '<div class="c n" title="' + esc(x) + '"><i></i><i></i><i></i><i></i></div>';
+      if (/(button|btn|cta|fab|زر)/.test(l)) return '<div class="c b" dir="auto">' + esc(x) + '</div>';
+      if (/(field|input|search|form|حقل|بحث|نموذج)/.test(l)) return '<div class="c i" dir="auto">' + esc(x) + '</div>';
+      if (/(image|photo|banner|hero|صورة|بانر)/.test(l)) return '<div class="c m" dir="auto">' + esc(x) + '</div>';
+      return '<div class="c" dir="auto">' + esc(x) + '</div>';
     };
-    return '<div class="wf' + (s.kind === 'web' ? ' web' : '') + '" style="' + esc(css) + '"><div class="hd" dir="auto">' + esc(s.name) + '</div>' + (s.components || []).map(block).join('') + '</div>';
+    return '<div class="wf' + (s.kind === 'web' ? ' web' : '') + '" style="' + esc(css) + '" dir="' + (rtl ? 'rtl' : 'ltr') + '">' + (s.kind === 'web' ? '<div class="url"><i></i><i></i><i></i></div>' : '') +
+      '<div class="hd" dir="auto">' + esc(s.name) + '</div>' + (s.components || []).map(block).join('') + '</div>';
   }
 
   function project(key) {
-    app.innerHTML = '<div class="msg">…</div>';
+    skeleton();
     get('/devices/projects/' + encodeURIComponent(key)).then(function (p) {
-      var total = p.tasks.length, done = p.tasks.filter(function (t) { return t.state === 'done'; }).length;
-      var h = '<a class="back" href="#">→ كل المشاريع</a>';
-      h += '<div class="head"><div style="min-width:0"><h1 dir="auto">' + esc(p.name) + '</h1><p class="sub" dir="auto" style="margin-bottom:6px">' + esc(p.summary) + '</p>' +
-        '<div class="muted">النسخة ' + esc(p.revision) + ' · 💻 ' + esc(p.device) + ' · آخر تحديث ' + esc(when(p.updatedAt)) + '</div></div>' +
-        '<a class="btn primary" href="' + esc(deep(p.key)) + '">افتح بـ VS Code ↗</a></div>';
-      h += '<div class="card" style="margin-top:14px"><div class="stats" style="margin:0"><span>المهام <b class="ltr">' + done + '/' + total + '</b></span><span>الشاشات <b class="ltr">' + p.screens.filter(function (s) { return s.built; }).length + '/' + p.screens.length + '</b></span><span>الرصيد اللي صرفه المشروع <b class="ltr">' + num(p.spent) + '</b></span></div>' +
-        '<div class="meter"><i style="width:' + pct(done, total) + '%"></i></div>' +
-        '<div class="note">زر "افتح بـ VS Code" بيشتغل على الجهاز اللي عليه المشروع (' + esc(p.device) + ')، لأن الكود هناك.</div></div>';
+      var total = p.tasks.length, done = p.tasks.filter(function (x) { return x.state === 'done'; }).length, pc = pct(done, total);
+      var built = p.screens.filter(function (s) { return s.built; }).length;
+      var awaiting = p.tasks.filter(function (x) { return x.state === 'awaiting'; })[0];
+      var h = '<a class="back" href="#">' + I.back + esc(t().all) + '</a>';
+      h += '<div class="card dhead"><div class="drow"><div class="ring" style="--p:' + pc + '"><i class="ltr">' + pc + '%</i></div><div style="min-width:0">' +
+        '<div class="eyebrow">' + esc(t().eyebrow) + '</div><h1 dir="auto" style="margin:0">' + esc(p.name) + '</h1>' +
+        '<p class="lead" dir="auto" style="margin-top:4px">' + esc(p.summary) + '</p>' +
+        '<div class="dmeta"><span>' + I.layers + esc(t().rev) + ' <b class="ltr">' + esc(p.revision) + '</b></span><span>' + I.pc + esc(p.device) + '</span><span>' + I.clock + esc(ago(p.updatedAt)) + '</span>' +
+        '<span>' + I.coin + esc(t().credits) + ' <b>' + num(p.spent) + '</b></span></div></div></div>' +
+        '<div class="dactions"><a class="btn primary" href="' + esc(deep(p.key)) + '">' + I.ext + esc(t().open) + '</a>' +
+        (awaiting ? '<a class="btn" href="' + esc(deep(p.key, awaiting.id)) + '">' + esc(t().openTask) + ' · <span class="ltr">' + esc(awaiting.id) + '</span></a>' : '') +
+        '<div class="hint">' + I.info + '<span>' + esc(t().deskHint) + ' (' + esc(p.device) + ')</span></div></div></div>';
+      if (touch) h += '<div class="card note-card"><div class="hint">' + I.info + '<span>' + esc(t().mobileHint) + '</span></div></div>';
 
-      h += '<h2>المهام</h2><div class="tasks">' + p.tasks.map(function (t) {
-        var st = STATE[t.state] || STATE.pending;
-        return '<div class="task"><span class="id">' + esc(t.id) + '</span><div class="t" dir="auto">' + esc(t.title) + '<small>' + (t.files ? t.files + ' ملفات' : '') + (t.agent ? ' · ' + esc(t.agent) : '') + '</small></div>' +
-          '<span class="pill ' + st[1] + '">' + st[0] + '</span>' +
-          (t.state === 'awaiting' || t.state === 'next' ? '<a class="btn sm" href="' + esc(deep(p.key, t.id)) + '">افتح المهمة</a>' : '') + '</div>';
+      h += '<h2>' + esc(t().tasks) + ' <span class="count ltr">' + done + '/' + total + '</span></h2><div class="tasks">' + p.tasks.map(function (x) {
+        var map = { done: 'c-ok', awaiting: 'c-warn', next: 'c-info', failed: 'c-warn' };
+        return '<div class="card task"><span class="tid">' + esc(x.id) + '</span><div class="ttl" dir="auto">' + esc(x.title) +
+          '<small dir="' + (lang === 'ar' ? 'rtl' : 'ltr') + '">' + (x.files ? num(x.files) + ' ' + esc(t().files) : '') + (x.agent ? ' · <span class="ltr">' + esc(x.agent) + '</span>' : '') + '</small></div>' +
+          '<div class="tend"><span class="chip ' + (map[x.state] || 'c-off') + '">' + esc(t().st[x.state] || x.state) + '</span>' +
+          ((x.state === 'awaiting' || x.state === 'next') && !touch ? '<a class="btn sm" href="' + esc(deep(p.key, x.id)) + '">' + esc(t().openTask) + '</a>' : '') + '</div></div>';
       }).join('') + '</div>';
 
       if (p.screens.length) {
-        h += '<h2>الشاشات</h2><div class="screens">' + p.screens.map(function (s) {
-          return '<div class="scr"><div class="head"><b dir="auto">' + esc(s.name) + '</b>' + (s.built ? '<span class="pill p-ok">مبنية</span>' : '<span class="pill p-off">مخطط لها</span>') + '</div>' +
-            (s.route ? '<div class="muted ltr" style="text-align:right">' + esc(s.route) + '</div>' : '') + wire(s, p.colors) +
-            '<div class="muted" dir="auto">' + esc(s.purpose) + '</div></div>';
+        h += '<h2>' + esc(t().screensH) + ' <span class="count ltr">' + built + '/' + p.screens.length + '</span></h2><div class="screens">' + p.screens.map(function (s) {
+          return '<div class="card scr"><div class="sh"><b dir="auto">' + esc(s.name) + '</b><span class="chip ' + (s.built ? 'c-ok' : 'c-off') + '">' + esc(s.built ? t().built : t().planned) + '</span></div>' +
+            (s.route ? '<span class="route">' + esc(s.route) + '</span>' : '') + wire(s, p.colors, p.rtl) + (s.purpose ? '<div class="purpose" dir="auto">' + esc(s.purpose) + '</div>' : '') + '</div>';
         }).join('') + '</div>';
       }
       var cols = Object.keys(p.colors || {});
-      if (cols.length) h += '<h2>الألوان</h2><div class="sw">' + cols.map(function (k) { return '<span><i style="background:' + esc(p.colors[k]) + '"></i>' + esc(k) + ' <span class="ltr">' + esc(p.colors[k]) + '</span></span>'; }).join('') + '</div>';
+      if (cols.length) h += '<h2>' + esc(t().colors) + '</h2><div class="swatches">' + cols.map(function (k) { return '<div class="sw"><i style="background:' + esc(p.colors[k]) + '"></i><div><b>' + esc(k) + '</b><small>' + esc(p.colors[k]) + '</small></div></div>'; }).join('') + '</div>';
+      h += '<div class="mbar"><a class="btn" href="#">' + I.back + esc(t().all) + '</a><a class="btn primary" href="/account.html">' + I.user + esc(t().account) + '</a></div>';
       app.innerHTML = h;
     }).catch(fail);
   }
 
   function route() {
+    chrome();
     if (location.hash.indexOf('elyvori_auth') >= 0) {
       var hp = new URLSearchParams(location.hash.slice(1));
-      if (hp.get('elyvori_auth')) { set('elyvori_token', hp.get('elyvori_auth')); set('elyvori_user', JSON.stringify({ email: hp.get('email') || '', organizationName: hp.get('org') || '' })); }
+      if (hp.get('elyvori_auth')) { store('elyvori_token', hp.get('elyvori_auth')); store('elyvori_user', JSON.stringify({ email: hp.get('email') || '', organizationName: hp.get('org') || '' })); }
       history.replaceState(null, '', location.pathname);
     }
     if (!token()) return login();
@@ -214,7 +451,6 @@ a.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
-  document.getElementById('refresh').onclick = route;
   route();
 })();
 </script>
