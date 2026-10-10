@@ -56,6 +56,8 @@ export function Navbar({
   const closeAll = () => { setAgentsOpen(false); setMobileOpen(false); };
 
   const agents = [
+    // ELYVORI-ACCOUNT-NAV: customer plan / credits page
+    ...(auth.isAuthenticated ? [{ icon: Sparkles, labelEn: 'My plan & credits', labelAr: 'حسابي وباقتي', descEn: 'Plan, credits, usage & wallet', descAr: 'الباقة والرصيد والاستهلاك والمحفظة', color: '#22c55e', action: () => { closeAll(); window.location.href = '/account.html'; } }] : []),
     { icon: Briefcase, labelEn: 'Career Agent', labelAr: 'وكيل التوظيف', descEn: 'Resume matching & cover letters', descAr: 'مطابقة السيرة ورسائل التغطية', color: '#6366f1', action: () => { closeAll(); onOpenCareerAgent(); } },
     { icon: Scale, labelEn: 'Contract AI', labelAr: 'محلل العقود', descEn: 'Forensic contract risk analysis', descAr: 'تحليل مخاطر العقود', color: '#8b5cf6', action: () => { closeAll(); onOpenContractAnalyzer(); } },
     { icon: HeadphonesIcon, labelEn: 'Support AI', labelAr: 'دعم العملاء', descEn: 'Customer de-escalation & response', descAr: 'تهدئة العملاء وردود جاهزة', color: '#0ea5e9', action: () => { closeAll(); onOpenCustomerSupport(); } },

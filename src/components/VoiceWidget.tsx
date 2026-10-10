@@ -843,6 +843,41 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
   };
 
+  // ELYVORI-ACCOUNT-CHAT: credits / plan inside the chat (1000 Starter, 3000 Pro)
+  const fetchAccount = async (): Promise<any | null> => {
+    const { token } = getAuth();
+    if (!token) return null;
+    try {
+      const res = await fetch(`${API}/account/summary`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return null;
+      const j = await res.json();
+      return j && j.found ? j : null;
+    } catch { return null; }
+  };
+  const upgradeActions = (ar: boolean): MsgAction[] => [
+    { label: ar ? 'رقّي لـ Starter — $19 (1000 رصيد)' : 'Upgrade to Starter — $19 (1000 credits)', wallet: { type: 'pay_item', payload: { itemType: 'plan', itemId: 'starter' } } },
+    { label: ar ? 'رقّي لـ Pro — $29 (3000 رصيد)' : 'Upgrade to Pro — $29 (3000 credits)', wallet: { type: 'pay_item', payload: { itemType: 'plan', itemId: 'pro' } } },
+    { label: ar ? 'حسابي وباقتي' : 'My plan & credits', url: '/account.html' },
+    { label: T().plansBtn, type: 'pricing' },
+  ];
+  const outOfCredits = (viaVoice: boolean) => {
+    const ar = replyLangRef.current === 'ar';
+    const msg = ar
+      ? 'خلص رصيدك 🙏 كل خدمة إلها سعر بالرصيد (موقع = 50، بحث عن شركات = 35، حملة تسويق = 10).\n\nرقّي باقتك وبينضافلك الرصيد فوراً:\n• **Starter** — $19 ← **1000 رصيد** (≈ 20 موقع)\n• **Pro** — $29 ← **3000 رصيد** (≈ 60 موقع)\n\nتقدر تدفع من محفظة Elyvori Pay مباشرة من هون.'
+      : 'You are out of credits 🙏 Every service costs credits (website = 50, business search = 35, marketing = 10).\n\nUpgrade and the credits are added instantly:\n• **Starter** — $19 → **1000 credits** (≈ 20 websites)\n• **Pro** — $29 → **3000 credits** (≈ 60 websites)\n\nYou can pay from your Elyvori Pay wallet right here.';
+    reply(msg, viaVoice, { actions: upgradeActions(ar) });
+  };
+  const creditsNote = async (cost: number) => {
+    const acc = await fetchAccount();
+    if (!acc) return;
+    const ar = replyLangRef.current === 'ar';
+    const low = Number(acc.credits) < cost;
+    const text = ar
+      ? `💳 انخصم **${cost} رصيد** — باقي معك **${acc.credits}** رصيد.${low ? '\nرصيدك قرب يخلص — رقّي باقتك عشان تكمل.' : ''}`
+      : `💳 **${cost} credits** used — **${acc.credits}** credits left.${low ? '\nYou are almost out — upgrade to keep going.' : ''}`;
+    setMessages(prev => [...prev, { id: Date.now() + 7, role: 'ai', text, time: formatTime(langRef.current), actions: low ? upgradeActions(ar) : [{ label: ar ? 'حسابي وباقتي' : 'My plan & credits', url: '/account.html' }] }]);
+  };
+
   /** "رصيدي" / "اشحن محفظتي 20 دولار" / "ادفع من المحفظة" ... -> true when handled. */
   const walletIntent = (msg: string, viaVoice: boolean): boolean => {
     const m = msg.toLowerCase();
@@ -855,6 +890,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
     }
     if (/(ادفع|اشتري|اشترك).{0,25}(من|بال|ب)\s*(ال)?محفظ|pay (with|from) (my )?wallet/.test(m)) { walletCall('catalog', {}, viaVoice); return true; }
     if (/حركات(ي)?\s*(ال)?محفظ|آخر حركاتي|اخر حركاتي|wallet history/.test(m)) { walletCall('history', {}, viaVoice); return true; }
+    if (/باقتي|اشتراكي|حسابي وباقتي|كريدت|الكريدت|نقاطي|رصيد الكريدت|رصيد الباقة|رصيدي بالمنصة|كم باقي (لي|الي|إلي) رصيد|my plan|my credits|my account|credits left/.test(m)) { walletCall('account', {}, viaVoice); return true; }
     if (/رصيدي|رصيد محفظتي|رصيد المحفظة|كم رصيدي|قديش رصيدي|my balance|wallet balance/.test(m)) { walletCall('balance', {}, viaVoice); return true; }
     if (/(افصل|فك ربط)\s*(ال)?محفظ|unlink (my )?wallet/.test(m)) {
       walletFetch('/wallet/chat/link', null, 'DELETE').then(() => reply(replyLangRef.current === 'ar' ? 'تم فصل المحفظة عن حسابك.' : 'Wallet unlinked.', viaVoice)).catch(() => undefined);
@@ -934,7 +970,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       const data = (await res.json()) as any;
       if (data?.data?.creditsExhausted) {
         setProg({ failed: true });
-        reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] });
+        outOfCredits(viaVoice);
         return;
       }
       const candidates = [data?.data?.publicUrl, data?.data?.liveUrl, data?.liveUrl];
@@ -989,7 +1025,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       const data = (await res.json()) as any;
       const d = data?.data || {};
       if (d.notAllowed) { setProg({ failed: true }); reply(T().huntNotAllowed, viaVoice); return; }
-      if (d.creditsExhausted) { setProg({ failed: true }); reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] }); return; }
+      if (d.creditsExhausted) { setProg({ failed: true }); outOfCredits(viaVoice); return; }
       const businesses: any[] = Array.isArray(d.businesses) ? d.businesses : [];
       if (!businesses.length) { setProg({ failed: true }); reply(T().huntNone, viaVoice); return; }
       // ELYVORI-PROSPECTS-BG: the server now works in the background and reports to Telegram + email
@@ -1002,6 +1038,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
           T().huntStarted.replace('{n}', String(businesses.length)).replace('{cat}', String(d.category || '')).replace('{city}', String(d.city || '')).replace('{list}', list),
           viaVoice,
         );
+        creditsNote(35);
         return;
       }
       const target = d.target || businesses[0];
@@ -1147,7 +1184,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
       return;
     }
     if (status && status.left <= 0 && status.balance < status.cost) {
-      reply(T().quotaReached, viaVoice, { actions: [{ label: T().plansBtn, type: 'pricing' }] });
+      outOfCredits(viaVoice);
       return;
     }
     pendingRef.current = 'details';

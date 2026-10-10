@@ -80,6 +80,20 @@ export default function App() {
     }
   }, [theme]);
 
+  // ELYVORI-ACCOUNT-CHECKOUT: /account.html links to /?checkout=starter|pro
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const p = url.searchParams.get('checkout');
+      if (p === 'starter' || p === 'pro') {
+        setCheckoutPlan(p);
+        setShowCheckout(true);
+        url.searchParams.delete('checkout');
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // Sync language and RTL direction
   useEffect(() => {
     localStorage.setItem('elyvori_lang', lang);
