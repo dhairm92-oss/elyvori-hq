@@ -1453,6 +1453,7 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
                     <h4>{isAr ? 'ربط محفظة Elyvori Pay' : 'Link Elyvori Pay'}</h4>
                     <p>{isAr ? 'مرة وحدة بس: رقم جوال المحفظة ورمزها السري. الرمز ما بينحفظ بالشات.' : 'One time only: your wallet phone and PIN. The PIN is never stored in the chat.'}</p>
                     <input type="tel" dir="ltr" autoComplete="tel" placeholder="0591234567" value={wmPhone} onChange={e => setWmPhone(e.target.value)} />
+                    <p style={{ margin: '-4px 0 10px' }}>{isAr ? 'ما عندك محفظة؟ ' : 'No wallet yet? '}<a href="/pay.html" target="_blank" rel="noopener" style={{ color: '#22d3ee', fontWeight: 700 }}>{isAr ? 'افتح Elyvori Pay وأنشئ وحدة' : 'Open Elyvori Pay and create one'}</a></p>
                   </>
                 )}
                 {walletModal.mode === 'pin' && (

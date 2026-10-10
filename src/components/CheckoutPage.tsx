@@ -28,6 +28,13 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
   const [wPin, setWPin] = useState('');
   const [wBusy, setWBusy] = useState(false);
   const [wError, setWError] = useState('');
+  // ELYVORI-PAY-SIGNUP: create a new wallet right here (no app needed)
+  const [wMode, setWMode] = useState<'link' | 'create'>('link');
+  const [wStep, setWStep] = useState<'phone' | 'details'>('phone');
+  const [wCode, setWCode] = useState('');
+  const [wDevCode, setWDevCode] = useState('');
+  const [wName, setWName] = useState(auth.user?.name || '');
+  const [wPin2, setWPin2] = useState('');
   const [wKey] = useState(() => `site-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`);
   const cardRef = useRef<any>(null);
   const stripeRef = useRef<any>(null);
@@ -111,6 +118,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
 
   const loadWallet = async () => {
     setWError('');
+    setWallet(null);
     try {
       const r = await walletAction('balance');
       if (r.code === 'wallet_not_linked') { setWallet({ linked: false, usd: '0' }); return; }
@@ -154,6 +162,63 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
     }
   };
 
+  const SIGNUP_ERR: Record<string, [string, string]> = {
+    invalid_phone: ['رقم الجوال مش صحيح.', 'Invalid phone number.'],
+    too_many_codes: ['طلبت رموز كثيرة، جرّب بعد 10 دقائق.', 'Too many codes, try again in 10 minutes.'],
+    invalid_code: ['رمز التحقق غلط أو انتهى.', 'The code is wrong or expired.'],
+    phone_taken: ['هالرقم عنده محفظة — اربطها بدل ما تعمل وحدة جديدة.', 'This number already has a wallet — link it instead.'],
+    pin_too_simple: ['الرمز السري سهل كثير، اختار غيره.', 'That PIN is too simple.'],
+    pin_must_be_6_digits: ['الرمز السري لازم يكون 6 أرقام.', 'The PIN must be 6 digits.'],
+    name_required: ['اكتب اسمك.', 'Enter your name.'],
+  };
+  const signupError = (code: string) => { const e = SIGNUP_ERR[code]; return e ? (isAr ? e[0] : e[1]) : (isAr ? 'صار خطأ، جرّب مرة ثانية.' : 'Something went wrong, try again.'); };
+
+  const sendWalletCode = async () => {
+    if (wBusy) return;
+    setWBusy(true); setWError('');
+    try {
+      const res = await fetch(`${API}/wallet/auth/otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: wPhone.trim(), purpose: 'signup' }) });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { setWError(signupError(String(j?.message || ''))); return; }
+      setWDevCode(j?.devCode ? String(j.devCode) : '');
+      if (j?.devCode) setWCode(String(j.devCode));
+      setWStep('details');
+    } catch {
+      setWError(isAr ? 'ما قدرت أوصل للسيرفر (ممكن يكون نايم) — جرّب بعد دقيقة.' : 'Could not reach the server — try again in a minute.');
+    } finally {
+      setWBusy(false);
+    }
+  };
+
+  const createWallet = async () => {
+    if (wBusy) return;
+    if (wName.trim().length < 2) { setWError(signupError('name_required')); return; }
+    if (!/^\d{6}$/.test(wPin)) { setWError(signupError('pin_must_be_6_digits')); return; }
+    if (wPin !== wPin2) { setWError(isAr ? 'الرمزين مش متطابقين.' : 'The PINs do not match.'); return; }
+    setWBusy(true); setWError('');
+    try {
+      const res = await fetch(`${API}/wallet/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: wPhone.trim(), code: wCode.trim(), name: wName.trim(), email: auth.user?.email || '', pin: wPin,
+          deviceId: `web-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`, deviceName: 'Elyvori website',
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { setWError(signupError(String(j?.message || ''))); if (j?.message === 'phone_taken') { setWMode('link'); setWStep('phone'); } return; }
+      // link the new wallet to this Elyvori account, then show its balance
+      const link = await fetch(`${API}/wallet/chat/link`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` }, body: JSON.stringify({ phone: wPhone.trim(), pin: wPin }) });
+      if (link.status === 401 || link.status === 403) { onOpenAuthModal(); return; }
+      setWPin(''); setWPin2(''); setWMode('link'); setWStep('phone');
+      await loadWallet();
+    } catch {
+      setWError(isAr ? 'ما قدرت أوصل للسيرفر.' : 'Could not reach the server.');
+    } finally {
+      setWBusy(false);
+    }
+  };
+
   const payFromWallet = async () => {
     if (wBusy) return;
     if (!/^\d{6}$/.test(wPin)) { setWError(isAr ? 'اكتب رمزك السري (6 أرقام).' : 'Enter your 6-digit PIN.'); return; }
@@ -162,8 +227,8 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
       const r = await walletAction('pay_item', { itemType: 'plan', itemId: selectedPlan, pin: wPin, idempotencyKey: `${wKey}-${selectedPlan}` });
       setWPin('');
       if (r.ok) { setStep('success'); return; }
+      if (r.code === 'insufficient_funds') await loadWallet();
       setWError(isAr ? r.message_ar : r.message_en);
-      if (r.code === 'insufficient_funds') loadWallet();
     } catch (e: any) {
       if (e?.message === 'auth') { onOpenAuthModal(); return; }
       setWError(isAr ? 'ما قدرت أوصل للسيرفر.' : 'Could not reach the server.');
@@ -441,7 +506,40 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                 {payMethod === 'wallet' && (
                   <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:18,padding:'18px 16px',marginBottom:16,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
                     {!wallet ? (
-                      <div style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:10}}>{isAr ? 'جاري تحميل المحفظة…' : 'Loading wallet…'}</div>
+                      wError ? (
+                        <button type="button" onClick={loadWallet} style={{width:'100%',background:'transparent',border:'1px solid rgba(255,255,255,0.12)',color:'rgba(255,255,255,0.8)',borderRadius:14,padding:12,cursor:'pointer',font:'inherit'}}>
+                          {isAr ? '↻ حاول مرة ثانية' : '↻ Try again'}
+                        </button>
+                      ) : (
+                        <div style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:10}}>{isAr ? 'جاري تحميل المحفظة… (أول مرة ممكن تاخد دقيقة)' : 'Loading wallet… (the first time can take a minute)'}</div>
+                      )
+                    ) : !wallet.linked && wMode === 'create' ? (
+                      <>
+                        <div style={{color:'#fff',fontWeight:800,marginBottom:4}}>{isAr ? 'محفظة جديدة' : 'New wallet'}</div>
+                        <p style={{color:'rgba(255,255,255,0.45)',fontSize:13,margin:'0 0 12px'}}>{isAr ? 'بدقيقة وحدة: رقم جوالك، رمز التحقق، واسمك ورمز سري.' : 'One minute: your phone, a code, your name and a PIN.'}</p>
+                        {wStep === 'phone' ? (
+                          <>
+                            <input className="inp" type="tel" dir="ltr" autoComplete="tel" placeholder="0591234567" value={wPhone} onChange={e => setWPhone(e.target.value)} style={{marginBottom:12}} />
+                            <button className="cta" type="button" onClick={sendWalletCode} disabled={wBusy} style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff'}}>
+                              {wBusy ? <span className="spinner"/> : (isAr ? 'أرسل رمز التحقق' : 'Send code')}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {wDevCode && <div style={{color:'#fbbf24',fontSize:12.5,marginBottom:8}}>{isAr ? `وضع تجريبي — الرمز: ${wDevCode}` : `Sandbox — code: ${wDevCode}`}</div>}
+                            <input className="inp" type="text" inputMode="numeric" dir="ltr" maxLength={6} placeholder={isAr ? 'رمز التحقق' : 'Verification code'} value={wCode} onChange={e => setWCode(e.target.value.replace(/\D/g, '').slice(0, 6))} style={{marginBottom:10}} />
+                            <input className="inp" type="text" autoComplete="name" placeholder={isAr ? 'الاسم الكامل' : 'Full name'} value={wName} onChange={e => setWName(e.target.value)} style={{marginBottom:10}} />
+                            <input className="inp" type="password" inputMode="numeric" maxLength={6} dir="ltr" autoComplete="new-password" placeholder={isAr ? 'رمز سري جديد (6 أرقام)' : 'New PIN (6 digits)'} value={wPin} onChange={e => setWPin(e.target.value.replace(/\D/g, '').slice(0, 6))} style={{marginBottom:10}} />
+                            <input className="inp" type="password" inputMode="numeric" maxLength={6} dir="ltr" autoComplete="new-password" placeholder={isAr ? 'أكّد الرمز السري' : 'Confirm PIN'} value={wPin2} onChange={e => setWPin2(e.target.value.replace(/\D/g, '').slice(0, 6))} style={{marginBottom:12}} />
+                            <button className="cta" type="button" onClick={createWallet} disabled={wBusy} style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff'}}>
+                              {wBusy ? <span className="spinner"/> : (isAr ? 'إنشاء المحفظة' : 'Create wallet')}
+                            </button>
+                          </>
+                        )}
+                        <button type="button" onClick={() => { setWMode('link'); setWStep('phone'); setWError(''); }} style={{width:'100%',marginTop:10,background:'transparent',border:0,color:'#22d3ee',cursor:'pointer',font:'inherit',fontSize:13}}>
+                          {isAr ? 'عندي محفظة — بدي أربطها' : 'I already have a wallet — link it'}
+                        </button>
+                      </>
                     ) : !wallet.linked ? (
                       <>
                         <div style={{color:'#fff',fontWeight:800,marginBottom:4}}>{isAr ? 'اربط محفظتك (مرة وحدة)' : 'Link your wallet (one time)'}</div>
@@ -450,6 +548,9 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                         <input className="inp" type="password" inputMode="numeric" maxLength={6} dir="ltr" autoComplete="off" placeholder={isAr ? 'الرمز السري' : 'PIN'} value={wPin} onChange={e => setWPin(e.target.value.replace(/\D/g, '').slice(0, 6))} style={{marginBottom:12}} />
                         <button className="cta" type="button" onClick={linkWallet} disabled={wBusy} style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff'}}>
                           {wBusy ? <span className="spinner"/> : (isAr ? 'ربط المحفظة' : 'Link wallet')}
+                        </button>
+                        <button type="button" onClick={() => { setWMode('create'); setWStep('phone'); setWError(''); setWPin(''); }} style={{width:'100%',marginTop:10,background:'transparent',border:0,color:'#22d3ee',cursor:'pointer',font:'inherit',fontSize:13}}>
+                          {isAr ? 'ما عندك محفظة؟ أنشئ محفظة جديدة هون ←' : "No wallet yet? Create one here →"}
                         </button>
                       </>
                     ) : (
