@@ -21,6 +21,14 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
   const [name, setName] = useState(auth.user?.name || '');
   const [email, setEmail] = useState(auth.user?.email || '');
   const [stripeLoaded, setStripeLoaded] = useState(false);
+  // ELYVORI-PAY-CHECKOUT: pay a plan from the Elyvori Pay wallet
+  const [payMethod, setPayMethod] = useState<'card' | 'wallet'>('card');
+  const [wallet, setWallet] = useState<{ linked: boolean; usd: string } | null>(null);
+  const [wPhone, setWPhone] = useState('');
+  const [wPin, setWPin] = useState('');
+  const [wBusy, setWBusy] = useState(false);
+  const [wError, setWError] = useState('');
+  const [wKey] = useState(() => `site-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`);
   const cardRef = useRef<any>(null);
   const stripeRef = useRef<any>(null);
   const elementsRef = useRef<any>(null);
@@ -50,7 +58,7 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
 
   // Mount Stripe card element when on payment step
   useEffect(() => {
-    if (step !== 'payment' || !stripeLoaded || cardRef.current?.hasChildNodes()) return;
+    if (step !== 'payment' || payMethod !== 'card' || !stripeLoaded || cardRef.current?.hasChildNodes()) return;
     const timer = setTimeout(() => {
       try {
         const stripe = (window as any).Stripe(STRIPE_PK);
@@ -89,7 +97,97 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
       } catch (e) { console.error(e); }
     }, 100);
     return () => clearTimeout(timer);
-  }, [step, stripeLoaded]);
+  }, [step, stripeLoaded, payMethod]);
+
+  const walletAction = async (action: string, params: Record<string, unknown> = {}) => {
+    const res = await fetch(`${API}/wallet/chat/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+      body: JSON.stringify({ action, params }),
+    });
+    if (res.status === 401 || res.status === 403) throw new Error('auth');
+    return (await res.json()) as { ok: boolean; code?: string; message_ar: string; message_en: string; data?: any; actions?: any[] };
+  };
+
+  const loadWallet = async () => {
+    setWError('');
+    try {
+      const r = await walletAction('balance');
+      if (r.code === 'wallet_not_linked') { setWallet({ linked: false, usd: '0' }); return; }
+      const usd = (r.data?.wallets || []).find((w: any) => w.currency === 'USD')?.balance ?? '0.00';
+      setWallet({ linked: true, usd: String(usd) });
+    } catch (e: any) {
+      if (e?.message === 'auth') { onOpenAuthModal(); return; }
+      setWError(isAr ? 'ما قدرت أوصل للمحفظة، جرّب كمان شوي.' : 'Could not reach the wallet, try again shortly.');
+    }
+  };
+
+  const chooseWallet = () => {
+    if (!auth.isAuthenticated) { onOpenAuthModal(); return; }
+    setPayMethod('wallet');
+    setError('');
+    if (!wallet) loadWallet();
+  };
+
+  const linkWallet = async () => {
+    if (wBusy) return;
+    if (!/^\d{6}$/.test(wPin)) { setWError(isAr ? 'الرمز السري 6 أرقام.' : 'The PIN is 6 digits.'); return; }
+    setWBusy(true); setWError('');
+    try {
+      const res = await fetch(`${API}/wallet/chat/link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ phone: wPhone.trim(), pin: wPin }),
+      });
+      if (res.status === 401 || res.status === 403) { onOpenAuthModal(); return; }
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setWError(j?.message === 'pin_locked' ? (isAr ? 'انقفلت المحفظة 15 دقيقة.' : 'Wallet locked for 15 minutes.') : (isAr ? 'رقم الجوال أو الرمز السري غلط.' : 'Wrong phone or PIN.'));
+        return;
+      }
+      setWPin('');
+      await loadWallet();
+    } catch {
+      setWError(isAr ? 'ما قدرت أوصل للسيرفر.' : 'Could not reach the server.');
+    } finally {
+      setWBusy(false);
+    }
+  };
+
+  const payFromWallet = async () => {
+    if (wBusy) return;
+    if (!/^\d{6}$/.test(wPin)) { setWError(isAr ? 'اكتب رمزك السري (6 أرقام).' : 'Enter your 6-digit PIN.'); return; }
+    setWBusy(true); setWError('');
+    try {
+      const r = await walletAction('pay_item', { itemType: 'plan', itemId: selectedPlan, pin: wPin, idempotencyKey: `${wKey}-${selectedPlan}` });
+      setWPin('');
+      if (r.ok) { setStep('success'); return; }
+      setWError(isAr ? r.message_ar : r.message_en);
+      if (r.code === 'insufficient_funds') loadWallet();
+    } catch (e: any) {
+      if (e?.message === 'auth') { onOpenAuthModal(); return; }
+      setWError(isAr ? 'ما قدرت أوصل للسيرفر.' : 'Could not reach the server.');
+    } finally {
+      setWBusy(false);
+    }
+  };
+
+  const topUpWallet = async () => {
+    if (wBusy || !wallet) return;
+    const missing = Math.max(2, Math.ceil((plan.price - Number(wallet.usd)) * 100) / 100);
+    setWBusy(true); setWError('');
+    try {
+      const r = await walletAction('topup', { amount: missing.toFixed(2), currency: 'USD' });
+      const url = (r.actions || []).find((a: any) => a.type === 'open_url')?.url;
+      if (r.ok && url) { window.open(url, '_blank', 'noopener'); setWError(isAr ? 'بعد ما تدفع بالصفحة اللي انفتحت، ارجع هون واكبس "حدّث الرصيد".' : 'After paying on the page that opened, come back and tap "Refresh balance".'); }
+      else setWError(isAr ? r.message_ar : r.message_en);
+    } catch (e: any) {
+      if (e?.message === 'auth') { onOpenAuthModal(); return; }
+      setWError(isAr ? 'ما قدرت أوصل للسيرفر.' : 'Could not reach the server.');
+    } finally {
+      setWBusy(false);
+    }
+  };
 
   const handlePay = async () => {
     if (!auth.isAuthenticated) { onOpenAuthModal(); return; }
@@ -246,6 +344,15 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                   </p>
                 </div>
 
+                <div className="plan-pill" style={{marginBottom:18,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                  <button type="button" className="pill-btn" onClick={() => setPayMethod('card')} style={{background: payMethod==='card' ? plan.gradient : 'transparent', color: payMethod==='card' ? (selectedPlan==='starter' ? '#000' : '#fff') : 'rgba(255,255,255,0.5)'}}>
+                    {isAr ? '💳 بطاقة' : '💳 Card'}
+                  </button>
+                  <button type="button" className="pill-btn" onClick={chooseWallet} style={{background: payMethod==='wallet' ? plan.gradient : 'transparent', color: payMethod==='wallet' ? (selectedPlan==='starter' ? '#000' : '#fff') : 'rgba(255,255,255,0.5)'}}>
+                    {isAr ? '👛 محفظة Elyvori Pay' : '👛 Elyvori Pay wallet'}
+                  </button>
+                </div>
+                {payMethod === 'card' && (<>
                 <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:16}}>
                   {/* Name */}
                   <div>
@@ -330,6 +437,51 @@ export function CheckoutPage({ lang, auth, initialPlan = 'starter', onClose, onO
                     {isAr ? 'مشفّر بـ SSL — لا نحتفظ ببيانات بطاقتك' : 'SSL encrypted — we never store your card'}
                   </span>
                 </div>
+                </>)}
+                {payMethod === 'wallet' && (
+                  <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:18,padding:'18px 16px',marginBottom:16,fontFamily: isAr ? 'Cairo,sans-serif' : 'Inter,sans-serif'}}>
+                    {!wallet ? (
+                      <div style={{color:'rgba(255,255,255,0.5)',textAlign:'center',padding:10}}>{isAr ? 'جاري تحميل المحفظة…' : 'Loading wallet…'}</div>
+                    ) : !wallet.linked ? (
+                      <>
+                        <div style={{color:'#fff',fontWeight:800,marginBottom:4}}>{isAr ? 'اربط محفظتك (مرة وحدة)' : 'Link your wallet (one time)'}</div>
+                        <p style={{color:'rgba(255,255,255,0.45)',fontSize:13,margin:'0 0 12px'}}>{isAr ? 'رقم جوال محفظة Elyvori Pay ورمزها السري.' : 'Your Elyvori Pay phone number and PIN.'}</p>
+                        <input className="inp" type="tel" dir="ltr" autoComplete="tel" placeholder="0591234567" value={wPhone} onChange={e => setWPhone(e.target.value)} style={{marginBottom:10}} />
+                        <input className="inp" type="password" inputMode="numeric" maxLength={6} dir="ltr" autoComplete="off" placeholder={isAr ? 'الرمز السري' : 'PIN'} value={wPin} onChange={e => setWPin(e.target.value.replace(/\D/g, '').slice(0, 6))} style={{marginBottom:12}} />
+                        <button className="cta" type="button" onClick={linkWallet} disabled={wBusy} style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff'}}>
+                          {wBusy ? <span className="spinner"/> : (isAr ? 'ربط المحفظة' : 'Link wallet')}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+                          <span style={{color:'rgba(255,255,255,0.55)',fontSize:14}}>{isAr ? 'رصيد المحفظة' : 'Wallet balance'}</span>
+                          <span dir="ltr" style={{color: Number(wallet.usd) >= plan.price ? '#10B981' : '#f87171',fontWeight:900,fontSize:20}}>${wallet.usd}</span>
+                        </div>
+                        {Number(wallet.usd) >= plan.price ? (
+                          <>
+                            <input className="inp" type="password" inputMode="numeric" maxLength={6} dir="ltr" autoComplete="off" placeholder={isAr ? 'الرمز السري (6 أرقام)' : 'PIN (6 digits)'} value={wPin}
+                              onChange={e => setWPin(e.target.value.replace(/\D/g, '').slice(0, 6))} onKeyDown={e => { if (e.key === 'Enter') payFromWallet(); }} style={{marginBottom:12}} />
+                            <button className="cta" type="button" onClick={payFromWallet} disabled={wBusy} style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff',boxShadow:`0 8px 32px ${plan.shadow}`}}>
+                              {wBusy ? <span className="spinner"/> : (isAr ? <>👛 ادفع <bdi>${plan.price}</bdi> من المحفظة</> : `👛 Pay $${plan.price} from wallet`)}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <p style={{color:'rgba(255,255,255,0.5)',fontSize:13,margin:'0 0 12px'}}>{isAr ? 'رصيدك ما بكفي لهالباقة. اشحن الفرق بالبطاقة وبعدين ادفع من المحفظة.' : 'Not enough balance for this plan. Top up the difference by card, then pay from the wallet.'}</p>
+                            <button className="cta" type="button" onClick={topUpWallet} disabled={wBusy} style={{background:plan.gradient,color:selectedPlan==='starter'?'#000':'#fff',marginBottom:10}}>
+                              {wBusy ? <span className="spinner"/> : (isAr ? '💳 اشحن المحفظة بالبطاقة' : '💳 Top up the wallet by card')}
+                            </button>
+                            <button type="button" onClick={loadWallet} style={{width:'100%',background:'transparent',border:'1px solid rgba(255,255,255,0.12)',color:'rgba(255,255,255,0.7)',borderRadius:14,padding:12,cursor:'pointer',font:'inherit'}}>
+                              {isAr ? '↻ حدّث الرصيد' : '↻ Refresh balance'}
+                            </button>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {wError && <div style={{color:'#fbbf24',fontSize:13,marginTop:12,textAlign:'center'}}>{wError}</div>}
+                  </div>
+                )}
               </>
             )}
 
