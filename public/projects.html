@@ -128,9 +128,16 @@ a.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
   function list() {
     app.innerHTML = '<div class="msg">جاري تحميل مشاريعك… (أول مرة ممكن ياخذ نص دقيقة)</div>';
     get('/devices/projects').then(function (ps) {
-      var h = '<h1>مشاريعي</h1><p class="sub">المشاريع اللي بنيتها بمصنع Elyvori بـ VS Code — المهام والشاشات والرصيد. الكود نفسه بيضل على جهازك.</p>';
+      var h = '<div class="head"><div><h1>مشاريعي</h1><p class="sub">المشاريع اللي بنيتها بمصنع Elyvori بـ VS Code — المهام والشاشات والرصيد. الكود نفسه بيضل على جهازك.</p></div>' +
+        '<a class="btn primary" href="vscode://' + EXT + '/new">＋ مشروع جديد بـ VS Code</a></div>';
       if (!ps.length) {
-        h += '<div class="msg">ما في مشاريع بعد.<br>بـ VS Code اضغط <b>Sign in with Elyvori</b> بإضافة Elyvori، وابنِ أو افتح مشروع — بيطلع هون لحاله.</div>';
+        h += '<div class="card" style="text-align:center;padding:30px 18px"><div style="font-size:42px">🏭</div><h2 style="margin-top:6px">ابدأ أول مشروع</h2>' +
+          '<div class="steps" style="display:grid;gap:10px;max-width:520px;margin:12px auto 18px;text-align:right">' +
+          '<div class="task"><span class="pill p-info">1</span><div class="t">ثبّت إضافة <b>Elyvori</b> على VS Code</div></div>' +
+          '<div class="task"><span class="pill p-info">2</span><div class="t">بالإضافة اضغط <b class="ltr">Sign in with Elyvori</b> واربط جهازك</div></div>' +
+          '<div class="task"><span class="pill p-info">3</span><div class="t">اضغط الزر تحت واكتب شو بدك تبني — المشروع بيطلع هون لحاله</div></div></div>' +
+          '<a class="btn primary" href="vscode://' + EXT + '/new">＋ مشروع جديد بـ VS Code</a>' +
+          '<div class="note">إذا عندك مشاريع قديمة، افتحها بـ VS Code وإنت مسجّل دخول، وبتظهر هون.</div></div>';
       } else {
         h += '<div class="grid">' + ps.map(function (p) {
           var done = p.tasks.done === p.tasks.total && p.tasks.total > 0;
