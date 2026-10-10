@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>ربط جهاز | Elyvori</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script>(function(){try{var t=localStorage.getItem('elyvori_theme');var d=t?t==='dark':!matchMedia('(prefers-color-scheme: light)').matches;document.documentElement.classList.add(d?'dark':'light');}catch(e){document.documentElement.classList.add('dark');}})();</script>
+<style>
+:root{--bg:#070a14;--card:#0e1324;--card2:#121a30;--line:#1f2740;--text:#e8ecf7;--muted:#9aa5c0;--accent:#7c5cff;--accent2:#22d3ee;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+html.light{--bg:#f6f7fb;--card:#fff;--card2:#f3f5fa;--line:#e3e7f0;--text:#141a2b;--muted:#5a6580;--accent:#5b3df5;--accent2:#0891b2}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
+body{font-family:'Cairo',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.top{border-bottom:1px solid var(--line)}
+.top-in{max-width:560px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:800;font-size:17px}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff}
+main{max-width:560px;margin:0 auto;padding:22px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
+h1{font-size:24px;margin:0 0 4px;font-weight:900}
+.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;padding:14px;border-radius:16px;background:var(--card2);border:1px dashed var(--accent2);margin:12px 0}
+.dev{display:flex;gap:12px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:12px 0}
+.dev .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:20px;flex:none}
+.dev b{display:block}
+.dev small{color:var(--muted)}
+.inp{font:inherit;width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);margin:4px 0 10px}
+.inp.big{font-family:ui-monospace,Consolas,monospace;font-size:22px;letter-spacing:4px;text-align:center;text-transform:uppercase;direction:ltr}
+.btn{font:inherit;font-size:15px;font-weight:800;padding:11px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#fff}
+.btn:disabled{opacity:.55;cursor:default}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:14px 0}
+.or:before,.or:after{content:'';flex:1;height:1px;background:var(--line)}
+.note{font-size:13.5px;margin-top:10px;min-height:20px}
+.note.err{color:var(--bad)}.note.ok{color:var(--ok)}
+.done{text-align:center;padding:10px 0}
+.done .big{font-size:54px}
+.warn{font-size:13px;color:var(--muted);background:color-mix(in srgb,var(--warn) 10%,transparent);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:12px;padding:10px 12px;margin-top:12px}
+.who{font-size:13px;color:var(--muted);margin-top:14px;text-align:center}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--accent2);cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="brand" href="/"><span class="logo">E</span><span>Elyvori</span></a>
+  <span class="sub" style="margin:0">Device sign-in</span>
+</div></header>
+<main><div class="card" id="app"><p class="sub">…</p></div></main>
+<script>
+(function () {
+  var API = 'https://elyvori-api.onrender.com';
+  var app = document.getElementById('app');
+  var code = '';
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function sget(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function sset(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} }
+  function norm(c) { var s = String(c || '').toUpperCase().replace(/[^A-Z]/g, ''); return s.length === 8 ? s.slice(0, 4) + '-' + s.slice(4) : ''; }
+  function token() { return get('elyvori_token'); }
+  function email() { try { return (JSON.parse(get('elyvori_user') || '{}') || {}).email || ''; } catch (e) { return ''; } }
+  function api(path, opts) {
+    opts = opts || {};
+    var h = { 'Content-Type': 'application/json' };
+    if (opts.auth) h.Authorization = 'Bearer ' + token();
+    return fetch(API + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; }); });
+  }
+
+  // ---- code from the link VS Code opened (?code=), kept across a Google/GitHub sign-in round trip
+  var q = new URLSearchParams(location.search);
+  code = norm(q.get('code')) || norm(sget('elyvori_device_code'));
+  if (code) sset('elyvori_device_code', code);
+
+  // ---- coming back from Google / GitHub sign-in: #elyvori_auth=<token>&email=…&org=…
+  if (location.hash.indexOf('elyvori_auth') >= 0) {
+    var h = new URLSearchParams(location.hash.slice(1));
+    if (h.get('elyvori_auth')) {
+      set('elyvori_token', h.get('elyvori_auth'));
+      set('elyvori_user', JSON.stringify({ email: h.get('email') || '', organizationName: h.get('org') || '' }));
+    }
+    history.replaceState(null, '', location.pathname + (code ? '?code=' + code : ''));
+  }
+
+  function askCode(msg) {
+    app.innerHTML = '<h1>اربط جهازك</h1><p class="sub">اكتب الكود اللي ظاهر بـ VS Code.</p>' +
+      '<form id="f"><input class="inp big" id="c" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" autofocus>' +
+      '<button class="btn primary" type="submit">متابعة</button><div class="note err">' + esc(msg || '') + '</div></form>';
+    document.getElementById('f').onsubmit = function (e) {
+      e.preventDefault();
+      var c = norm(document.getElementById('c').value);
+      if (!c) { app.querySelector('.note').textContent = 'الكود 8 حروف، مثل BCDF-GHJK'; return; }
+      code = c; sset('elyvori_device_code', c); start();
+    };
+  }
+
+  function login(msg) {
+    var back = location.origin + location.pathname;
+    app.innerHTML = '<h1>سجّل دخول</h1><p class="sub">سجّل دخول بحساب Elyvori عشان تربط الجهاز بحسابك.</p>' +
+      '<div class="code ltr">' + esc(code) + '</div>' +
+      '<form id="lf" autocomplete="on"><input class="inp ltr" id="em" type="email" placeholder="email@example.com" autocomplete="username" required>' +
+      '<input class="inp ltr" id="pw" type="password" placeholder="••••••••" autocomplete="current-password" required>' +
+      '<button class="btn primary" type="submit" id="lb">تسجيل الدخول</button></form>' +
+      '<div class="or">أو</div><div class="row">' +
+      '<a class="btn" href="' + API + '/auth/google/start?redirect=' + encodeURIComponent(back) + '">Google</a>' +
+      '<a class="btn" href="' + API + '/auth/github/start?redirect=' + encodeURIComponent(back) + '">GitHub</a></div>' +
+      '<div class="note err" id="ln">' + esc(msg || '') + '</div>';
+    document.getElementById('lf').onsubmit = function (e) {
+      e.preventDefault();
+      var b = document.getElementById('lb'); b.disabled = true; b.textContent = '…';
+      api('/auth/login', { method: 'POST', body: { email: document.getElementById('em').value, password: document.getElementById('pw').value } }).then(function (r) {
+        if (r.s >= 200 && r.s < 300 && r.j.accessToken) {
+          set('elyvori_token', r.j.accessToken);
+          if (r.j.user) set('elyvori_user', JSON.stringify(r.j.user));
+          start();
+        } else { b.disabled = false; b.textContent = 'تسجيل الدخول'; document.getElementById('ln').textContent = r.s === 401 ? 'الإيميل أو كلمة السر غلط.' : 'ما زبط، جرّب كمان مرة.'; }
+      }).catch(function () { b.disabled = false; b.textContent = 'تسجيل الدخول'; document.getElementById('ln').textContent = 'مشكلة بالاتصال، جرّب كمان مرة.'; });
+    };
+  }
+
+  function confirmScreen(d) {
+    var tool = /vscode/i.test(d.client) ? 'VS Code' : d.client;
+    app.innerHTML = '<h1>اربط هذا الجهاز بحسابك؟</h1><p class="sub">تأكد إن الكود نفس اللي ظاهر عندك بـ ' + esc(tool) + '.</p>' +
+      '<div class="code ltr">' + esc(d.userCode) + '</div>' +
+      '<div class="dev"><div class="ic">⌘</div><div><b>' + esc(tool) + '</b><small>' + esc(d.name) + '</small></div></div>' +
+      '<div class="row"><button class="btn" id="no" type="button">رفض</button><button class="btn primary" id="yes" type="button">اربط الجهاز ✔</button></div>' +
+      '<div class="warn">إذا ما إنت اللي طلبت هالكود، اضغط <b>رفض</b>. الجهاز المربوط بيقدر يشوف باقتك ورصيدك ويستخدمه.</div>' +
+      '<div class="note" id="n"></div>' +
+      '<div class="who">مسجّل دخول باسم <span class="ltr">' + esc(email() || '—') + '</span> · <button class="linkbtn" id="sw" type="button">مش أنا</button></div>';
+    document.getElementById('yes').onclick = function () { decide(true); };
+    document.getElementById('no').onclick = function () { decide(false); };
+    document.getElementById('sw').onclick = function () { try { localStorage.removeItem('elyvori_token'); localStorage.removeItem('elyvori_user'); } catch (e) {} login(); };
+  }
+
+  function decide(yes) {
+    app.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    api('/devices/approve', { method: 'POST', auth: true, body: { code: code, approve: yes } }).then(function (r) {
+      if (r.s === 401) return login('انتهت جلستك — سجّل دخول مرة ثانية.');
+      if (r.s >= 300) return askCode('الكود انتهى أو انستخدم. اطلب كود جديد من VS Code.');
+      sset('elyvori_device_code', null);
+      app.innerHTML = yes
+        ? '<div class="done"><div class="big">✅</div><h1>تم ربط الجهاز</h1><p class="sub">ارجع لـ VS Code، رح تلاقي حسابك جاهز خلال ثواني. بتقدر تسكّر هالصفحة.</p><a class="btn" href="/account.html">حسابي وباقتي</a></div>'
+        : '<div class="done"><div class="big">🛑</div><h1>تم الرفض</h1><p class="sub">ما انربط أي جهاز بحسابك.</p></div>';
+    }).catch(function () { app.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); document.getElementById('n').textContent = 'مشكلة بالاتصال، جرّب كمان مرة.'; });
+  }
+
+  function start() {
+    if (!code) return askCode();
+    if (!token()) return login();
+    app.innerHTML = '<p class="sub">جاري التحقق من الكود… (أول مرة ممكن ياخذ نص دقيقة لما السيرفر يصحى)</p>';
+    api('/devices/lookup?code=' + encodeURIComponent(code), { auth: true }).then(function (r) {
+      if (r.s === 401) return login();
+      if (r.s === 404) return askCode('الكود انتهى (صلاحيته 10 دقايق). اطلب كود جديد من VS Code.');
+      if (r.s >= 300) return askCode(r.j && r.j.message === 'already_used' ? 'هالكود انستخدم قبل. اطلب كود جديد من VS Code.' : 'الكود غلط، تأكد منه.');
+      confirmScreen(r.j);
+    }).catch(function () { askCode('مشكلة بالاتصال، جرّب كمان مرة.'); });
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>
