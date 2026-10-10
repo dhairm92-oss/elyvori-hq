@@ -57,6 +57,8 @@ export function Navbar({
 
   const agents = [
     // ELYVORI-ACCOUNT-NAV: customer plan / credits page
+    // ELYVORI-PROJECTS-NAV: projects built with the Elyvori Factory (VS Code)
+    ...(auth.isAuthenticated ? [{ icon: LayoutGrid, labelEn: 'My Factory projects', labelAr: 'مشاريعي', descEn: 'Projects built in VS Code: tasks, screens, credits', descAr: 'مشاريع المصنع: المهام والشاشات والرصيد', color: '#22d3ee', action: () => { closeAll(); window.location.href = '/projects.html'; } }] : []),
     ...(auth.isAuthenticated ? [{ icon: Sparkles, labelEn: 'My plan & credits', labelAr: 'حسابي وباقتي', descEn: 'Plan, credits, usage & wallet', descAr: 'الباقة والرصيد والاستهلاك والمحفظة', color: '#22c55e', action: () => { closeAll(); window.location.href = '/account.html'; } }] : []),
     { icon: Briefcase, labelEn: 'Career Agent', labelAr: 'وكيل التوظيف', descEn: 'Resume matching & cover letters', descAr: 'مطابقة السيرة ورسائل التغطية', color: '#6366f1', action: () => { closeAll(); onOpenCareerAgent(); } },
     { icon: Scale, labelEn: 'Contract AI', labelAr: 'محلل العقود', descEn: 'Forensic contract risk analysis', descAr: 'تحليل مخاطر العقود', color: '#8b5cf6', action: () => { closeAll(); onOpenContractAnalyzer(); } },

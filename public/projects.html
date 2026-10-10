@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>مشاريعي | Elyvori</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script>(function(){try{var t=localStorage.getItem('elyvori_theme');var d=t?t==='dark':!matchMedia('(prefers-color-scheme: light)').matches;document.documentElement.classList.add(d?'dark':'light');}catch(e){document.documentElement.classList.add('dark');}})();</script>
+<style>
+:root{--bg:#070a14;--card:#0e1324;--card2:#121a30;--line:#1f2740;--text:#e8ecf7;--muted:#9aa5c0;--accent:#7c5cff;--accent2:#22d3ee;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+html.light{--bg:#f6f7fb;--card:#fff;--card2:#f3f5fa;--line:#e3e7f0;--text:#141a2b;--muted:#5a6580;--accent:#5b3df5;--accent2:#0891b2}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
+body{font-family:'Cairo',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+a{color:inherit}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:17px}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff}
+.btn{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#fff}
+.btn.sm{min-height:32px;padding:4px 10px;font-size:12.5px;border-radius:10px}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 70px}
+h1{font-size:clamp(22px,4vw,30px);margin:4px 0 2px;font-weight:900}
+h2{font-size:18px;margin:26px 0 10px;font-weight:800}
+.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.muted{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}
+a.card{display:block;text-decoration:none;transition:border-color .15s,transform .15s}
+a.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.pname{font-weight:900;font-size:18px;margin:0 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.psum{color:var(--muted);font-size:13.5px;margin:0 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+.meter{height:9px;border-radius:999px;background:var(--card2);overflow:hidden;margin:6px 0}
+.meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.stats b{color:var(--text)}
+.pill{font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;white-space:nowrap;display:inline-block}
+.p-ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.p-warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.p-info{background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)}
+.p-off{background:var(--card2);color:var(--muted)}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tasks{display:grid;gap:8px}
+.task{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-width:0}
+.task .id{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--muted);direction:ltr}
+.task .t{flex:1;min-width:0;font-weight:700}
+.task .t small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.screens{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.scr{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+.wf{background:var(--wbg);border-radius:14px;overflow:hidden;border:4px solid #1e293b;display:flex;flex-direction:column;gap:6px;padding-bottom:8px;margin:8px 0;min-height:220px}
+.wf.web{border-width:1px;border-color:var(--line);border-radius:10px}
+.wf .hd{background:var(--wp);color:#fff;padding:10px;font-weight:800;font-size:13px}
+.wf .c{margin:0 8px;border-radius:8px;background:var(--wsf);padding:6px 8px;font-size:11px;color:var(--wtx);border:1px dashed rgba(100,116,139,.45)}
+.wf .c.b{background:var(--wp);color:#fff;text-align:center;font-weight:800;border:0;border-radius:999px}
+.wf .c.i{background:var(--wbg);border:1px solid rgba(100,116,139,.6)}
+.wf .c.m{height:52px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,var(--wsf),var(--wsf) 6px,transparent 6px,transparent 12px)}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.sw i{width:16px;height:16px;border-radius:5px;border:1px solid var(--line);display:inline-block}
+.msg{text-align:center;color:var(--muted);padding:36px 14px;background:var(--card);border:1px dashed var(--line);border-radius:18px}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:6px}
+.inp{font:inherit;width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);margin:4px 0 10px;direction:ltr}
+@media (max-width:640px){.brand .t{display:none}.task{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="brand" href="/"><span class="logo">E</span><span class="t">Elyvori</span></a>
+  <div style="display:flex;gap:8px">
+    <button class="btn" id="refresh" type="button">↻ تحديث</button>
+    <a class="btn" href="/account.html">حسابي</a>
+  </div>
+</div></header>
+<main id="app"><div class="msg">…</div></main>
+<script>
+(function () {
+  var API = 'https://elyvori-api.onrender.com';
+  var EXT = 'elyvori.elyvori';
+  var app = document.getElementById('app');
+  var STATE = { done: ['✓ خلصت', 'p-ok'], awaiting: ['⏳ بانتظار موافقتك', 'p-warn'], next: ['→ الجاية', 'p-info'], waiting: ['بتستنى مهام قبلها', 'p-off'], blocked: ['بتستنى مهمة قبلها', 'p-off'], pending: ['لسا', 'p-off'], failed: ['✗ فشلت', 'p-warn'] };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function token() { try { return localStorage.getItem('elyvori_token'); } catch (e) { return null; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function when(iso) { try { return new Date(iso).toLocaleString('ar', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function num(n) { return Number(n || 0).toLocaleString('en-US'); }
+  function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
+  function deep(key, task) { return 'vscode://' + EXT + '/open?project=' + encodeURIComponent(key) + (task ? '&task=' + encodeURIComponent(task) : ''); }
+  function get(path) {
+    return fetch(API + path, { headers: { Authorization: 'Bearer ' + token() } }).then(function (r) {
+      if (r.status === 401 || r.status === 403) throw new Error('auth');
+      if (r.status === 404) throw new Error('404');
+      if (!r.ok) throw new Error('http');
+      return r.json();
+    });
+  }
+
+  function login(msg) {
+    app.innerHTML = '<div class="card" style="max-width:440px;margin:30px auto"><h1>مشاريعي</h1><p class="sub">' + esc(msg || 'سجّل دخول عشان تشوف مشاريع المصنع تبعتك.') + '</p>' +
+      '<form id="lf"><input class="inp" id="em" type="email" placeholder="email@example.com" autocomplete="username" required>' +
+      '<input class="inp" id="pw" type="password" placeholder="••••••••" autocomplete="current-password" required>' +
+      '<button class="btn primary" style="width:100%" id="lb">تسجيل الدخول</button><div class="note" id="ln"></div></form>' +
+      '<div class="note">أو <a href="' + API + '/auth/google/start?redirect=' + encodeURIComponent(location.origin + location.pathname) + '">Google</a> · <a href="' + API + '/auth/github/start?redirect=' + encodeURIComponent(location.origin + location.pathname) + '">GitHub</a></div></div>';
+    document.getElementById('lf').onsubmit = function (e) {
+      e.preventDefault();
+      var b = document.getElementById('lb'); b.disabled = true;
+      fetch(API + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('em').value, password: document.getElementById('pw').value }) })
+        .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+        .then(function (r) {
+          if (r.j.accessToken) { set('elyvori_token', r.j.accessToken); if (r.j.user) set('elyvori_user', JSON.stringify(r.j.user)); route(); }
+          else { b.disabled = false; document.getElementById('ln').textContent = 'الإيميل أو كلمة السر غلط.'; }
+        }).catch(function () { b.disabled = false; document.getElementById('ln').textContent = 'مشكلة بالاتصال.'; });
+    };
+  }
+
+  function fail(e) {
+    if (e && e.message === 'auth') return login('انتهت جلستك — سجّل دخول مرة ثانية.');
+    app.innerHTML = '<div class="msg">' + (e && e.message === '404' ? 'المشروع مش موجود أو انحذف.' : 'ما قدرت أحمّل المشاريع. السيرفر ممكن يكون نايم — جرّب بعد دقيقة.') + '<br><br><a class="btn" href="/projects.html">رجوع</a></div>';
+  }
+
+  // ---------------------------------------------------------------- list
+  function list() {
+    app.innerHTML = '<div class="msg">جاري تحميل مشاريعك… (أول مرة ممكن ياخذ نص دقيقة)</div>';
+    get('/devices/projects').then(function (ps) {
+      var h = '<h1>مشاريعي</h1><p class="sub">المشاريع اللي بنيتها بمصنع Elyvori بـ VS Code — المهام والشاشات والرصيد. الكود نفسه بيضل على جهازك.</p>';
+      if (!ps.length) {
+        h += '<div class="msg">ما في مشاريع بعد.<br>بـ VS Code اضغط <b>Sign in with Elyvori</b> بإضافة Elyvori، وابنِ أو افتح مشروع — بيطلع هون لحاله.</div>';
+      } else {
+        h += '<div class="grid">' + ps.map(function (p) {
+          var done = p.tasks.done === p.tasks.total && p.tasks.total > 0;
+          return '<a class="card" href="#p=' + encodeURIComponent(p.key) + '"' + (p.rtl ? '' : ' dir="auto"') + '>' +
+            '<div class="head"><div class="pname" dir="auto">' + esc(p.name) + '</div>' +
+            (p.tasks.awaiting ? '<span class="pill p-warn">بانتظار موافقتك</span>' : done ? '<span class="pill p-ok">خلص ✓</span>' : '<span class="pill p-info">شغّال</span>') + '</div>' +
+            '<p class="psum" dir="auto">' + esc(p.summary) + '</p>' +
+            '<div class="muted">المهام <b class="ltr">' + p.tasks.done + '/' + p.tasks.total + '</b></div>' +
+            '<div class="meter"><i style="width:' + pct(p.tasks.done, p.tasks.total) + '%"></i></div>' +
+            '<div class="stats"><span>الشاشات <b class="ltr">' + p.screens.built + '/' + p.screens.total + '</b></span><span>الرصيد <b class="ltr">' + num(p.spent) + '</b></span><span>💻 ' + esc(p.device) + '</span></div>' +
+            '<div class="note">آخر تحديث ' + esc(when(p.updatedAt)) + '</div></a>';
+        }).join('') + '</div>';
+      }
+      app.innerHTML = h;
+    }).catch(fail);
+  }
+
+  // ---------------------------------------------------------------- one project
+  function wire(s, colors) {
+    var c = colors || {};
+    var pick = function () { for (var i = 0; i < arguments.length; i++) if (c[arguments[i]]) return c[arguments[i]]; return ''; };
+    var css = '--wp:' + (pick('primary', 'brand') || '#0891b2') + ';--wbg:' + (pick('background', 'bg') || '#ffffff') + ';--wsf:' + (pick('surface', 'card') || '#f1f5f9') + ';--wtx:' + (pick('text', 'foreground') || '#0f172a');
+    var block = function (t) {
+      var l = t.toLowerCase();
+      if (/(button|btn|cta|fab|زر)/.test(l)) return '<div class="c b" dir="auto">' + esc(t) + '</div>';
+      if (/(field|input|search|form|حقل|بحث|نموذج)/.test(l)) return '<div class="c i" dir="auto">' + esc(t) + '</div>';
+      if (/(image|photo|banner|hero|logo|صورة|بانر)/.test(l)) return '<div class="c m" dir="auto">' + esc(t) + '</div>';
+      return '<div class="c" dir="auto">' + esc(t) + '</div>';
+    };
+    return '<div class="wf' + (s.kind === 'web' ? ' web' : '') + '" style="' + esc(css) + '"><div class="hd" dir="auto">' + esc(s.name) + '</div>' + (s.components || []).map(block).join('') + '</div>';
+  }
+
+  function project(key) {
+    app.innerHTML = '<div class="msg">…</div>';
+    get('/devices/projects/' + encodeURIComponent(key)).then(function (p) {
+      var total = p.tasks.length, done = p.tasks.filter(function (t) { return t.state === 'done'; }).length;
+      var h = '<a class="back" href="#">→ كل المشاريع</a>';
+      h += '<div class="head"><div style="min-width:0"><h1 dir="auto">' + esc(p.name) + '</h1><p class="sub" dir="auto" style="margin-bottom:6px">' + esc(p.summary) + '</p>' +
+        '<div class="muted">النسخة ' + esc(p.revision) + ' · 💻 ' + esc(p.device) + ' · آخر تحديث ' + esc(when(p.updatedAt)) + '</div></div>' +
+        '<a class="btn primary" href="' + esc(deep(p.key)) + '">افتح بـ VS Code ↗</a></div>';
+      h += '<div class="card" style="margin-top:14px"><div class="stats" style="margin:0"><span>المهام <b class="ltr">' + done + '/' + total + '</b></span><span>الشاشات <b class="ltr">' + p.screens.filter(function (s) { return s.built; }).length + '/' + p.screens.length + '</b></span><span>الرصيد اللي صرفه المشروع <b class="ltr">' + num(p.spent) + '</b></span></div>' +
+        '<div class="meter"><i style="width:' + pct(done, total) + '%"></i></div>' +
+        '<div class="note">زر "افتح بـ VS Code" بيشتغل على الجهاز اللي عليه المشروع (' + esc(p.device) + ')، لأن الكود هناك.</div></div>';
+
+      h += '<h2>المهام</h2><div class="tasks">' + p.tasks.map(function (t) {
+        var st = STATE[t.state] || STATE.pending;
+        return '<div class="task"><span class="id">' + esc(t.id) + '</span><div class="t" dir="auto">' + esc(t.title) + '<small>' + (t.files ? t.files + ' ملفات' : '') + (t.agent ? ' · ' + esc(t.agent) : '') + '</small></div>' +
+          '<span class="pill ' + st[1] + '">' + st[0] + '</span>' +
+          (t.state === 'awaiting' || t.state === 'next' ? '<a class="btn sm" href="' + esc(deep(p.key, t.id)) + '">افتح المهمة</a>' : '') + '</div>';
+      }).join('') + '</div>';
+
+      if (p.screens.length) {
+        h += '<h2>الشاشات</h2><div class="screens">' + p.screens.map(function (s) {
+          return '<div class="scr"><div class="head"><b dir="auto">' + esc(s.name) + '</b>' + (s.built ? '<span class="pill p-ok">مبنية</span>' : '<span class="pill p-off">مخطط لها</span>') + '</div>' +
+            (s.route ? '<div class="muted ltr" style="text-align:right">' + esc(s.route) + '</div>' : '') + wire(s, p.colors) +
+            '<div class="muted" dir="auto">' + esc(s.purpose) + '</div></div>';
+        }).join('') + '</div>';
+      }
+      var cols = Object.keys(p.colors || {});
+      if (cols.length) h += '<h2>الألوان</h2><div class="sw">' + cols.map(function (k) { return '<span><i style="background:' + esc(p.colors[k]) + '"></i>' + esc(k) + ' <span class="ltr">' + esc(p.colors[k]) + '</span></span>'; }).join('') + '</div>';
+      app.innerHTML = h;
+    }).catch(fail);
+  }
+
+  function route() {
+    if (location.hash.indexOf('elyvori_auth') >= 0) {
+      var hp = new URLSearchParams(location.hash.slice(1));
+      if (hp.get('elyvori_auth')) { set('elyvori_token', hp.get('elyvori_auth')); set('elyvori_user', JSON.stringify({ email: hp.get('email') || '', organizationName: hp.get('org') || '' })); }
+      history.replaceState(null, '', location.pathname);
+    }
+    if (!token()) return login();
+    var m = location.hash.match(/^#p=(.+)$/);
+    if (m) project(decodeURIComponent(m[1])); else list();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  document.getElementById('refresh').onclick = route;
+  route();
+})();
+</script>
+</body>
+</html>
