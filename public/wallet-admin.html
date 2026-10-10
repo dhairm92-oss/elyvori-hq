@@ -269,6 +269,7 @@ select.search{width:auto}
         (p.status === 'active' ? '<button class="btn danger sm" data-act="frozen" type="button">🧊 تجميد</button>' : '<button class="btn okb sm" data-act="active" type="button">✓ تفعيل</button>') +
         (p.status !== 'closed' ? '<button class="btn danger sm" data-act="closed" type="button">إغلاق الحساب</button>' : '') +
         '<button class="btn sm" data-act="kyc" type="button">مستوى التحقق</button>' +
+        (p.status !== 'closed' ? '<button class="btn sm" data-act="pinreset" type="button">🔑 نسي الرمز السري</button>' : '') +
         '<button class="btn sm" data-act="audit" type="button">سجل إجراءاته</button></div>';
       h += '<h2>الأجهزة (' + (d.devices || []).length + ')</h2><div class="list">' + ((d.devices || []).map(function (v) {
         return '<div class="row"><div class="main"><b>' + esc(v.deviceName) + '</b><small>آخر استخدام: ' + esc(when(v.lastSeenAt)) + '</small></div></div>';
@@ -284,6 +285,22 @@ select.search{width:auto}
 
   function userAction(p, act) {
     if (act === 'audit') { closeDrawer(); state.auditQ = p.id; switchTab('audit'); return; }
+    // ELYVORI-PIN-RESET: one-time code for a customer who forgot the PIN
+    if (act === 'pinreset') {
+      ask('نسي الرمز السري', 'تأكد أول إنه صاحب المحفظة (بيحكي معك من رقم ' + p.phone + ' وبيعرف اسمه وآخر حركاته). بعدين بنطلعلك كود لمرة وحدة (30 دقيقة) بيستخدمه بصفحة elyvori-hq.vercel.app/wallet-reset.html.', '')
+        .then(function (r) {
+          if (!r) return;
+          api('/wallet/admin/users/' + encodeURIComponent(p.id) + '/pin-reset', { method: 'POST', body: '{}' })
+            .then(function (x) {
+              ask('الكود جاهز', 'ابعته للعميل على رقم ' + x.phone + ' بس — بيشتغل ' + x.expiresInMinutes + ' دقيقة ولمرة وحدة.',
+                '<div class="ltr" style="font-size:34px;font-weight:900;letter-spacing:8px;text-align:center;padding:10px;border:1px dashed var(--line);border-radius:14px">' + esc(x.code) + '</div>' +
+                '<div style="margin-top:8px;font-size:13px;color:var(--muted)">الرابط: elyvori-hq.vercel.app/wallet-reset.html</div>');
+              openUser(p.id);
+            })
+            .catch(function (e) { toast(ERR[e.message] || e.message); });
+        });
+      return;
+    }
     if (act === 'kyc') {
       ask('مستوى التحقق', 'بيغيّر حدود الإرسال اليومية والشهرية لهالمستخدم.',
         '<select name="level">' + KYC.map(function (k, i) { return '<option value="' + i + '"' + (i === p.kycLevel ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select>')
@@ -354,7 +371,7 @@ select.search{width:auto}
   // ------------------------------------------------------------- audit
   var ACTIONS = {
     register: 'تسجيل جديد', login: 'دخول', login_new_device: 'دخول من جهاز جديد', pin_wrong: 'رمز سري غلط', pin_locked: 'قفل بعد محاولات خاطئة',
-    pin_changed: 'تغيير الرمز السري', device_revoked: 'إخراج جهاز', user_frozen: 'تجميد (أدمن)', user_active: 'تفعيل (أدمن)', user_closed: 'إغلاق (أدمن)',
+    pin_changed: 'تغيير الرمز السري', pin_reset_platform: 'تغيير الرمز (نسيه — من حسابه بالموقع)', pin_reset_code: 'تغيير الرمز (نسيه — بكود الدعم)', pin_reset_code_created: 'إصدار كود تصفير الرمز (أدمن)', device_revoked: 'إخراج جهاز', user_frozen: 'تجميد (أدمن)', user_active: 'تفعيل (أدمن)', user_closed: 'إغلاق (أدمن)',
     kyc_level_set: 'تغيير مستوى التحقق', entry_reversed: 'استرجاع عملية', transfer: 'تحويل', request_created: 'طلب دفع', request_paid: 'دفع طلب',
     request_declined: 'رفض طلب', request_cancelled: 'إلغاء طلب', topup: 'شحن', withdraw: 'سحب',
     stripe_topup_started: 'بدء شحن بالبطاقة', stripe_topup_paid: 'شحن بالبطاقة (مدفوع)', stripe_amount_mismatch: 'تنبيه: مبلغ Stripe مختلف', stripe_session_mismatch: 'تنبيه: جلسة Stripe غريبة',

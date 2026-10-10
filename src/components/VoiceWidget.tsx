@@ -881,6 +881,19 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
   /** "رصيدي" / "اشحن محفظتي 20 دولار" / "ادفع من المحفظة" ... -> true when handled. */
   const walletIntent = (msg: string, viaVoice: boolean): boolean => {
     const m = msg.toLowerCase();
+    // ELYVORI-PIN-RESET: forgot the wallet PIN
+    if (/(نسيت|ناسي|ضيعت|ضيّعت).{0,25}(رمز|الرمز|الرقم السري|pin|بن كود|محفظ)|forgot.{0,20}(wallet )?pin/.test(m)) {
+      const ar = replyLangRef.current === 'ar';
+      reply(ar
+        ? 'ولا يهمك 🙏 عشان نحمي فلوسك، بتغيّر الرمز بطريقة من ثنتين:\n\n1) إذا محفظتك **مربوطة بحسابك** هون: افتح «حسابي وباقتي» واضغط «نسيت الرمز السري؟» واختار رمز جديد.\n\n2) إذا مش مربوطة: تواصل مع الدعم من رقم جوال المحفظة، بنتأكد إنك صاحبها وبنبعتلك كود لمرة وحدة تغيّر فيه الرمز.\n\n⚠️ لا تكتب رمزك السري هون بالشات أبداً.'
+        : 'No problem 🙏 To keep your money safe there are two ways:\n\n1) If your wallet is **linked to this account**: open "My plan & credits" and tap "Forgot your PIN?".\n\n2) If not: contact support from the wallet phone number — after we verify you, we send a one-time code to set a new PIN.\n\n⚠️ Never type your PIN in the chat.',
+        viaVoice,
+        { actions: [
+          { label: ar ? 'غيّر الرمز من حسابي' : 'Reset from my account', url: '/account.html#pin' },
+          { label: ar ? 'عندي كود من الدعم' : 'I have a support code', url: '/wallet-reset.html' },
+        ] });
+      return true;
+    }
     if (/(اشحن|شحن|عبّي|عبي).{0,20}محفظ|top ?up (my )?wallet|add money to (my )?wallet/.test(m)) {
       const num = m.match(/(\d+(?:[.,]\d{1,3})?)/);
       const currency = /شيكل|شيقل|₪|ils|nis/.test(m) ? 'ILS' : /دينار|jod|jd/.test(m) ? 'JOD' : 'USD';
@@ -1516,6 +1529,12 @@ export function VoiceWidget({ lang = 'en' }: VoiceWidgetProps) {
                 {walletModal.mode !== 'topup' && (
                   <input type="password" inputMode="numeric" autoComplete="off" maxLength={6} dir="ltr" placeholder={isAr ? 'الرمز السري (6 أرقام)' : 'PIN (6 digits)'}
                     value={wmPin} onChange={e => setWmPin(e.target.value.replace(/\D/g, '').slice(0, 6))} autoFocus />
+                )}
+                {walletModal.mode !== 'topup' && (
+                  <p style={{ margin: '-4px 0 10px' }}>
+                    {/* ELYVORI-PIN-RESET */}
+                    <a href={walletModal.mode === 'pin' ? '/account.html#pin' : '/wallet-reset.html'} target="_blank" rel="noopener" style={{ color: '#22d3ee', fontWeight: 700 }}>{isAr ? 'نسيت الرمز السري؟' : 'Forgot your PIN?'}</a>
+                  </p>
                 )}
                 {wmError && <div className="err">{wmError}</div>}
                 <div className="btns">

@@ -56,6 +56,12 @@ h2{font-size:18px;margin:26px 0 10px;font-weight:800}
 .amt{font-weight:800;white-space:nowrap}
 .amt.plus{color:var(--ok)}
 .wallets{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.pinform{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.pinform.open{display:block}
+.inp{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);margin:4px 0 8px;letter-spacing:4px;text-align:center;direction:ltr}
+.linkbtn{background:none;border:0;padding:0;margin-top:10px;font:inherit;font-size:13px;color:var(--accent2);cursor:pointer;text-decoration:underline;display:inline-block}
+.note{font-size:13px;margin-top:6px}
+.note.err{color:var(--bad)}.note.ok{color:var(--ok)}
 .msg{text-align:center;color:var(--muted);padding:36px 10px;background:var(--card);border:1px dashed var(--line);border-radius:18px}
 @media (max-width:820px){.hero{grid-template-columns:1fr}.plans{grid-template-columns:1fr}}
 @media (max-width:640px){.brand .t{display:none}.big{font-size:38px}}
@@ -105,10 +111,17 @@ h2{font-size:18px;margin:26px 0 10px;font-weight:800}
     if (w.linked) {
       h += '<div class="planname" style="font-size:18px">' + esc(w.name) + '</div><div class="muted ltr" style="text-align:right">' + esc(w.phone) + '</div><div class="wallets">' +
         (w.wallets || []).map(function (x) { return '<span class="pill p-info ltr">' + esc(x.balance) + ' ' + esc(SYM[x.currency] || x.currency) + '</span>'; }).join('') +
-        '</div><a class="btn" href="/pay.html" target="_blank" rel="noopener">افتح المحفظة</a>';
+        '</div><a class="btn" href="/pay.html" target="_blank" rel="noopener">افتح المحفظة</a><br>' +
+        // ELYVORI-PIN-RESET: forgot the wallet PIN (signed in + linked wallet)
+        '<button class="linkbtn" type="button" id="forgot">نسيت الرمز السري؟</button>' +
+        '<form class="pinform" id="pinform" autocomplete="off"><div class="muted">اختار رمز سري جديد (6 أرقام). المحفظة رح تطلب منك تسجّل دخول من جديد على كل الأجهزة.</div>' +
+        '<input class="inp" id="np1" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" aria-label="الرمز الجديد">' +
+        '<input class="inp" id="np2" type="password" inputmode="numeric" maxlength="6" placeholder="أعد كتابته" aria-label="تأكيد الرمز">' +
+        '<button class="btn primary" type="submit" id="npgo" style="width:100%">غيّر الرمز السري</button><div class="note" id="npmsg"></div></form>';
     } else {
       h += '<p class="muted" style="margin:8px 0 14px">ادفع باقاتك من محفظة Elyvori Pay — وبتتفعّل فوراً.</p>' +
-        '<a class="btn primary" href="/?checkout=starter">أنشئ أو اربط محفظتك</a>';
+        '<a class="btn primary" href="/?checkout=starter">أنشئ أو اربط محفظتك</a>' +
+        '<br><a class="linkbtn" href="/wallet-reset.html">نسيت رمز محفظتك؟</a>';
     }
     h += '</div></div>';
 
@@ -133,6 +146,35 @@ h2{font-size:18px;margin:26px 0 10px;font-weight:800}
         '<span class="amt' + (u.amount > 0 ? ' plus' : '') + ' ltr">' + (u.amount > 0 ? '+' : '') + u.amount + '</span></div>';
     }).join('') || '<div class="msg" style="padding:20px">ما استخدمت إشي لسا — اطلب من المساعد يبنيلك موقع!</div>') + '</div>';
     app.innerHTML = h;
+    wirePin();
+  }
+
+  var PIN_ERR = { pin_too_simple: 'الرمز سهل كثير — لا تستخدم أرقام متكررة أو متسلسلة.', pin_must_be_6_digits: 'الرمز لازم يكون 6 أرقام.',
+    wallet_not_linked: 'محفظتك مش مربوطة بحسابك.', account_closed: 'هاي المحفظة مسكّرة — تواصل مع الدعم.' };
+  function wirePin() {
+    var f = document.getElementById('pinform'), b = document.getElementById('forgot');
+    if (!f || !b) return;
+    b.onclick = function () { f.classList.toggle('open'); if (f.classList.contains('open')) document.getElementById('np1').focus(); };
+    if (location.hash === '#pin') f.classList.add('open');
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      var a = document.getElementById('np1').value.trim(), c = document.getElementById('np2').value.trim();
+      var m = document.getElementById('npmsg'), go = document.getElementById('npgo');
+      m.className = 'note err';
+      if (!/^\d{6}$/.test(a)) { m.textContent = PIN_ERR.pin_must_be_6_digits; return; }
+      if (a !== c) { m.textContent = 'الرمزين مش متطابقين.'; return; }
+      go.disabled = true; m.className = 'note'; m.textContent = 'لحظة…';
+      fetch(API + '/wallet/chat/reset-pin', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() }, body: JSON.stringify({ newPin: a }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; }); })
+        .then(function (x) {
+          if (x.s === 401) { m.className = 'note err'; m.textContent = 'انتهت جلستك — سجّل دخول مرة ثانية.'; return; }
+          if (x.s === 429) { m.className = 'note err'; m.textContent = 'محاولات كثير — جرّب بعد 10 دقايق.'; return; }
+          if (x.s >= 400) { m.className = 'note err'; m.textContent = PIN_ERR[String(x.j && x.j.message)] || 'ما زبط، جرّب مرة ثانية.'; return; }
+          f.innerHTML = '<div class="note ok">تم ✅ رمزك السري الجديد جاهز. افتح المحفظة وسجّل دخول فيه.</div>';
+        })
+        .catch(function () { m.className = 'note err'; m.textContent = 'ما قدرت أوصل للسيرفر — جرّب بعد دقيقة.'; })
+        .finally(function () { go.disabled = false; document.getElementById('np1') && (document.getElementById('np1').value = '', document.getElementById('np2').value = ''); });
+    };
   }
 
   function load() {
