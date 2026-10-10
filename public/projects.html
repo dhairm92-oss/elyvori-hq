@@ -176,6 +176,151 @@ html.light .route{color:#0891B2}
 .mbar{display:none}
 .toast{position:fixed;inset-inline:16px;bottom:calc(16px + var(--safe-b));z-index:40;max-width:520px;margin:0 auto;padding:12px 16px;border-radius:14px;background:var(--card-solid);border:1px solid var(--line2);box-shadow:var(--shadow);font-size:13.5px;display:none}
 .toast.show{display:block}
+/* ---- guide badge (first visits) */
+.guide-wrap{position:relative;display:inline-flex;flex-direction:column;align-items:flex-end;gap:12px}
+.guide{position:relative;display:flex;align-items:center;gap:10px;max-width:300px;padding:10px 12px 10px 14px;border-radius:14px;background:var(--card-solid);border:1px solid color-mix(in srgb,var(--cyan) 45%,transparent);color:var(--text);font-size:13px;font-weight:700;line-height:1.45;box-shadow:0 0 0 0 rgba(0,229,255,.45),0 14px 34px -14px rgba(0,229,255,.55);animation:gpulse 2.4s ease-out infinite,gfloat 3.2s ease-in-out infinite}
+[dir=rtl] .guide{padding:10px 14px 10px 12px}
+html.light .guide{border-color:color-mix(in srgb,var(--violet) 40%,transparent);box-shadow:0 0 0 0 rgba(124,58,237,.35),0 12px 28px -14px rgba(124,58,237,.45)}
+.guide:before{content:'';position:absolute;top:-7px;inset-inline-end:28px;width:12px;height:12px;background:var(--card-solid);border-top:1px solid color-mix(in srgb,var(--cyan) 45%,transparent);border-inline-start:1px solid color-mix(in srgb,var(--cyan) 45%,transparent);transform:rotate(45deg)}
+[dir=rtl] .guide:before{transform:rotate(-45deg)}
+html.light .guide:before{border-color:color-mix(in srgb,var(--violet) 40%,transparent)}
+.guide .gi{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:var(--grad);color:#fff;flex:none}
+.guide .gi svg{width:15px;height:15px}
+.guide .gx{margin-inline-start:2px;width:26px;height:26px;border-radius:8px;border:0;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;flex:none}
+.guide .gx:hover{background:var(--bg2);color:var(--text)}
+.guide .gx svg{width:14px;height:14px}
+@keyframes gpulse{0%{box-shadow:0 0 0 0 rgba(0,229,255,.45),0 14px 34px -14px rgba(0,229,255,.55)}70%{box-shadow:0 0 0 12px rgba(0,229,255,0),0 14px 34px -14px rgba(0,229,255,.55)}100%{box-shadow:0 0 0 0 rgba(0,229,255,0),0 14px 34px -14px rgba(0,229,255,.55)}}
+@keyframes gfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.btn.glow{animation:bglow 2.4s ease-out infinite}
+@keyframes bglow{0%{box-shadow:0 0 0 0 rgba(0,229,255,.55),0 10px 30px -12px rgba(0,229,255,.6)}70%{box-shadow:0 0 0 10px rgba(0,229,255,0),0 10px 30px -12px rgba(0,229,255,.6)}100%{box-shadow:0 0 0 0 rgba(0,229,255,0),0 10px 30px -12px rgba(0,229,255,.6)}}
+@media (prefers-reduced-motion:reduce){.guide,.btn.glow,.live i,.busy-bar i{animation:none!important}}
+.alt-link{background:none;border:0;padding:4px 2px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:4px}
+.alt-link:hover{color:var(--text);text-decoration-color:var(--cyan)}
+.alt-link svg{width:16px;height:16px}
+
+/* ---- sheet (dialog on desktop, bottom sheet on phones) */
+.sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(3,6,14,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s}
+html.light .sheet-bg{background:rgba(15,23,42,.35)}
+.sheet-bg.show{opacity:1}
+.sheet{width:100%;max-width:560px;max-height:min(88vh,860px);overflow:auto;overscroll-behavior:contain;background:var(--card-solid);border:1px solid var(--line2);border-radius:24px;box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 0 1px rgba(0,229,255,.08);padding:22px;transform:translateY(12px) scale(.98);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.sheet-bg.show .sheet{transform:none}
+.sheet .grab{display:none}
+.sh-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:6px}
+.sh-head h3{margin:0;font-size:20px;font-weight:800;line-height:1.3;flex:1}
+.sh-x{width:38px;height:38px;border-radius:12px;border:1px solid var(--line2);background:var(--bg2);color:var(--text);cursor:pointer;display:grid;place-items:center;flex:none}
+.sh-x svg{width:18px;height:18px}
+.sh-lead{color:var(--muted);font-size:14px;margin:0 0 16px}
+.how{display:flex;align-items:center;gap:8px;padding:12px;border-radius:16px;background:var(--bg2);border:1px solid var(--line);margin-bottom:16px;font-size:12.5px;color:var(--muted);text-align:center}
+.how div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.how b{color:var(--text);font-size:12.5px}
+.how .hi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--card-solid);border:1px solid var(--line2)}
+.how .hi svg{width:20px;height:20px;color:var(--cyan)}
+html.light .how .hi svg{color:#0891B2}
+.how .ar{color:var(--faint);flex:none}
+.how .ar svg{width:18px;height:18px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:start;padding:14px;border-radius:16px;border:1px solid var(--line2);background:var(--card);color:var(--text);cursor:pointer;text-decoration:none;transition:border-color .2s,box-shadow .2s,transform .15s}
+.opt:hover{border-color:var(--cyan);box-shadow:var(--glow)}
+.opt:active{transform:scale(.99)}
+.opt .oi{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;background:var(--bg2);border:1px solid var(--line)}
+.opt .oi svg{width:22px;height:22px}
+.opt.rec .oi{background:var(--grad);border:0;color:#fff}
+.opt .ot{flex:1;min-width:0}
+.opt .ot b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15px}
+.opt .ot small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.45}
+.opt .badge{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--grad);color:#fff;letter-spacing:.02em}
+.opt .chev{color:var(--faint);flex:none}
+.opt .chev svg{width:18px;height:18px}
+.field{display:block;font-size:13px;font-weight:700;margin:4px 0 6px}
+.ta{width:100%;min-height:120px;resize:vertical;padding:12px 14px;border-radius:14px;border:1px solid var(--line2);background:var(--bg2);color:var(--text);font:inherit;font-size:16px;line-height:1.5}
+.ta:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.15)}
+.ta.sm{min-height:76px}
+.examples{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.examples button{border:1px dashed var(--line2);background:transparent;color:var(--muted);font:inherit;font-size:12.5px;padding:5px 10px;border-radius:999px;cursor:pointer}
+.examples button:hover{color:var(--text);border-color:var(--cyan)}
+.pcs{display:grid;gap:8px;margin-bottom:14px}
+.pc{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--line2);background:var(--bg2);cursor:pointer}
+.pc input{accent-color:#00E5FF;width:18px;height:18px;margin:0}
+.pc .pn{flex:1;min-width:0;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc:has(input:checked){border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.12)}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--faint);position:relative}
+.live.on{color:var(--ok)}
+html.light .live.on{color:#15803D}
+.live.on i{background:var(--ok);animation:lpulse 1.8s ease-out infinite}
+@keyframes lpulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}80%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.warnbox{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--warn) 10%,transparent);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);font-size:12.5px;color:var(--body);margin-bottom:14px}
+.warnbox svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--warn)}
+.sh-actions{display:flex;gap:10px;margin-top:4px}
+.sh-actions .btn{flex:1}
+.share-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.share-row .btn{flex-direction:column;gap:6px;min-height:76px;font-size:12.5px;white-space:normal;text-align:center;line-height:1.3}
+.share-row .btn svg{width:22px;height:22px}
+
+/* ---- live tracker (a request on its way to the computer) */
+.track{display:grid;gap:0;margin:6px 0 16px}
+.tstep{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;position:relative;padding-bottom:14px}
+.tstep:not(:last-child):after{content:'';position:absolute;top:28px;bottom:0;inset-inline-start:13px;width:2px;background:var(--line2)}
+.tstep.done:not(:last-child):after{background:var(--grad)}
+.tdot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line2);background:var(--card-solid);color:var(--faint)}
+.tdot svg{width:14px;height:14px}
+.tstep.done .tdot{background:var(--grad);border:0;color:#fff}
+.tstep.now .tdot{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 0 4px rgba(0,229,255,.15)}
+.tstep.bad .tdot{border-color:var(--bad);color:var(--bad)}
+.tstep b{display:block;font-size:14px;line-height:1.5}
+.tstep small{display:block;color:var(--muted);font-size:12.5px;line-height:1.5}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin .8s linear infinite}
+
+/* ---- remote control on the project page */
+.remote{padding:18px;margin-top:16px;position:relative;overflow:hidden}
+.remote:before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--grad)}
+.rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.rhead h2{margin:0;font-size:17px;flex:1;min-width:0}
+.rhead h2 svg{width:20px;height:20px;color:var(--cyan)}
+.busy-bar{height:4px;border-radius:999px;background:var(--bg2);overflow:hidden;margin:2px 0 12px}
+.busy-bar i{display:block;height:100%;width:40%;border-radius:999px;background:var(--grad);animation:slide 1.4s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+[dir=rtl] .busy-bar i{animation-name:slide-r}
+@keyframes slide-r{0%{transform:translateX(100%)}100%{transform:translateX(-260%)}}
+.wait{border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);background:color-mix(in srgb,var(--warn) 6%,transparent);border-radius:16px;padding:14px;margin-bottom:12px}
+.wait h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.4}
+.wait p{margin:0 0 10px;color:var(--muted);font-size:13px}
+.files{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.files span{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;padding:3px 8px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);direction:ltr;unicode-bidi:isolate;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crit{margin:6px 0 12px;padding:0;list-style:none;display:grid;gap:4px}
+.crit li{display:flex;gap:8px;font-size:13px;color:var(--body)}
+.crit li svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--ok)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-row .btn{flex:1;min-width:140px;white-space:normal;text-align:center;line-height:1.25}
+.btn.ok{background:linear-gradient(135deg,#16a34a,#22c55e);border:0;color:#fff;box-shadow:0 10px 26px -12px rgba(34,197,94,.7)}
+.btn.ok.sure{background:#15803D}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+.btn.danger:hover{border-color:var(--bad)}
+.rnote{margin-top:10px;display:none}
+.rnote.show{display:block}
+.reqs{display:grid;gap:8px;margin-top:14px}
+.req{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);font-size:13px}
+.req .ri{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--card-solid);border:1px solid var(--line2);color:var(--muted)}
+.req .ri svg{width:15px;height:15px}
+.req b{display:block;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.req small{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+.req .rx{border:0;background:none;color:var(--faint);cursor:pointer;font:inherit;font-size:12px;text-decoration:underline}
+.sub{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px}
+[dir=rtl] .sub{letter-spacing:0}
+.wait .guide{margin-top:14px}
+.wait .guide:before{inset-inline-end:auto;inset-inline-start:28px;margin:0}
+.c-bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent);border-color:color-mix(in srgb,var(--bad) 28%,transparent)}
+@media (max-width:760px){
+  .sheet-bg{align-items:flex-end;padding:0}
+  .sheet{max-width:none;border-radius:24px 24px 0 0;max-height:92vh;max-height:92dvh;padding:10px 16px calc(18px + var(--safe-b));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .sheet .grab{display:block;width:44px;height:5px;border-radius:999px;background:var(--line2);margin:0 auto 12px}
+  .guide-wrap{display:flex;width:100%;align-items:stretch}
+  .guide{max-width:none}
+  .guide:before{inset-inline-end:auto;inset-inline-start:50%;margin-inline-start:-6px}
+  .remote{padding:16px}
+  .btn-row .btn{min-width:0}
+  .hero .alt-link{align-self:center}
+}
 @media (max-width:980px){.stats4{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:760px){
   .top-in{padding:8px 14px;gap:8px}
@@ -287,7 +432,6 @@ html.light .route{color:#0891B2}
   var NEW = 'vscode://' + EXT + '/new';
   var touch = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches && !matchMedia('(min-width:1024px)').matches);
   function toast(msg) { var el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 5000); }
-  document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href^="vscode://"]'); if (a) toast(t().opening); });
 
   function chrome() {
     document.title = t().title + ' | Elyvori';
@@ -355,11 +499,12 @@ html.light .route{color:#0891B2}
     skeleton();
     get('/devices/projects').then(function (ps) {
       var h = '<div class="hero"><div><div class="eyebrow">' + esc(t().eyebrow) + '</div><h1><span class="grad-text">' + esc(t().title) + '</span></h1><p class="lead">' + esc(t().lead) + '</p></div>' +
-        '<a class="btn primary" href="' + NEW + '">' + I.plus + esc(t().newBtn) + '</a></div>';
+        '<div class="guide-wrap"><a class="btn primary' + (seenTip('new') ? '' : ' glow') + '" data-tip-target="new" href="' + NEW + '">' + I.plus + esc(t().newBtn) + '</a>' + guide('new') +
+        (mobile ? '' : '<button class="alt-link" type="button" data-away>' + I.phone + esc(t().away) + '</button>') + '</div></div>';
       if (!ps.length) {
         h += '<div class="card empty"><div class="ill">' + I.factory + '</div><h2 style="justify-content:center;margin:14px 0 4px">' + esc(t().emptyH) + '</h2>' +
           '<div class="steps"><div class="step"><span class="n">1</span><div>' + t().s1 + '</div></div><div class="step"><span class="n">2</span><div>' + t().s2 + '</div></div><div class="step"><span class="n">3</span><div>' + esc(t().s3) + '</div></div></div>' +
-          '<a class="btn primary" href="' + NEW + '">' + I.plus + esc(t().newBtn) + '</a><p class="upd" style="margin:14px 0 0">' + esc(t().emptyNote) + '</p></div>';
+          '<a class="btn primary" data-tip-target="new" href="' + NEW + '">' + I.plus + esc(t().newBtn) + '</a><p class="upd" style="margin:14px 0 0">' + esc(t().emptyNote) + '</p></div>';
         app.innerHTML = h; return;
       }
       var tt = 0, td = 0, st = 0, sb = 0, cr = 0;
@@ -371,7 +516,7 @@ html.light .route{color:#0891B2}
         '<div class="card stat"><div class="k">' + esc(t().credits) + '</div><div class="v"><span class="grad-text">' + num(cr) + '</span></div></div></div>';
       h += '<div class="grid">' + ps.map(function (p) {
         var finished = p.tasks.total > 0 && p.tasks.done === p.tasks.total;
-        var chip = p.tasks.awaiting ? '<span class="chip c-warn">' + esc(t().waiting) + '</span>' : finished ? '<span class="chip c-ok">' + esc(t().done) + '</span>' : '<span class="chip c-info">' + esc(t().running) + '</span>';
+        var chip = p.busy ? '<span class="chip c-info">' + esc(p.busy === 'plan' ? t().busyPlan : t().busyOther) + '</span>' : p.draft ? '<span class="chip c-warn">' + esc(t().planWait) + '</span>' : p.tasks.awaiting ? '<span class="chip c-warn">' + esc(t().waiting) + '</span>' : finished ? '<span class="chip c-ok">' + esc(t().done) + '</span>' : '<span class="chip c-info">' + esc(t().running) + '</span>';
         return '<a class="card pcard" href="#p=' + encodeURIComponent(p.key) + '">' +
           '<div class="prow"><div class="pav">' + esc((p.name || '?').trim().charAt(0).toUpperCase()) + '</div><div class="ptitle"><div class="pname" dir="auto">' + esc(p.name) + '</div><div class="pdev">' + I.pc + '<span>' + esc(p.device) + '</span></div></div>' + chip + '</div>' +
           '<p class="psum" dir="auto">' + esc(p.summary) + '</p>' +
@@ -400,9 +545,11 @@ html.light .route{color:#0891B2}
       '<div class="hd" dir="auto">' + esc(s.name) + '</div>' + (s.components || []).map(block).join('') + '</div>';
   }
 
-  function project(key) {
-    skeleton();
-    get('/devices/projects/' + encodeURIComponent(key)).then(function (p) {
+  function project(key, quiet) {
+    if (!quiet) skeleton();
+    var y = window.scrollY;
+    Promise.all([get('/devices/projects/' + encodeURIComponent(key)), get('/devices/requests?project=' + encodeURIComponent(key)).catch(function () { return []; }), computers().catch(function () { return []; })]).then(function (all) {
+      var p = all[0], reqs = all[1], list = all[2];
       var total = p.tasks.length, done = p.tasks.filter(function (x) { return x.state === 'done'; }).length, pc = pct(done, total);
       var built = p.screens.filter(function (s) { return s.built; }).length;
       var awaiting = p.tasks.filter(function (x) { return x.state === 'awaiting'; })[0];
@@ -415,7 +562,7 @@ html.light .route{color:#0891B2}
         '<div class="dactions"><a class="btn primary" href="' + esc(deep(p.key)) + '">' + I.ext + esc(t().open) + '</a>' +
         (awaiting ? '<a class="btn" href="' + esc(deep(p.key, awaiting.id)) + '">' + esc(t().openTask) + ' · <span class="ltr">' + esc(awaiting.id) + '</span></a>' : '') +
         '<div class="hint">' + I.info + '<span>' + esc(t().deskHint) + ' (' + esc(p.device) + ')</span></div></div></div>';
-      if (touch) h += '<div class="card note-card"><div class="hint">' + I.info + '<span>' + esc(t().mobileHint) + '</span></div></div>';
+      h += remotePanel(p, reqs, list);
 
       h += '<h2>' + esc(t().tasks) + ' <span class="count ltr">' + done + '/' + total + '</span></h2><div class="tasks">' + p.tasks.map(function (x) {
         var map = { done: 'c-ok', awaiting: 'c-warn', next: 'c-info', failed: 'c-warn' };
@@ -433,12 +580,411 @@ html.light .route{color:#0891B2}
       }
       var cols = Object.keys(p.colors || {});
       if (cols.length) h += '<h2>' + esc(t().colors) + '</h2><div class="swatches">' + cols.map(function (k) { return '<div class="sw"><i style="background:' + esc(p.colors[k]) + '"></i><div><b>' + esc(k) + '</b><small>' + esc(p.colors[k]) + '</small></div></div>'; }).join('') + '</div>';
-      h += '<div class="mbar"><a class="btn" href="#">' + I.back + esc(t().all) + '</a><a class="btn primary" href="/account.html">' + I.user + esc(t().account) + '</a></div>';
+      h += '<div class="mbar"><a class="btn" href="#">' + I.back + esc(t().all) + '</a><button class="btn primary" type="button" data-jump>' + I.remote + esc(t().remoteH) + '</button></div>';
       app.innerHTML = h;
+      current = p; wireRemote(p);
+      var j = app.querySelector('[data-jump]'); if (j) j.onclick = function () { document.getElementById('remote').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+      if (quiet) window.scrollTo(0, y);
+      clearTimeout(poll);
+      poll = setTimeout(function () { refreshRemote(p.key); }, (p.busy || reqs.some(function (q) { return q.status === 'queued' || q.status === 'working'; })) ? 4000 : 20000);
     }).catch(fail);
   }
 
+  // ================================================================ ELYVORI-REMOTE: phone & desktop aware actions
+  Object.assign(I, {
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18h2"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+    share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+    code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    chev: '<svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+    arrow: '<svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+    checkc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 10"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>',
+    remote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="13" height="10" rx="2"/><path d="M6 18h5M8.5 14v4"/><rect x="16" y="8" width="6" height="12" rx="1.6"/><path d="M18.5 17h1"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg>',
+    sparkle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z"/></svg>'
+  });
+
+  Object.assign(T.en, {
+    guideTap: 'Tap here to start — or manage everything from your phone',
+    guideClick: 'Click here to start — or manage from your phone or computer',
+    guideApprove: 'Approve or reject right here — your computer commits it for you',
+    hide: 'Hide',
+    away: 'Away from your computer? Send it from here',
+    shNewTitle: 'Start a project from here', shProjTitle: 'Work on this project from here',
+    shLead: 'VS Code runs on your computer, so the code is written and checked there. From here you tell it what to do and approve each step.',
+    howYou: 'You, here', howPc: 'Your computer', howBack: 'Progress back here',
+    o1: 'Build it from here', o1s: 'Describe it — VS Code on your computer plans it, and you approve every step from here.',
+    o1p: 'Control it from here', o1ps: 'Approve, reject, build next or add a feature — your computer does the work.',
+    rec: 'Recommended',
+    o2: 'Send the link to my computer', o2s: 'Share, copy or email yourself the link and open it when you sit at your computer.',
+    o3: 'View the code on vscode.dev', o3s: 'Opens the GitHub repository in VS Code for the Web — for reading and small edits.',
+    o4: 'Open VS Code on this computer', o4s: 'This computer has VS Code and the Elyvori extension.',
+    whatH: 'What should the Factory build?', whatPh: 'e.g. A booking app for a dental clinic: React front end, Express API, Arabic and English, patients can pick a time and get a reminder.',
+    ex: ['Online flower shop, Arabic + English', 'Clinic booking app', 'Notes API with Express'],
+    pickPc: 'Send to', online: 'online', offline: 'offline', seen: 'last seen',
+    offWarn: 'This computer looks offline. The request waits up to 30 minutes for VS Code to open there, then it expires.',
+    noPc: 'No computer is linked yet. In VS Code press “Sign in with Elyvori” once — then you can send work from anywhere.',
+    sendBtn: 'Send to my computer', back2: 'Back', shareBtn: 'Share', copyBtn: 'Copy link', mailBtn: 'Email me', copied: 'Link copied.',
+    mailSubj: 'Open in VS Code — Elyvori', mailBody: 'Open this on the computer that has VS Code:',
+    tSent: 'Sent', tSentS: 'Waiting for VS Code on', tPicked: 'Your computer picked it up', tWork: 'Working on it', tDone: 'Done', tFail: 'Did not work',
+    tExpired: 'Expired — VS Code did not open in 30 minutes', tCancelled: 'Cancelled',
+    cancel: 'Cancel', close: 'Close', openProjects: 'See my projects',
+    remoteH: 'Control from here', pcLine: 'Runs on',
+    busyPlan: 'The architect is planning…', busyBuild: 'Building and checking the code…', busyOther: 'Working…',
+    planWait: 'A plan is waiting for your approval', planWaitS: 'These tasks will be added. Nothing is built before you approve.',
+    approvePlan: 'Approve the plan', discardPlan: 'Discard',
+    taskWait: 'is ready for your review', taskWaitS: 'Passed every automatic check. Approve to commit it, or reject and say what to change.',
+    attempt: 'attempt', filesN: 'files', approve: 'Approve & commit', sure: 'Tap again to commit', reject: 'Reject',
+    rejectNote: 'What should change? (optional)', rejectSend: 'Rebuild with this note', rejectOnly: 'Just reject',
+    buildNext: 'Build next task', buildAll: 'Build every task', allDone: 'Every task is done.',
+    feature: 'Add a feature', featurePh: 'e.g. Add a wishlist and share it on WhatsApp', featureBtn: 'Send',
+    recent: 'Recent requests',
+    k: { new: 'New project', extend: 'New feature', approvePlan: 'Approve plan', discardPlan: 'Discard plan', build: 'Build next', buildAll: 'Build all', approve: 'Approve', reject: 'Reject' },
+    s: { queued: 'Waiting for your computer', working: 'Working', done: 'Done', failed: 'Failed', expired: 'Expired', cancelled: 'Cancelled' },
+    sentOk: 'Sent to your computer.', sendErr: 'Could not send. Check your connection and try again.', short: 'Write a little more about what to build.',
+    noDevice: 'No computer is linked yet — sign in from VS Code first.'
+  });
+  Object.assign(T.ar, {
+    guideTap: 'اضغط هنا للبدء — أو تحكّم بكل اشي من جوالك',
+    guideClick: 'اضغط هنا للبدء أو التحكم عبر الجوال/الكمبيوتر',
+    guideApprove: 'وافق أو ارفض من هون — وكمبيوترك بيحفظها عنك',
+    hide: 'إخفاء',
+    away: 'بعيد عن الكمبيوتر؟ ابعتها من هون',
+    shNewTitle: 'ابدأ مشروع من هون', shProjTitle: 'اشتغل على المشروع من هون',
+    shLead: 'VS Code بيشتغل على كمبيوترك، فالكود بينكتب وبينفحص هناك. من هون بتقلّه شو يعمل وبتوافق على كل خطوة.',
+    howYou: 'إنت، من هون', howPc: 'كمبيوترك', howBack: 'التقدّم بيرجع هون',
+    o1: 'ابنيه من هون', o1s: 'اوصف المشروع — VS Code على كمبيوترك بيخطّطه، وإنت بتوافق على كل خطوة من هون.',
+    o1p: 'تحكّم فيه من هون', o1ps: 'وافق، ارفض، ابنِ الجاية أو زيد ميزة — وكمبيوترك بيشتغل.',
+    rec: 'مُقترح',
+    o2: 'ابعت الرابط لكمبيوتري', o2s: 'شارك أو انسخ أو ابعت الرابط لإيميلك وافتحه لما تقعد على الكمبيوتر.',
+    o3: 'شوف الكود على vscode.dev', o3s: 'بيفتح مستودع GitHub بنسخة الويب من VS Code — للقراءة والتعديلات الصغيرة.',
+    o4: 'افتح VS Code على هالجهاز', o4s: 'هالجهاز عليه VS Code وإضافة Elyvori.',
+    whatH: 'شو بدك المصنع يبني؟', whatPh: 'مثلاً: تطبيق حجوزات لعيادة أسنان، واجهة React وسيرفر Express، عربي وإنجليزي، المريض بيختار موعد وبيوصله تذكير.',
+    ex: ['متجر ورد أونلاين، عربي وإنجليزي', 'تطبيق حجوزات لعيادة', 'Notes API بـ Express'],
+    pickPc: 'ابعت لـ', online: 'شغّال', offline: 'مطفي', seen: 'آخر ظهور',
+    offWarn: 'هالكمبيوتر شكله مطفي. الطلب بيستنى لحد 30 دقيقة لحتى ينفتح VS Code عليه، وبعدها بينلغى.',
+    noPc: 'لسا ما في كمبيوتر مربوط. من VS Code اضغط «Sign in with Elyvori» مرة وحدة — وبعدها بتقدر تبعت شغل من أي مكان.',
+    sendBtn: 'ابعت لكمبيوتري', back2: 'رجوع', shareBtn: 'مشاركة', copyBtn: 'انسخ الرابط', mailBtn: 'ابعتلي إيميل', copied: 'انسخ الرابط.',
+    mailSubj: 'افتح بـ VS Code — Elyvori', mailBody: 'افتح هالرابط على الكمبيوتر اللي عليه VS Code:',
+    tSent: 'انبعت', tSentS: 'بيستنى VS Code على', tPicked: 'كمبيوترك استلمه', tWork: 'شغّال عليه', tDone: 'خلص', tFail: 'ما زبط',
+    tExpired: 'انتهى — VS Code ما انفتح خلال 30 دقيقة', tCancelled: 'انلغى',
+    cancel: 'إلغاء', close: 'سكّر', openProjects: 'شوف مشاريعي',
+    remoteH: 'تحكّم من هون', pcLine: 'شغّال على',
+    busyPlan: 'المهندس بخطّط…', busyBuild: 'ببني الكود وبفحصه…', busyOther: 'شغّال…',
+    planWait: 'في خطة بتستنى موافقتك', planWaitS: 'هاي المهام رح تنضاف. ما بينبنى اشي قبل موافقتك.',
+    approvePlan: 'وافق على الخطة', discardPlan: 'الغِها',
+    taskWait: 'جاهزة لمراجعتك', taskWaitS: 'نجحت بكل الفحوصات التلقائية. وافق عشان تنحفظ، أو ارفض وقلّه شو يتغيّر.',
+    attempt: 'محاولة', filesN: 'ملفات', approve: 'وافق واحفظ', sure: 'اضغط كمان مرة للتأكيد', reject: 'ارفض',
+    rejectNote: 'شو بدك يتغيّر؟ (اختياري)', rejectSend: 'ابنيها من جديد بهالملاحظة', rejectOnly: 'ارفض بس',
+    buildNext: 'ابنِ المهمة الجاية', buildAll: 'ابنِ كل المهام', allDone: 'كل المهام خلصت.',
+    feature: 'زيد ميزة', featurePh: 'مثلاً: زيد قائمة أمنيات وخلّيها تنشارك على واتساب', featureBtn: 'ابعت',
+    recent: 'آخر الطلبات',
+    k: { new: 'مشروع جديد', extend: 'ميزة جديدة', approvePlan: 'موافقة على الخطة', discardPlan: 'إلغاء الخطة', build: 'ابنِ الجاية', buildAll: 'ابنِ الكل', approve: 'موافقة', reject: 'رفض' },
+    s: { queued: 'بيستنى كمبيوترك', working: 'شغّال', done: 'خلص', failed: 'ما زبط', expired: 'انتهى', cancelled: 'انلغى' },
+    sentOk: 'انبعت لكمبيوترك.', sendErr: 'ما قدرت أبعت. تأكد من النت وجرّب كمان مرة.', short: 'اكتب شوي أكثر عن اللي بدك تبنيه.',
+    noDevice: 'لسا ما في كمبيوتر مربوط — سجّل دخول من VS Code أول.'
+  });
+
+  var UA = navigator.userAgent || '';
+  var mobile = /Android|iPhone|iPod|Mobile|Windows Phone/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1) || touch;
+
+  function send(method, path, body) {
+    return fetch(API + path, { method: method, headers: { Authorization: 'Bearer ' + token(), 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (r.status === 401) throw new Error('auth');
+        if (!r.ok) { var e = new Error(j && j.message ? String(j.message) : 'http'); e.status = r.status; throw e; }
+        return j;
+      });
+    });
+  }
+  var pcs = null, pcsAt = 0;
+  function computers(fresh) {
+    if (!fresh && pcs && Date.now() - pcsAt < 15000) return Promise.resolve(pcs);
+    return get('/devices/computers').then(function (d) { pcs = d; pcsAt = Date.now(); return d; });
+  }
+  function liveDot(on) { return '<span class="live' + (on ? ' on' : '') + '"><i></i>' + esc(on ? t().online : t().offline) + '</span>'; }
+
+  // ---------------------------------------------------------------- guide badge (shown until used or hidden)
+  function seenTip(k) { try { return localStorage.getItem('ely_tip_' + k) === '1'; } catch (e) { return true; } }
+  function hideTip(k) { store('ely_tip_' + k, '1'); }
+  function guide(k) {
+    if (seenTip(k)) return '';
+    var text = k === 'approve' ? t().guideApprove : mobile ? t().guideTap : t().guideClick;
+    return '<div class="guide" role="note" data-tip="' + k + '"><span class="gi">' + I.up + '</span><span>' + esc(text) + '</span><button class="gx" type="button" aria-label="' + esc(t().hide) + '" data-hide-tip="' + k + '">' + I.x + '</button></div>';
+  }
+  document.addEventListener('click', function (e) {
+    var h = e.target.closest && e.target.closest('[data-hide-tip]');
+    if (h) { hideTip(h.getAttribute('data-hide-tip')); var g = h.closest('.guide'); if (g) g.remove(); document.querySelectorAll('.btn.glow').forEach(function (b) { b.classList.remove('glow'); }); return; }
+    var used = e.target.closest && e.target.closest('[data-tip-target]');
+    if (used) { hideTip(used.getAttribute('data-tip-target')); }
+  }, true);
+
+  // ---------------------------------------------------------------- sheet
+  var sheetEl = null, lastFocus = null, sheetTimer = null;
+  function closeSheet() {
+    clearInterval(sheetTimer); sheetTimer = null;
+    if (!sheetEl) return;
+    var el = sheetEl; sheetEl = null;
+    el.classList.remove('show'); document.body.style.overflow = '';
+    setTimeout(function () { el.remove(); }, 260);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function openSheet(title, body, after) {
+    closeSheet();
+    lastFocus = document.activeElement;
+    var bg = document.createElement('div');
+    bg.className = 'sheet-bg';
+    bg.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="grab"></div><div class="sh-head"><h3 id="shT"></h3><button class="sh-x" type="button" aria-label="' + esc(t().close) + '">' + I.x + '</button></div><div class="sh-body"></div></div>';
+    document.body.appendChild(bg);
+    bg.querySelector('#shT').textContent = title;
+    bg.querySelector('.sh-body').innerHTML = body;
+    bg.addEventListener('click', function (e) { if (e.target === bg) closeSheet(); });
+    bg.querySelector('.sh-x').onclick = closeSheet;
+    document.body.style.overflow = 'hidden';
+    sheetEl = bg;
+    requestAnimationFrame(function () { bg.classList.add('show'); });
+    var f = bg.querySelector('.sh-x'); if (f) f.focus();
+    if (after) after(bg.querySelector('.sh-body'));
+    return bg;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (!sheetEl) return;
+    if (e.key === 'Escape') closeSheet();
+    if (e.key === 'Tab') { // keep focus inside the dialog
+      var f = sheetEl.querySelectorAll('button,a[href],textarea,input,select'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  function howStrip() {
+    return '<div class="how" aria-hidden="true"><div><span class="hi">' + I.phone + '</span><b>' + esc(t().howYou) + '</b></div><span class="ar">' + I.arrow + '</span>' +
+      '<div><span class="hi">' + I.pc + '</span><b>' + esc(t().howPc) + '</b></div><span class="ar">' + I.arrow + '</span>' +
+      '<div><span class="hi">' + I.refresh + '</span><b>' + esc(t().howBack) + '</b></div></div>';
+  }
+  function opt(id, icon, title, sub, rec, href) {
+    var inner = '<span class="oi">' + icon + '</span><span class="ot"><b>' + esc(title) + (rec ? ' <span class="badge">' + esc(t().rec) + '</span>' : '') + '</b><small>' + esc(sub) + '</small></span><span class="chev">' + I.chev + '</span>';
+    return href ? '<a class="opt' + (rec ? ' rec' : '') + '" href="' + esc(href) + '" target="_blank" rel="noopener" data-opt="' + id + '">' + inner + '</a>'
+      : '<button class="opt' + (rec ? ' rec' : '') + '" type="button" data-opt="' + id + '">' + inner + '</button>';
+  }
+  function linkFor(key) { return location.origin + '/projects.html' + (key ? '#p=' + encodeURIComponent(key) : ''); }
+  function vscodeDev(repo) { var m = String(repo || '').match(/^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)$/); return m ? 'https://vscode.dev/github/' + m[1] + '/' + m[2] : ''; }
+  function myEmail() { try { return (JSON.parse(localStorage.getItem('elyvori_user') || '{}') || {}).email || ''; } catch (e) { return ''; } }
+
+  /** ctx: { key?, task?, repo?, deep? } — key missing = new project */
+  function actionSheet(ctx) {
+    var proj = !!ctx.key;
+    var dev = vscodeDev(ctx.repo);
+    var body = '<p class="sh-lead">' + esc(t().shLead) + '</p>' + howStrip() + '<div class="opts">' +
+      (proj ? opt('control', I.remote, t().o1p, t().o1ps, true) : opt('build', I.send, t().o1, t().o1s, true)) +
+      opt('share', I.share, t().o2, t().o2s) +
+      (dev ? opt('dev', I.code, t().o3, t().o3s, false, dev) : '') +
+      (mobile ? '' : opt('local', I.ext, t().o4, t().o4s, false)) + '</div>';
+    openSheet(proj ? t().shProjTitle : t().shNewTitle, body, function (b) {
+      b.querySelectorAll('[data-opt]').forEach(function (o) {
+        o.addEventListener('click', function () {
+          var id = o.getAttribute('data-opt');
+          if (id === 'build') return buildForm();
+          if (id === 'share') return shareView(ctx);
+          if (id === 'control') { closeSheet(); var r = document.getElementById('remote'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+          if (id === 'local') { closeSheet(); location.href = ctx.deep || NEW; toast(t().opening); }
+        });
+      });
+    });
+  }
+
+  function shareView(ctx) {
+    var url = linkFor(ctx.key), em = myEmail();
+    var mail = 'mailto:' + encodeURIComponent(em) + '?subject=' + encodeURIComponent(t().mailSubj) + '&body=' + encodeURIComponent(t().mailBody + '\n' + url);
+    openSheet(t().o2, '<p class="sh-lead">' + esc(t().o2s) + '</p><div class="share-row">' +
+      (navigator.share ? '<button class="btn" type="button" id="shS">' + I.share + esc(t().shareBtn) + '</button>' : '') +
+      '<button class="btn" type="button" id="shC">' + I.copy + esc(t().copyBtn) + '</button>' +
+      '<a class="btn" href="' + esc(mail) + '">' + I.mail + esc(t().mailBtn) + '</a></div>' +
+      '<p class="upd ltr" style="margin:14px 0 0;word-break:break-all">' + esc(url) + '</p>' +
+      '<div class="sh-actions" style="margin-top:16px"><button class="btn" type="button" id="shB">' + I.back + esc(t().back2) + '</button></div>', function (b) {
+      var s = b.querySelector('#shS'); if (s) s.onclick = function () { navigator.share({ title: 'Elyvori', text: t().mailBody, url: url }).catch(function () {}); };
+      b.querySelector('#shC').onclick = function () {
+        var done = function () { toast(t().copied); };
+        if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, function () { fallbackCopy(url); done(); }); else { fallbackCopy(url); done(); }
+      };
+      b.querySelector('#shB').onclick = function () { actionSheet(ctx); };
+    });
+  }
+  function fallbackCopy(s) { var ta = document.createElement('textarea'); ta.value = s; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); }
+
+  function pcPicker(list) {
+    if (!list.length) return '<div class="warnbox">' + I.info + '<span>' + esc(t().noPc) + '</span></div>';
+    return '<span class="field">' + esc(t().pickPc) + '</span><div class="pcs" role="radiogroup">' + list.map(function (d, i) {
+      return '<label class="pc"><input type="radio" name="pc" value="' + esc(d.id) + '"' + (i === 0 ? ' checked' : '') + '>' + I.pc.replace('<svg', '<svg width="18" height="18"') + '<span class="pn" dir="auto">' + esc(d.name) + '</span>' + liveDot(d.online) + '</label>';
+    }).join('') + '</div><div id="offw"></div>';
+  }
+
+  function buildForm() {
+    openSheet(t().o1, '<div class="sk" style="height:140px"></div>', function (b) {
+      computers(true).catch(function () { return []; }).then(function (list) {
+        if (!sheetEl) return;
+        b.innerHTML = '<label class="field" for="what">' + esc(t().whatH) + '</label><textarea class="ta" id="what" dir="auto" maxlength="4000" placeholder="' + esc(t().whatPh) + '"></textarea>' +
+          '<div class="examples">' + t().ex.map(function (x) { return '<button type="button">' + esc(x) + '</button>'; }).join('') + '</div>' +
+          pcPicker(list) + '<div class="err" id="bfe" role="alert"></div>' +
+          '<div class="sh-actions"><button class="btn" type="button" id="bfb">' + I.back + esc(t().back2) + '</button><button class="btn primary" type="button" id="bfs"' + (list.length ? '' : ' disabled') + '>' + I.send + esc(t().sendBtn) + '</button></div>';
+        var ta = b.querySelector('#what');
+        b.querySelectorAll('.examples button').forEach(function (x) { x.onclick = function () { ta.value = x.textContent; ta.focus(); }; });
+        var warn = function () {
+          var sel = b.querySelector('input[name=pc]:checked'), d = sel && list.filter(function (x) { return x.id === sel.value; })[0];
+          var w = b.querySelector('#offw'); if (w) w.innerHTML = d && !d.online ? '<div class="warnbox">' + I.warn + '<span>' + esc(t().offWarn) + '</span></div>' : '';
+        };
+        b.querySelectorAll('input[name=pc]').forEach(function (r) { r.onchange = warn; }); warn();
+        b.querySelector('#bfb').onclick = function () { actionSheet({}); };
+        b.querySelector('#bfs').onclick = function () {
+          var text = ta.value.trim(), sel = b.querySelector('input[name=pc]:checked'), btn = this, er = b.querySelector('#bfe');
+          if (text.length < 8) { er.textContent = t().short; ta.focus(); return; }
+          btn.disabled = true; er.textContent = '';
+          send('POST', '/devices/requests', { kind: 'new', text: text, deviceId: sel ? sel.value : undefined }).then(function (r) { trackSheet(r); })
+            .catch(function (e) { btn.disabled = false; er.textContent = e.message === 'no_device' ? t().noDevice : t().sendErr; });
+        };
+        ta.focus();
+      });
+    });
+  }
+
+  function trackSteps(r) {
+    var st = r.status, fin = st === 'done' || st === 'failed' || st === 'expired' || st === 'cancelled';
+    var step = function (cls, icon, title, sub) { return '<div class="tstep ' + cls + '"><span class="tdot">' + icon + '</span><div><b>' + esc(title) + '</b>' + (sub ? '<small dir="auto">' + esc(sub) + '</small>' : '') + '</div></div>'; };
+    var spin = '<i class="spin"></i>';
+    var h = step('done', I.check, t().tSent, t().tSentS + ' ' + (r.device || ''));
+    if (st === 'queued') h += step('now', spin, t().s.queued, '') + step('', '', t().tDone, '');
+    else if (st === 'working') h += step('done', I.check, t().tPicked, '') + step('now', spin, t().tWork, r.message);
+    else if (st === 'done') h += step('done', I.check, t().tPicked, '') + step('done', I.check, t().tDone, r.message);
+    else if (st === 'failed') h += step('done', I.check, t().tPicked, '') + step('bad', I.x, t().tFail, r.message);
+    else h += step('bad', I.x, st === 'expired' ? t().tExpired : t().tCancelled, '');
+    return { html: '<div class="track">' + h + '</div>', fin: fin };
+  }
+  function trackSheet(r) {
+    var draw = function (b, r) {
+      var s = trackSteps(r);
+      b.innerHTML = s.html + '<div class="sh-actions">' +
+        (r.status === 'queued' ? '<button class="btn" type="button" id="tkc">' + esc(t().cancel) + '</button>' : '') +
+        '<button class="btn' + (s.fin ? ' primary' : '') + '" type="button" id="tko">' + esc(s.fin && r.status === 'done' ? t().openProjects : t().close) + '</button></div>';
+      var c = b.querySelector('#tkc'); if (c) c.onclick = function () { send('DELETE', '/devices/requests/' + encodeURIComponent(r.id)).then(function () { r.status = 'cancelled'; draw(b, r); }).catch(function () {}); };
+      b.querySelector('#tko').onclick = function () { closeSheet(); if (location.hash) location.hash = ''; else route(); };
+      return s.fin;
+    };
+    openSheet(t().o1, '', function (b) {
+      if (draw(b, r)) return;
+      sheetTimer = setInterval(function () {
+        get('/devices/requests?project=*new').then(function (list) {
+          var x = list.filter(function (q) { return q.id === r.id; })[0];
+          if (x && sheetEl) { r = x; if (draw(b, r)) { clearInterval(sheetTimer); if (r.status === 'done') pcs = null; } }
+        }).catch(function () {});
+      }, 4000);
+    });
+  }
+
+  // Phones (and "away" links) get the sheet instead of a vscode:// link that cannot open there
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="vscode://"]');
+    if (!a) return;
+    if (!mobile) { toast(t().opening); return; }
+    e.preventDefault();
+    var href = a.getAttribute('href'), q = href.split('?')[1] || '', p = new URLSearchParams(q);
+    actionSheet(href.indexOf('/new') >= 0 ? {} : { key: p.get('project'), task: p.get('task'), repo: current && current.repo, deep: href });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-away]');
+    if (a) { e.preventDefault(); actionSheet(current ? { key: current.key, repo: current.repo, deep: deep(current.key) } : {}); }
+  });
+
+  // ---------------------------------------------------------------- remote panel on the project page
+  var current = null, poll = null;
+  function remotePanel(p, reqs, list) {
+    var dev = list.filter(function (d) { return d.id === p.deviceId; })[0];
+    var h = '<section class="card remote" id="remote" aria-live="polite"><div class="rhead"><h2>' + I.remote + '<span>' + esc(t().remoteH) + '</span></h2>' +
+      '<span class="upd">' + esc(t().pcLine) + ' <b dir="auto">' + esc(p.device) + '</b></span> ' + liveDot(!!(dev && dev.online)) + '</div>';
+    if (p.busy) h += '<div class="busy-bar"><i></i></div><p class="upd" style="margin:-4px 0 12px">' + esc(p.busy === 'plan' ? t().busyPlan : p.busy === 'build' ? t().busyBuild : t().busyOther) + '</p>';
+    var waiting = function (kind, extra) { return reqs.some(function (r) { return r.kind === kind && (r.status === 'queued' || r.status === 'working') && (!extra || extra(r)); }); };
+    if (dev && !dev.online) h += '<div class="warnbox">' + I.warn + '<span>' + esc(t().offWarn) + '</span></div>';
+
+    if (p.draft && p.draft.tasks) {
+      h += '<div class="wait"><h3>' + I.sparkle.replace('<svg', '<svg width="18" height="18"') + esc(t().planWait) + '</h3><p>' + esc(t().planWaitS) + '</p>' +
+        '<div class="tasks" style="margin-bottom:12px">' + p.draft.tasks.map(function (x) { return '<div class="card task" style="padding:10px 12px"><span class="tid">' + esc(x.id) + '</span><div class="ttl" dir="auto">' + esc(x.title) + '</div></div>'; }).join('') + '</div>' +
+        '<div class="btn-row"><button class="btn ok" type="button" data-req="approvePlan"' + (waiting('approvePlan') ? ' disabled' : '') + '>' + I.check + esc(t().approvePlan) + '</button><button class="btn danger" type="button" data-req="discardPlan"' + (waiting('discardPlan') ? ' disabled' : '') + '>' + esc(t().discardPlan) + '</button></div></div>';
+    } else if (p.pending) {
+      var pd = p.pending, busyA = waiting('approve', function (r) { return r.taskId === pd.taskId; }) || waiting('reject', function (r) { return r.taskId === pd.taskId; });
+      h += '<div class="wait"><h3><span class="tid">' + esc(pd.taskId) + '</span><span dir="auto">' + esc(pd.title) + '</span></h3><p>' + esc(t().taskWait) + ' · ' + num(pd.files.length) + ' ' + esc(t().filesN) + ' · ' + esc(t().attempt) + ' ' + num(pd.attempts) + '<br>' + esc(t().taskWaitS) + '</p>' +
+        '<div class="files">' + pd.files.slice(0, 14).map(function (f) { return '<span title="' + esc(f) + '">' + esc(f) + '</span>'; }).join('') + (pd.files.length > 14 ? '<span>+' + (pd.files.length - 14) + '</span>' : '') + '</div>' +
+        (pd.criteria.length ? '<ul class="crit">' + pd.criteria.map(function (c) { return '<li>' + I.checkc + '<span dir="auto">' + esc(c) + '</span></li>'; }).join('') + '</ul>' : '') +
+        '<div class="btn-row"><button class="btn ok" type="button" id="apv" data-tip-target="approve"' + (busyA ? ' disabled' : '') + '>' + I.check + esc(t().approve) + '</button><button class="btn danger" type="button" id="rjt"' + (busyA ? ' disabled' : '') + '>' + esc(t().reject) + '</button></div>' + guide('approve') +
+        '<div class="rnote" id="rnote"><label class="field" for="rtext">' + esc(t().rejectNote) + '</label><textarea class="ta sm" id="rtext" dir="auto" maxlength="4000"></textarea><div class="btn-row" style="margin-top:8px"><button class="btn primary" type="button" id="rsend">' + esc(t().rejectSend) + '</button><button class="btn" type="button" id="ronly">' + esc(t().rejectOnly) + '</button></div></div></div>';
+    } else if (p.tasks.some(function (x) { return x.state === 'next'; }) && !p.busy) {
+      var wb = waiting('build') || waiting('buildAll');
+      h += '<div class="btn-row" style="margin-bottom:6px"><button class="btn primary" type="button" data-req="build"' + (wb ? ' disabled' : '') + '>' + I.play + esc(t().buildNext) + '</button><button class="btn" type="button" data-req="buildAll"' + (wb ? ' disabled' : '') + '>' + esc(t().buildAll) + '</button></div>';
+    } else if (p.tasks.length && p.tasks.every(function (x) { return x.state === 'done'; })) {
+      h += '<p class="upd" style="margin:0 0 6px;display:flex;gap:6px;align-items:center;color:var(--ok)">' + I.checkc.replace('<svg', '<svg width="16" height="16"') + esc(t().allDone) + '</p>';
+    }
+    if (!p.draft && !p.pending) {
+      h += '<div class="sub">' + esc(t().feature) + '</div><textarea class="ta sm" id="feat" dir="auto" maxlength="4000" placeholder="' + esc(t().featurePh) + '"></textarea>' +
+        '<div class="btn-row" style="margin-top:8px"><button class="btn" type="button" id="featSend"' + (p.busy || waiting('extend') ? ' disabled' : '') + '>' + I.send + esc(t().featureBtn) + '</button></div>';
+    }
+    if (reqs.length) {
+      h += '<div class="sub">' + esc(t().recent) + '</div><div class="reqs">' + reqs.slice(0, 6).map(function (r) {
+        var map = { queued: 'c-info', working: 'c-info', done: 'c-ok', failed: 'c-bad', expired: 'c-off', cancelled: 'c-off' };
+        return '<div class="req"><span class="ri">' + (r.status === 'working' || r.status === 'queued' ? '<i class="spin"></i>' : I.phone) + '</span><div style="min-width:0"><b>' + esc(t().k[r.kind] || r.kind) + (r.taskId ? ' · <span class="ltr">' + esc(r.taskId) + '</span>' : '') + (r.text ? ' — <span dir="auto">' + esc(r.text) + '</span>' : '') + '</b>' +
+          '<small dir="auto">' + esc(r.message || ago(r.updatedAt)) + '</small></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="chip ' + (map[r.status] || 'c-off') + '">' + esc(t().s[r.status] || r.status) + '</span>' +
+          (r.status === 'queued' ? '<button class="rx" type="button" data-cancel="' + esc(r.id) + '">' + esc(t().cancel) + '</button>' : '') + '</div></div>';
+      }).join('') + '</div>';
+    }
+    return h + '</section>';
+  }
+
+  function wireRemote(p) {
+    var root = document.getElementById('remote'); if (!root) return;
+    var go = function (body, btn) {
+      if (btn) btn.disabled = true;
+      return send('POST', '/devices/requests', Object.assign({ projectKey: p.key }, body)).then(function () { toast(t().sentOk); refreshRemote(p.key, true); })
+        .catch(function (e) { if (btn) btn.disabled = false; if (e.message === 'auth') return login(t().expired); toast(e.message === 'no_device' ? t().noDevice : t().sendErr); });
+    };
+    root.querySelectorAll('[data-req]').forEach(function (b) { b.onclick = function () { go({ kind: b.getAttribute('data-req') }, b); }; });
+    var apv = root.querySelector('#apv');
+    if (apv) apv.onclick = function () {
+      if (!apv.classList.contains('sure')) { apv.classList.add('sure'); apv.lastChild.textContent = t().sure; setTimeout(function () { if (document.body.contains(apv) && !apv.disabled) { apv.classList.remove('sure'); apv.lastChild.textContent = t().approve; } }, 4000); return; }
+      go({ kind: 'approve', taskId: p.pending.taskId }, apv);
+    };
+    var rjt = root.querySelector('#rjt');
+    if (rjt) rjt.onclick = function () { var n = root.querySelector('#rnote'); n.classList.toggle('show'); if (n.classList.contains('show')) root.querySelector('#rtext').focus(); };
+    var rs = root.querySelector('#rsend'), ro = root.querySelector('#ronly');
+    if (rs) rs.onclick = function () { var v = root.querySelector('#rtext').value.trim(); if (v.length < 3) { root.querySelector('#rtext').focus(); return; } go({ kind: 'reject', taskId: p.pending.taskId, text: v }, rs); };
+    if (ro) ro.onclick = function () { go({ kind: 'reject', taskId: p.pending.taskId }, ro); };
+    var fs = root.querySelector('#featSend');
+    if (fs) fs.onclick = function () { var v = root.querySelector('#feat').value.trim(); if (v.length < 8) { toast(t().short); root.querySelector('#feat').focus(); return; } go({ kind: 'extend', text: v }, fs); };
+    root.querySelectorAll('[data-cancel]').forEach(function (b) { b.onclick = function () { b.disabled = true; send('DELETE', '/devices/requests/' + encodeURIComponent(b.getAttribute('data-cancel'))).then(function () { refreshRemote(p.key, true); }).catch(function () { b.disabled = false; }); }; });
+  }
+
+  /** Re-renders the remote panel (and the page when the project changed) while something is on its way. */
+  function refreshRemote(key, soon) {
+    clearTimeout(poll);
+    if (!current || current.key !== key) return;
+    Promise.all([get('/devices/projects/' + encodeURIComponent(key)), get('/devices/requests?project=' + encodeURIComponent(key)), computers(true).catch(function () { return []; })]).then(function (r) {
+      if (!current || current.key !== key) return;
+      var p = r[0], reqs = r[1], list = r[2];
+      var typing = document.activeElement && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName) && document.getElementById('remote') && document.getElementById('remote').contains(document.activeElement);
+      var changed = JSON.stringify([p.tasks, p.screens, p.revision]) !== JSON.stringify([current.tasks, current.screens, current.revision]);
+      current = p;
+      if (changed && !typing) { project(key, true); return; }
+      var el = document.getElementById('remote');
+      if (el && !typing) { el.outerHTML = remotePanel(p, reqs, list); wireRemote(p); }
+      var active = p.busy || reqs.some(function (q) { return q.status === 'queued' || q.status === 'working'; });
+      poll = setTimeout(function () { if (document.visibilityState === 'visible') refreshRemote(key); else refreshRemote(key); }, active ? 4000 : 20000);
+    }).catch(function () { poll = setTimeout(function () { refreshRemote(key); }, 20000); });
+  }
+
   function route() {
+    clearTimeout(poll); current = null; closeSheet();
     chrome();
     if (location.hash.indexOf('elyvori_auth') >= 0) {
       var hp = new URLSearchParams(location.hash.slice(1));
