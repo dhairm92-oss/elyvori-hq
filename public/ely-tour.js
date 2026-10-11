@@ -271,8 +271,16 @@
     '.ag{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:2px 0 12px}' +
     '.ag div{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(148,163,184,.08);border:1px solid var(--line)}' +
     '.ag span{grid-row:span 2;font-size:18px}.ag b{font-size:13px}.ag small{color:var(--muted);font-size:11.5px;line-height:1.35}' +
-    '.pf{display:flex;align-items:center;gap:8px}' +
-    '.dots{display:flex;gap:5px;flex:1;align-items:center}.dots i{width:6px;height:6px;border-radius:99px;background:var(--line2);transition:width .25s,background .25s}.dots i.on{width:18px;background:var(--grad)}' +
+    '.pf{display:flex;align-items:center;gap:8px;min-width:0}.pf>.b{flex:none}' +
+    '.pf.intro{justify-content:flex-end;gap:14px;padding-top:4px}' +
+    '.pf>.b[data-a=back]{border-radius:999px;width:42px;min-height:42px;padding:0}' +
+    '.b.pill{border-radius:999px;min-height:42px;padding:0 8px 0 20px;gap:12px;max-width:100%}' +
+    '.wrap.ar .b.pill{padding:0 20px 0 8px}' +
+    '.b.pill span{flex:1;text-align:center;line-height:1;overflow:hidden;text-overflow:ellipsis}' +
+    '.b.pill svg{width:28px;height:28px;padding:6px;border-radius:50%;background:rgba(255,255,255,.2)}' +
+    '.b.pill:not(:has(svg)){padding:0 22px}' +
+    '.pf.intro .b.ghost{border-radius:999px;min-height:42px;padding:0 16px}' +
+    '.dots{display:flex;gap:5px;flex:1;min-width:0;align-items:center;overflow:hidden}.dots i{width:6px;height:6px;border-radius:99px;background:var(--line2);transition:width .25s,background .25s}.dots i.on{width:18px;background:var(--grad)}' +
     '.cnt{font-size:12px;color:var(--faint);margin-inline-end:4px;white-space:nowrap}' +
     '.b{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:12px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-weight:700;font-size:13.5px;text-decoration:none;color:var(--text);white-space:nowrap}' +
     '.b:hover{border-color:var(--cyan)}.b.p{background:var(--grad);border:0;color:#fff;box-shadow:0 10px 24px -12px rgba(0,229,255,.7)}.b.ghost{border-color:transparent;color:var(--muted)}.b.ghost:hover{color:var(--text)}' +
@@ -374,10 +382,12 @@
       '<button class="x" type="button" data-a="close" aria-label="' + esc(L(T.skip)) + '">' + IC.x + '</button></div>' +
       '<p class="pb">' + esc(L(st.body)) + '</p>' + (st.html || '') +
       (st.action ? '<div class="act">' + (st.action.href ? '<a class="b" href="' + esc(st.action.href) + '">' + esc(L(st.action.label)) + IC.arrow + '</a>' : '<button class="b" type="button" data-a="act">' + esc(L(st.action.label)) + IC.arrow + '</button>') + '</div>' : '') +
-      '<div class="pf">' + (n > 1 ? '<div class="dots" aria-hidden="true">' + Array.apply(null, Array(n)).map(function (_, k) { return '<i class="' + (k === i ? 'on' : '') + '"></i>'; }).join('') + '</div><span class="cnt">' + (i + 1) + ' ' + esc(L(T.of)) + ' ' + n + '</span>' : '<div class="dots"></div>') +
-      (st.intro ? '<button class="b ghost" type="button" data-a="close">' + esc(L(T.later)) + '</button><button class="b p" type="button" data-a="next">' + esc(L(T.start)) + IC.arrow + '</button>'
-        : (i > 0 ? '<button class="b" type="button" data-a="back" aria-label="' + esc(L(T.back)) + '">' + IC.back + '</button>' : '') +
-          '<button class="b p" type="button" data-a="next">' + esc(L(last ? T.done : T.next)) + (last ? '' : IC.arrow) + '</button>') + '</div>';
+      (st.intro
+        ? '<div class="pf intro"><button class="b ghost" type="button" data-a="close">' + esc(L(T.later)) + '</button>' +
+          '<button class="b p pill" type="button" data-a="next"><span>' + esc(L(T.start)) + '</span>' + IC.arrow + '</button></div>'
+        : '<div class="pf">' + (n > 1 ? '<div class="dots" aria-hidden="true">' + Array.apply(null, Array(n)).map(function (_, k) { return '<i class="' + (k === i ? 'on' : '') + '"></i>'; }).join('') + '</div><span class="cnt">' + (i + 1) + ' ' + esc(L(T.of)) + ' ' + n + '</span>' : '<div class="dots"></div>') +
+          (i > 0 ? '<button class="b" type="button" data-a="back" aria-label="' + esc(L(T.back)) + '">' + IC.back + '</button>' : '') +
+          '<button class="b p pill" type="button" data-a="next"><span>' + esc(L(last ? T.done : T.next)) + '</span>' + (last ? '' : IC.arrow) + '</button></div>');
     pop.setAttribute('aria-labelledby', 'ely-t');
     pop.querySelectorAll('[data-a]').forEach(function (b) {
       b.onclick = function () {
@@ -582,7 +592,13 @@
   function boot() {
     doc.body.appendChild(host);
     sync(); mountFab();
-    new MutationObserver(function () { sync(); refreshFab(); if (cur) place(); else if (pnl) { /* keep */ } }).observe(html, { attributes: true, attributeFilter: ['class', 'lang', 'dir'] });
+    var lastLang = lang();
+    new MutationObserver(function () {
+      sync(); refreshFab();
+      var changed = lang() !== lastLang; lastLang = lang();
+      // the language switch on the site re-draws the open step / panel in the new language
+      if (cur) { if (changed) paint(); else place(); } else if (pnl && changed) showPanel();
+    }).observe(html, { attributes: true, attributeFilter: ['class', 'lang', 'dir'] });
     var pending = null;
     new MutationObserver(function () { if (pending) return; pending = setTimeout(function () { pending = null; check(); }, 350); }).observe(doc.body, { childList: true, subtree: true });
     window.addEventListener('resize', refreshFab);
