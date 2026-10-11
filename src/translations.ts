@@ -297,7 +297,7 @@ export const translations = {
         emailLabel: 'Work Email Address',
         emailPlaceholder: 'sarah@company.com',
         messageLabel: 'Project Details & Service Interests',
-        messagePlaceholder: 'Please detail which of our 6 services you require (e.g. custom website with backend, bilingual marketing, or recruitment CRM) and your target timeline...',
+        messagePlaceholder: 'Please detail which of our 10 services you require (e.g. custom website with backend, bilingual marketing, or recruitment CRM) and your target timeline...',
         submitBtn: 'Submit Request',
         sendingBtn: 'Transmitting Request...',
         successTitle: 'Request Received!',
@@ -526,8 +526,8 @@ export const translations = {
     pricing: {
       sectionBadge: 'تسعير موحد',
       sectionTitle: 'استثمار بسيط وشفاف',
-      sectionSubtitle: 'كل خطة من الخطط تمنحك وصولاً كاملاً لجميع الخدمات التسع. اختر الفئة التي تناسب حجم مشاريعك النشطة.',
-      coverageLabel: 'الخدمات التسع مشمولة بالكامل في كل خطة:',
+      sectionSubtitle: 'كل خطة من الخطط تمنحك وصولاً كاملاً لجميع الخدمات العشر. اختر الفئة التي تناسب حجم مشاريعك النشطة.',
+      coverageLabel: 'الخدمات العشر مشمولة بالكامل في كل خطة:',
       servicesList: [
         'أداة بناء المنتجات الرقمية',
         'هندسة وتطوير المواقع والتطبيقات',
@@ -633,7 +633,7 @@ export const translations = {
         emailLabel: 'البريد الإلكتروني المهني',
         emailPlaceholder: 'ahmed@company.com',
         messageLabel: 'تفاصيل المشروع واهتماماتك بالخدمات',
-        messagePlaceholder: 'يرجى توضيح أي من خدماتنا التسع تحتاجها (مثل موقع ويب مع خادم، أو تسويق ثنائي اللغة، أو نظام إدارة التوظيف) مع الجدول الزمني المتوقع...',
+        messagePlaceholder: 'يرجى توضيح أي من خدماتنا العشر تحتاجها (مثل موقع ويب مع خادم، أو تسويق ثنائي اللغة، أو نظام إدارة التوظيف) مع الجدول الزمني المتوقع...',
         submitBtn: 'إرسال الطلب',
         sendingBtn: 'جاري إرسال الطلب...',
         successTitle: 'تم استلام طلبك بنجاح!',
