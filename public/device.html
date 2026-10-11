@@ -284,7 +284,7 @@ html.light .linkbtn{color:#0891B2}
 
   function confirmScreen(d) {
     data = d; view = function () { confirmScreen(d); };
-    var tool = /vscode/i.test(d.client) ? 'VS Code' : d.client;
+    var tool = /vscode/i.test(d.client) ? 'VS Code' : /figma/i.test(d.client) ? 'Figma (Elyvori plugin)' : d.client;
     app.innerHTML = steps(3) + '<h1 style="font-size:26px;text-align:center">' + esc(t().h1Confirm) + '</h1><p class="lead center" style="margin:0 auto">' + esc(t().confirmLead) + ' <b>' + esc(tool) + '</b>.</p>' + codeBox() +
       '<div class="dev"><div class="ic">' + I.vscode + '</div><div style="min-width:0"><b>' + esc(tool) + '</b><small>' + esc(d.name) + '</small></div></div>' +
       '<div class="actions2"><button class="btn" id="no" type="button">' + I.x + esc(t().deny) + '</button><button class="btn primary" id="yes" type="button">' + I.check + esc(t().approve) + '</button></div>' +
